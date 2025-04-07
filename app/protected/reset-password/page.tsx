@@ -1,11 +1,9 @@
 import { resetPasswordAction } from "@/app/actions";
-import { FormMessage, Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default async function ResetPassword(props: {
-  searchParams: Promise<Message>;
+  searchParams: Promise<any>;
 }) {
   const searchParams = await props.searchParams;
   return (
@@ -35,3 +33,38 @@ export default async function ResetPassword(props: {
     </form>
   );
 }
+
+const SubmitButton = ({
+  formAction,
+  children,
+}: {
+  formAction: (formData: FormData) => Promise<void>;
+  children: React.ReactNode;
+}) => {
+  return (
+    <button
+      type="submit"
+      className="bg-accent text-foreground rounded-md p-2 font-medium"
+      onClick={(e) => {
+        e.preventDefault();
+        const form = e.currentTarget.closest("form");
+        if (form) {
+          const formData = new FormData(form);
+          formAction(formData);
+        }
+      }}
+    >
+      {children}
+    </button>
+  );
+};
+
+const FormMessage = ({ message }: { message: Promise<unknown> }) => {
+  return (
+    <div className="text-sm text-foreground/60">
+      {message && (
+        <p className="text-sm text-foreground/60">{JSON.stringify(message)}</p>
+      )}
+    </div>
+  );
+};

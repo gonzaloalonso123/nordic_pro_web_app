@@ -1,0 +1,230 @@
+import { useMutation, useQuery, useQueryClient, type UseQueryOptions, type UseMutationOptions } from '@tanstack/react-query';
+import useSupabaseBrowser from '@/utils/supabase/browser';
+import { usersService, type UserInsert, type UserUpdate, type UserRole } from '@/utils/supabase/services';
+
+// Define return types for better type safety
+type User = Awaited<ReturnType<typeof usersService.getById>>;
+type Users = Awaited<ReturnType<typeof usersService.getAll>>;
+
+export const useUsersQueries = () => {
+  const supabase = useSupabaseBrowser();
+  const queryClient = useQueryClient();
+
+  // Get all users
+  const useUsers = <TData = Users>(
+    options?: Omit<UseQueryOptions<Users, Error, TData>, 'queryKey' | 'queryFn'>
+  ) => {
+    return useQuery<Users, Error, TData>({
+      queryKey: ['users'],
+      queryFn: () => usersService.getAll(supabase),
+      ...options,
+    });
+  };
+
+  // Get user by ID
+  const useUser = <TData = User>(
+    userId: string | undefined,
+    options?: Omit<UseQueryOptions<User | null, Error, TData>, 'queryKey' | 'queryFn' | 'enabled'>
+  ) => {
+    return useQuery<User | null, Error, TData>({
+      queryKey: ['users', userId],
+      queryFn: () => userId ? usersService.getById(supabase, userId) : null,
+      enabled: !!userId,
+      ...options,
+    });
+  };
+
+  // Get user by email
+  const useUserByEmail = <TData = User>(
+    email: string | undefined,
+    options?: Omit<UseQueryOptions<User | null, Error, TData>, 'queryKey' | 'queryFn' | 'enabled'>
+  ) => {
+    return useQuery<User | null, Error, TData>({
+      queryKey: ['users', 'email', email],
+      queryFn: () => email ? usersService.getByEmail(supabase, email) : null,
+      enabled: !!email,
+      ...options,
+    });
+  };
+
+  // Get users by role
+  const useUsersByRole = <TData = Users>(
+    role: UserRole | undefined,
+    options?: Omit<UseQueryOptions<Users | null, Error, TData>, 'queryKey' | 'queryFn' | 'enabled'>
+  ) => {
+    return useQuery<Users | null, Error, TData>({
+      queryKey: ['users', 'role', role],
+      queryFn: () => role ? usersService.getByRole(supabase, role) : null,
+      enabled: !!role,
+      ...options,
+    });
+  };
+
+  // Get users by team
+  const useUsersByTeam = <TData = Users>(
+    teamId: string | undefined,
+    options?: Omit<UseQueryOptions<Users | null, Error, TData>, 'queryKey' | 'queryFn' | 'enabled'>
+  ) => {
+    return useQuery<Users | null, Error, TData>({
+      queryKey: ['users', 'team', teamId],
+      queryFn: () => teamId ? usersService.getByTeam(supabase, teamId) : null,
+      enabled: !!teamId,
+      ...options,
+    });
+  };
+
+  // Get players by team
+  const usePlayersByTeam = <TData = Users>(
+    teamId: string | undefined,
+    options?: Omit<UseQueryOptions<Users | null, Error, TData>, 'queryKey' | 'queryFn' | 'enabled'>
+  ) => {
+    return useQuery<Users | null, Error, TData>({
+      queryKey: ['users', 'players', teamId],
+      queryFn: () => teamId ? usersService.getPlayersByTeam(supabase, teamId) : null,
+      enabled: !!teamId,
+      ...options,
+    });
+  };
+
+  // Get coaches by team
+  const useCoachesByTeam = <TData = Users>(
+    teamId: string | undefined,
+    options?: Omit<UseQueryOptions<Users | null, Error, TData>, 'queryKey' | 'queryFn' | 'enabled'>
+  ) => {
+    return useQuery<Users | null, Error, TData>({
+      queryKey: ['users', 'coaches', teamId],
+      queryFn: () => teamId ? usersService.getCoachesByTeam(supabase, teamId) : null,
+      enabled: !!teamId,
+      ...options,
+    });
+  };
+
+  // Get children of a parent
+  const useChildren = <TData = Users>(
+    parentId: string | undefined,
+    options?: Omit<UseQueryOptions<Users | null, Error, TData>, 'queryKey' | 'queryFn' | 'enabled'>
+  ) => {
+    return useQuery<Users | null, Error, TData>({
+      queryKey: ['users', parentId, 'children'],
+      queryFn: () => parentId ? usersService.getChildren(supabase, parentId) : null,
+      enabled: !!parentId,
+      ...options,
+    });
+  };
+
+  // Get parents of a child
+  const useParents = <TData = Users>(
+    childId: string | undefined,
+    options?: Omit<UseQueryOptions<Users | null, Error, TData>, 'queryKey' | 'queryFn' | 'enabled'>
+  ) => {
+    return useQuery<Users | null, Error, TData>({
+      queryKey: ['users', childId, 'parents'],
+      queryFn: () => childId ? usersService.getParents(supabase, childId) : null,
+      enabled: !!childId,
+      ...options,
+    });
+  };
+
+  // Create user mutation
+  const useCreateUser = (
+    options?: Omit<UseMutationOptions<User, Error, UserInsert>, 'mutationFn'>
+  ) => {
+    return useMutation<User, Error, UserInsert>({
+      mutationFn: (user: UserInsert) => usersService.create(supabase, user),
+      onSuccess: (data, variables, context) => {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        queryClient.invalidateQueries({ queryKey: ['users', 'role', data.role] });
+        if (data.team_id) {
+          queryClient.invalidateQueries({ queryKey: ['users', 'team', data.team_id] });
+          queryClient.invalidateQueries({ queryKey: ['teams', data.team_id, 'members'] });
+        }
+        options?.onSuccess?.(data, variables, context);
+      },
+      ...options,
+    });
+  };
+
+  // Update user mutation
+  const useUpdateUser = (
+    options?: Omit<UseMutationOptions<User, Error, { userId: string; updates: UserUpdate }>, 'mutationFn'>
+  ) => {
+    return useMutation<User, Error, { userId: string; updates: UserUpdate }>({
+      mutationFn: ({ userId, updates }) => usersService.update(supabase, userId, updates),
+      onSuccess: (data, variables, context) => {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        queryClient.invalidateQueries({ queryKey: ['users', variables.userId] });
+        queryClient.invalidateQueries({ queryKey: ['users', 'role', data.role] });
+        
+        if (data.team_id) {
+          queryClient.invalidateQueries({ queryKey: ['users', 'team', data.team_id] });
+          queryClient.invalidateQueries({ queryKey: ['teams', data.team_id, 'members'] });
+        }
+        options?.onSuccess?.(data, variables, context);
+      },
+      ...options,
+    });
+  };
+
+  // Delete user mutation
+  const useDeleteUser = (
+    options?: Omit<UseMutationOptions<boolean, Error, string>, 'mutationFn'>
+  ) => {
+    return useMutation<boolean, Error, string>({
+      mutationFn: (userId: string) => usersService.delete(supabase, userId),
+      onSuccess: (data, userId, context) => {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        queryClient.invalidateQueries({ queryKey: ['users', userId] });
+        options?.onSuccess?.(data, userId, context);
+      },
+      ...options,
+    });
+  };
+
+  // Add parent-child relationship mutation
+  const useAddParentChild = (
+    options?: Omit<UseMutationOptions<any, Error, { parentId: string; childId: string }>, 'mutationFn'>
+  ) => {
+    return useMutation<any, Error, { parentId: string; childId: string }>({
+      mutationFn: ({ parentId, childId }) => usersService.addParentChild(supabase, parentId, childId),
+      onSuccess: (data, variables, context) => {
+        queryClient.invalidateQueries({ queryKey: ['users', variables.parentId, 'children'] });
+        queryClient.invalidateQueries({ queryKey: ['users', variables.childId, 'parents'] });
+        options?.onSuccess?.(data, variables, context);
+      },
+      ...options,
+    });
+  };
+
+  // Remove parent-child relationship mutation
+  const useRemoveParentChild = (
+    options?: Omit<UseMutationOptions<boolean, Error, { parentId: string; childId: string }>, 'mutationFn'>
+  ) => {
+    return useMutation<boolean, Error, { parentId: string; childId: string }>({
+      mutationFn: ({ parentId, childId }) => usersService.removeParentChild(supabase, parentId, childId),
+      onSuccess: (data, variables, context) => {
+        queryClient.invalidateQueries({ queryKey: ['users', variables.parentId, 'children'] });
+        queryClient.invalidateQueries({ queryKey: ['users', variables.childId, 'parents'] });
+        options?.onSuccess?.(data, variables, context);
+      },
+      ...options,
+    });
+  };
+
+  return {
+    useUsers,
+    useUser,
+    useUserByEmail,
+    useUsersByRole,
+    useUsersByTeam,
+    usePlayersByTeam,
+    useCoachesByTeam,
+    useChildren,
+    useParents,
+    useCreateUser,
+    useUpdateUser,
+    useDeleteUser,
+    useAddParentChild,
+    useRemoveParentChild,
+  };
+};
+
