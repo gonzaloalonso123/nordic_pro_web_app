@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, MessageSquare, Search, Settings, User } from "lucide-react";
+import { Bell, MessageSquare, Search, Settings, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,7 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNotificationsByUser } from "@/hooks/queries";
-import { useCurrentUser } from "@/app/actions";
+import { getCurrentUser, type User } from "@/app/actions";
+import { useEffect, useState } from "react";
 
 export default function PlatformHeader() {
   return (
@@ -42,20 +43,28 @@ const NavBar = () => (
 );
 
 const RightMenu = () => {
-  const currentUser = useCurrentUser();
+  const [currentUser, setCurrentUser] = useState<User>(null);
   const { data: notifications, isPending, isError } = useNotificationsByUser(currentUser?.id);
 
   if (!currentUser || isPending || isError) {
     return null;
   }
 
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+    };
+    fetchCurrentUser();
+  }, []);
+
   const allNotifications = notifications.filter((n) => n.type !== "message");
   const allMessages = notifications.filter((n) => n.type === "message");
 
   return (
     <div className="flex items-center gap-4">
-      <NotificationsButton notifications={allNotifications} />
-      <MessagesButton messages={allMessages} />
+      <NotificationsButton notifications={allNotifications as unknown as Notification[]} />
+      <MessagesButton messages={allMessages as unknown as Notification[]} />
       <ProfileMenu />
     </div>
   );
@@ -105,7 +114,7 @@ const ProfileMenu = () => (
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        <User className="mr-2 h-4 w-4" />
+        <UserIcon className="mr-2 h-4 w-4" />
         <span>Profile</span>
       </DropdownMenuItem>
       <DropdownMenuItem>

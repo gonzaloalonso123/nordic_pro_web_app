@@ -4,6 +4,7 @@ import PlatformHeader from "@/components/platform/platform-header";
 import PlatformSidebar from "@/components/platform/platform-sidebar";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
+import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,18 +30,20 @@ export default function PlatformLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
-      >
-        <div className="min-h-screen flex flex-col">
-          <PlatformHeader />
-          <div className="flex flex-1">
-            <PlatformSidebar />
-            <main className="flex-1 p-6">{children}</main>
+    <ReactQueryClientProvider>
+      <html lang="en">
+        <body
+          className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
+        >
+          <div className="min-h-screen flex flex-col">
+            <PlatformHeader />
+            <div className="flex flex-1">
+              <PlatformSidebar />
+              <main className="flex-1 p-6">{children}</main>
+            </div>
           </div>
-        </div>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ReactQueryClientProvider>
   );
 }

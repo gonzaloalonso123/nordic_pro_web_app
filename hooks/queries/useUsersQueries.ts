@@ -5,7 +5,7 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query"
-import useSupabaseBrowser from "@/utils/supabase/browser"
+import useSupabaseBrowser from "@/utils/supabase/client"
 import { usersService } from "@/utils/supabase/services"
 import type { Tables, TablesInsert, TablesUpdate } from "@/utils/database.types"
 
@@ -118,7 +118,8 @@ export const useChildren = <TData = UserRow[]>(
   const supabase = useSupabaseBrowser()
   return useQuery<UserRow[] | null, Error, TData>({
     queryKey: ["users", parentId, "children"],
-    queryFn: () => (parentId ? usersService.getChildren(supabase, parentId) : null),
+    // TODO: Fix type error
+    queryFn: () => (parentId ? usersService.getChildren(supabase, parentId) as any : null),
     enabled: !!parentId,
     ...options,
   })
@@ -132,7 +133,8 @@ export const useParents = <TData = UserRow[]>(
   const supabase = useSupabaseBrowser()
   return useQuery<UserRow[] | null, Error, TData>({
     queryKey: ["users", childId, "parents"],
-    queryFn: () => (childId ? usersService.getParents(supabase, childId) : null),
+    // TODO: Fix type error
+    queryFn: () => (childId ? usersService.getParents(supabase, childId) as any: null),
     enabled: !!childId,
     ...options,
   })
