@@ -63,6 +63,40 @@ export const eventsService = {
     return data
   },
 
+  // Get upcoming events
+  getUpcoming: async (supabase: TypedSupabaseClient, limit?: number) => {
+    const now = new Date().toISOString()
+    const query = supabase
+      .from("events")
+      .select("*")
+      .gte("start_time", now)
+      .order("start_time", { ascending: true })
+
+    if (limit) query.limit(limit)
+
+    const { data, error } = await query
+
+    if (error) throw error
+    return data
+  },
+
+  // Get events by date range
+  getByDateRange: async (
+    supabase: TypedSupabaseClient,
+    startDate: string,
+    endDate: string
+  ) => {
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .gte("start_time", startDate)
+      .lte("start_time", endDate)
+      .order("start_time", { ascending: true })
+
+    if (error) throw error
+    return data
+  },
+
   // Get events by type and team
   getByTypeAndTeam: async (supabase: TypedSupabaseClient, eventType: EventType, teamId: string) => {
     const { data, error } = await supabase

@@ -102,15 +102,14 @@ export const notificationsService = {
 
   // Mark all notifications as read for a user
   markAllAsRead: async (supabase: TypedSupabaseClient, userId: string) => {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("notifications")
       .update({ is_read: true })
       .eq("user_id", userId)
       .eq("is_read", false)
-      .select()
 
     if (error) throw error
-    return data
+    return true
   },
 
   // Mark all notifications as read by type for a user
