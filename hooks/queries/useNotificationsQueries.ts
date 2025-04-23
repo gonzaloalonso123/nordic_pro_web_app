@@ -5,14 +5,8 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import { notificationsService } from "@/utils/supabase/services";
-import type { Tables, TablesInsert, TablesUpdate } from "@/utils/database.types";
+import { NotificationInsert, NotificationRow, notificationsService, NotificationType, NotificationUpdate } from "@/utils/supabase/services";
 import useSupabaseBrowser from "@/utils/supabase/client";
-
-type NotificationRow = Tables<"notifications">;
-type NotificationInsert = TablesInsert<"notifications">;
-type NotificationUpdate = TablesUpdate<"notifications">;
-type NotificationType = "event" | "roster" | "feedback" | "trophy" | "chat" | "general";
 
 // Get notification by ID
 export const useNotification = <TData = NotificationRow>(

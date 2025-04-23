@@ -4,7 +4,7 @@ import type { Tables, TablesInsert, TablesUpdate } from "@/utils/database.types"
 export type NotificationRow = Tables<"notifications">
 export type NotificationInsert = TablesInsert<"notifications">
 export type NotificationUpdate = TablesUpdate<"notifications">
-export type NotificationType = "event" | "roster" | "feedback" | "trophy" | "message" | "general"
+export type NotificationType = "event" | "roster" | "feedback" | "trophy" | "chat" | "general";
 
 export const notificationsService = {
   // Get notification by ID
