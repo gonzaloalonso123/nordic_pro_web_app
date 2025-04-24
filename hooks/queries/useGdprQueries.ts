@@ -5,7 +5,7 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query"
-import useSupabaseBrowser from "@/utils/supabase/browser"
+import useSupabaseBrowser from "@/utils/supabase/client"
 import { gdprService } from "@/utils/supabase/services"
 import type { Tables, TablesInsert, TablesUpdate } from "@/utils/database.types"
 

@@ -4,8 +4,6 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -137,9 +135,7 @@ export const signOutAction = async () => {
 
 export const getCurrentUser = async () => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     return null;
@@ -148,14 +144,4 @@ export const getCurrentUser = async () => {
   return user;
 };
 
-export const useCurrentUser = () => {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    getCurrentUser().then((user) => {
-      setUser(user);
-    });
-  }, []);
-
-  return user;
-};
+export type User = Awaited<ReturnType<typeof getCurrentUser>>;
