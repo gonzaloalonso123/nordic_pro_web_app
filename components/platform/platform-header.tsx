@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, MessageSquare, Search, Settings, User as UserIcon } from "lucide-react";
+import {
+  Bell,
+  MessageSquare,
+  Search,
+  Settings,
+  User as UserIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,7 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNotificationsByUser } from "@/hooks/queries";
-import { getCurrentUser, type User } from "@/app/actions";
+import { signOutAction, type User } from "@/app/actions";
+import useSupabaseBrowser from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 
 export default function PlatformHeader() {
@@ -28,7 +35,10 @@ export default function PlatformHeader() {
 
 const NavBar = () => (
   <div className="flex items-center">
-    <Link href="/platform" className="font-montserrat font-bold text-2xl text-primary mr-8">
+    <Link
+      href="/platform"
+      className="font-montserrat font-bold text-2xl text-primary mr-8"
+    >
       NordicPro
     </Link>
     <div className="hidden md:flex relative">
@@ -43,36 +53,57 @@ const NavBar = () => (
 );
 
 const RightMenu = () => {
-  const [currentUser, setCurrentUser] = useState<User>(null);
-  const { data: notifications, isPending, isError } = useNotificationsByUser(currentUser?.id);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const supabase = useSupabaseBrowser();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser(user);
+      }
+    };
+    fetchUser();
+  }, [supabase]);
+
+  const {
+    data: notifications,
+    isPending,
+    isError,
+  } = useNotificationsByUser(currentUser?.id);
 
   if (!currentUser || isPending || isError) {
     return null;
   }
-
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const user = await getCurrentUser();
-      setCurrentUser(user);
-    };
-    fetchCurrentUser();
-  }, []);
 
   const allNotifications = notifications.filter((n) => n.type !== "message");
   const allMessages = notifications.filter((n) => n.type === "message");
 
   return (
     <div className="flex items-center gap-4">
-      <NotificationsButton notifications={allNotifications as unknown as Notification[]} />
+      <NotificationsButton
+        notifications={allNotifications as unknown as Notification[]}
+      />
       <MessagesButton messages={allMessages as unknown as Notification[]} />
-      <ProfileMenu />
+      <ProfileMenu user={currentUser} />
     </div>
   );
 };
 
-const NotificationsButton = ({ notifications }: { notifications: Notification[] }) => {
+const NotificationsButton = ({
+  notifications,
+}: {
+  notifications: Notification[];
+}) => {
   return (
-    <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+    <Button
+      variant="ghost"
+      size="icon"
+      className="relative"
+      aria-label="Notifications"
+    >
       <Bell className="h-5 w-5 text-gray-600" />
       {notifications.length > 0 && (
         <span className="absolute top-1 right-1 w-4 h-4 bg-accent text-white text-xs rounded-full flex items-center justify-center">
@@ -85,7 +116,12 @@ const NotificationsButton = ({ notifications }: { notifications: Notification[] 
 
 const MessagesButton = ({ messages }: { messages: Notification[] }) => {
   return (
-    <Button variant="ghost" size="icon" className="relative" aria-label="Messages">
+    <Button
+      variant="ghost"
+      size="icon"
+      className="relative"
+      aria-label="Messages"
+    >
       <MessageSquare className="h-5 w-5 text-gray-600" />
       {messages.length > 0 && (
         <span className="absolute top-1 right-1 w-4 h-4 bg-accent text-white text-xs rounded-full flex items-center justify-center">
@@ -96,19 +132,22 @@ const MessagesButton = ({ messages }: { messages: Notification[] }) => {
   );
 };
 
-const ProfileMenu = () => (
+const ProfileMenu = ({ user }: { user: User }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="icon" className="rounded-full" aria-label="User menu">
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-          JD
-        </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-full"
+        aria-label="User menu"
+      >
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium"></div>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-56">
       <DropdownMenuLabel>
         <div className="flex flex-col">
-          <span className="font-medium">John Doe</span>
+          <span className="font-medium">{user?.email}</span>
           <span className="text-xs text-gray-500">Head Coach</span>
         </div>
       </DropdownMenuLabel>
@@ -123,9 +162,9 @@ const ProfileMenu = () => (
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        <Link href="/" className="flex w-full">
+        <label onClick={signOutAction} className="flex w-full">
           Log out
-        </Link>
+        </label>
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

@@ -1,38 +1,108 @@
-import { signUpAction } from "@/app/actions";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { SmtpMessage } from "../smtp-message";
-import { Button } from "@/components/ui/button";
+"use client";
 
-export default async function Signup() {
+import { signUpAction } from "@/app/actions";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Form } from "@/components/ui/form";
+import { useTransition } from "react";
+import { FormItemWrapper } from "@/components/form/form-item-wrapper";
+import { SubmitButton } from "@/components/form/submit-button";
+import { useTranslation } from "react-i18next";
+
+export default function SignUp() {
+  const { t } = useTranslation();
+  const [isPending, startTransition] = useTransition();
+
+  const formSchema = z
+    .object({
+      firstName: z.string().min(2, { message: t("First name is required") }),
+      lastName: z.string().min(2, { message: t("Last name is required") }),
+      email: z
+        .string()
+        .email({ message: t("Please enter a valid email address") }),
+      password: z
+        .string()
+        .min(6, { message: t("Password must be at least 6 characters") }),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("Passwords don't match"),
+      path: ["confirmPassword"],
+    });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    startTransition(() => {
+      signUpAction(values);
+    });
+  }
+
   return (
-    <>
-      <form className="flex flex-col min-w-64 max-w-64 mx-auto">
-        <h1 className="text-2xl font-medium">Sign up</h1>
-        <p className="text-sm text text-foreground">
-          Already have an account?{" "}
-          <Link className="text-primary font-medium underline" href="/sign-in">
-            Sign in
-          </Link>
-        </p>
-        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-          <Label htmlFor="email">Email</Label>
-          <Input name="email" placeholder="you@example.com" required />
-          <Label htmlFor="password">Password</Label>
-          <Input
-            type="password"
-            name="password"
-            placeholder="Your password"
-            minLength={6}
-            required
-          />
-          <Button formAction={signUpAction}>
-            Sign up
-          </Button>
-        </div>
-      </form>
-      <SmtpMessage />
-    </>
+    <Card className="flex flex-col w-full max-w-xl p-4">
+      <div className="flex flex-col gap-4">
+        <h1 className="text-2xl font-medium">{t("Sign up")}</h1>
+        <AlreadyHaveAccount />
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4 mt-8"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <FormItemWrapper name="firstName" label={t("First Name")}>
+                <Input placeholder={t("John")} />
+              </FormItemWrapper>
+              <FormItemWrapper name="lastName" label={t("Last Name")}>
+                <Input placeholder={t("Doe")} />
+              </FormItemWrapper>
+            </div>
+            <FormItemWrapper name="email" label={t("Email")}>
+              <Input placeholder={t("you@example.com")} />
+            </FormItemWrapper>
+            <FormItemWrapper name="password" label={t("Password")}>
+              <Input type="password" placeholder={t("Create a password")} />
+            </FormItemWrapper>
+            <FormItemWrapper
+              name="confirmPassword"
+              label={t("Confirm Password")}
+            >
+              <Input type="password" placeholder={t("Confirm your password")} />
+            </FormItemWrapper>
+            <SubmitButton
+              disabled={isPending}
+              loading={isPending}
+              className="mt-2"
+            >
+              {isPending ? t("Creating account...") : t("Create account")}
+            </SubmitButton>
+          </form>
+        </Form>
+      </div>
+    </Card>
   );
 }
+
+const AlreadyHaveAccount = () => {
+  const { t } = useTranslation();
+  return (
+    <p className="text-sm text-foreground">
+      {t("Already have an account")}?{" "}
+      <Link className="text-foreground font-medium underline" href="/sign-in">
+        {t("Sign in")}
+      </Link>
+    </p>
+  );
+};
