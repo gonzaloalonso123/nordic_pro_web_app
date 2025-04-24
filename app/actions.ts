@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 export const signUpAction = async (formValues: {
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
 }) => {
   const email = formValues.email as string;
   const password = formValues.password as string;
@@ -22,7 +24,7 @@ export const signUpAction = async (formValues: {
     );
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -33,13 +35,26 @@ export const signUpAction = async (formValues: {
   if (error) {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link."
-    );
   }
+  try {
+    const { error: insertError } = await supabase.from("users").insert({
+      user_id: data.user?.id,
+      email: formValues.email,
+      full_name: `${formValues.firstName} ${formValues.lastName}`,
+      role: "admin",
+    });
+
+    if (insertError) {
+      console.error("User insertion error:", insertError);
+    }
+  } catch (dbError) {
+    console.error("Database error:", dbError);
+  }
+  return encodedRedirect(
+    "success",
+    "/sign-up",
+    "Thanks for signing up! Please check your email for a verification link."
+  );
 };
 
 export const signInAction = async (formValues: {

@@ -8,14 +8,34 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
-import { useTransition } from "react";
+import { useTransition, useEffect, useState } from "react";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { SubmitButton } from "@/components/form/submit-button";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle, AlertCircle } from "lucide-react";
 
 export default function SignUp() {
   const { t } = useTranslation();
   const [isPending, startTransition] = useTransition();
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Check for messages in URL parameters
+    const success = searchParams.get("success");
+    const error = searchParams.get("error");
+
+    if (success) {
+      setMessage({ type: "success", text: decodeURIComponent(success) });
+    } else if (error) {
+      setMessage({ type: "error", text: decodeURIComponent(error) });
+    }
+  }, [searchParams]);
 
   const formSchema = z
     .object({
@@ -56,6 +76,9 @@ export default function SignUp() {
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-medium">{t("Sign up")}</h1>
         <AlreadyHaveAccount />
+
+        {message && <StatusMessage message={message} />}
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -94,6 +117,30 @@ export default function SignUp() {
     </Card>
   );
 }
+
+type MessageProps = {
+  type: "success" | "error";
+  text: string;
+};
+
+const StatusMessage = ({ message }: { message: MessageProps }) => {
+  return (
+    <Alert
+      className={
+        message.type === "success"
+          ? "bg-green-50 border-green-200 text-green-800"
+          : "bg-red-50 border-red-200 text-red-800"
+      }
+    >
+      {message.type === "success" ? (
+        <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+      ) : (
+        <AlertCircle className="h-4 w-4 text-red-600 mr-2" />
+      )}
+      <AlertDescription>{message.text}</AlertDescription>
+    </Alert>
+  );
+};
 
 const AlreadyHaveAccount = () => {
   const { t } = useTranslation();
