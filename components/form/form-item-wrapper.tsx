@@ -27,7 +27,7 @@ export const FormItemWrapper = ({
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{label}</FormLabel>
+          {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             {typeof children === "function"
               ? children(field)

@@ -35,13 +35,7 @@ export default function PlatformLayout({
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
         >
-          <div className="min-h-screen flex flex-col">
-            <PlatformHeader />
-            <div className="flex flex-1">
-              <PlatformSidebar />
-              <main className="flex-1 p-6">{children}</main>
-            </div>
-          </div>
+          <div className="min-h-screen flex flex-col">{children}</div>
         </body>
       </html>
     </ReactQueryClientProvider>

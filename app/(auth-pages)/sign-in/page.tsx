@@ -1,41 +1,101 @@
-import { signInAction } from "@/app/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
+"use client";
 
-export default async function Login() {
+import { signInAction } from "@/app/actions";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Form, FormLabel } from "@/components/ui/form";
+import { useTransition } from "react";
+import { FormItemWrapper } from "@/components/form/form-item-wrapper";
+import { SubmitButton } from "@/components/form/submit-button";
+import { useTranslation } from "react-i18next";
+
+export default function Login() {
+  const { t } = useTranslation();
+  const [isPending, startTransition] = useTransition();
+
+  const formSchema = z.object({
+    email: z
+      .string()
+      .email({ message: t("Please enter a valid email address") }),
+    password: z
+      .string()
+      .min(6, { message: t("Password must be at least 6 characters") }),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    startTransition(() => {
+      signInAction(values);
+    });
+  }
+
   return (
-    <form className="flex-1 flex flex-col min-w-64">
-      <h1 className="text-2xl font-medium">Sign in</h1>
-      <p className="text-sm text-foreground">
-        Don't have an account?{" "}
-        <Link className="text-foreground font-medium underline" href="/sign-up">
-          Sign up
-        </Link>
-      </p>
-      <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-        <Label htmlFor="email">Email</Label>
-        <Input name="email" placeholder="you@example.com" required />
-        <div className="flex justify-between items-center">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            className="text-xs text-foreground underline"
-            href="/forgot-password"
+    <Card className="flex flex-col w-full max-w-xl p-4">
+      <div className="flex flex-col gap-4">
+        <h1 className="text-2xl font-medium">Sign in</h1>
+        <DontHaveAccount />
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4 mt-8"
           >
-            Forgot Password?
-          </Link>
-        </div>
-        <Input
-          type="password"
-          name="password"
-          placeholder="Your password"
-          required
-        />
-        <Button formAction={signInAction}>
-          Sign in
-        </Button>
+            <FormItemWrapper name="email" label={t("Email")}>
+              <Input placeholder={t("you@example.com")} />
+            </FormItemWrapper>
+            <PasswordLabel />
+            <FormItemWrapper name="password">
+              <Input type="password" placeholder={t("Your password")} />
+            </FormItemWrapper>
+            <SubmitButton
+              disabled={isPending}
+              loading={isPending}
+              className="mt-2"
+            >
+              {isPending ? t("Signing in...") : t("Sign in")}
+            </SubmitButton>
+          </form>
+        </Form>
       </div>
-    </form>
+    </Card>
   );
 }
+
+const DontHaveAccount = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-foreground">
+        {t("Don't have an account")}?{" "}
+        <Link className="text-foreground font-medium underline" href="/sign-up">
+          {t("Sign up")}
+        </Link>
+      </p>
+    </div>
+  );
+};
+
+const PasswordLabel = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex justify-between items-center mt-2">
+      <FormLabel>{t("Password")}</FormLabel>
+      <Link
+        className="text-xs text-foreground underline"
+        href="/forgot-password"
+      >
+        {t("Forgot Password?")}
+      </Link>
+    </div>
+  );
+};
