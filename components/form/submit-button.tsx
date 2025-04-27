@@ -14,7 +14,7 @@ export const SubmitButton = ({
   loading?: boolean;
 }) => {
   return (
-    <Button className="w-fit self-end">
+    <Button className={className} disabled={disabled} {...props}>
       {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
       {children}
     </Button>
