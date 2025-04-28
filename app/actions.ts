@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import flags from "@/flags.json"
 
 export const signUpAction = async (formValues: {
   email: string;
@@ -74,7 +75,7 @@ export const signInAction = async (formValues: {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect("/app");
+  return redirect(flags.current_app);
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
