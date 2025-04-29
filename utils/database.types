@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export interface Database {
   public: {
@@ -11,7 +17,7 @@ export interface Database {
           is_admin: boolean
           email: string
           address: string
-          gender: "MAN" | "WOMAN"
+          gender: 'MAN' | 'WOMAN'
           birth_date: string
           created_at: string
           updated_at: string
@@ -25,7 +31,7 @@ export interface Database {
           is_admin?: boolean
           email: string
           address: string
-          gender: "MAN" | "WOMAN"
+          gender: 'MAN' | 'WOMAN'
           birth_date: string
           created_at: string
           updated_at: string
@@ -39,7 +45,7 @@ export interface Database {
           is_admin?: boolean
           email?: string
           address?: string
-          gender?: "MAN" | "WOMAN"
+          gender?: 'MAN' | 'WOMAN'
           birth_date?: string
           created_at?: string
           updated_at?: string
@@ -66,19 +72,19 @@ export interface Database {
           id: string
           user_id: string
           organisation_id: string
-          role: "MANAGER" | "USER"
+          role: 'MANAGER' | 'USER'
         }
         Insert: {
           id: string
           user_id: string
           organisation_id: string
-          role?: "MANAGER" | "USER"
+          role?: 'MANAGER' | 'USER'
         }
         Update: {
           id?: string
           user_id?: string
           organisation_id?: string
-          role?: "MANAGER" | "USER"
+          role?: 'MANAGER' | 'USER'
         }
       }
       teams: {
@@ -117,22 +123,22 @@ export interface Database {
           id: string
           team_id: string
           users_id: string
-          role: "MEMBER" | "LEADER"
-          position: "DEVELOPER" | "MANAGER" | "DESIGNER"
+          role: 'MEMBER' | 'LEADER'
+          position: 'DEVELOPER' | 'MANAGER' | 'DESIGNER'
         }
         Insert: {
           id: string
           team_id: string
           users_id: string
-          role: "MEMBER" | "LEADER"
-          position: "DEVELOPER" | "MANAGER" | "DESIGNER"
+          role: 'MEMBER' | 'LEADER'
+          position: 'DEVELOPER' | 'MANAGER' | 'DESIGNER'
         }
         Update: {
           id?: string
           team_id?: string
           users_id?: string
-          role?: "MEMBER" | "LEADER"
-          position?: "DEVELOPER" | "MANAGER" | "DESIGNER"
+          role?: 'MEMBER' | 'LEADER'
+          position?: 'DEVELOPER' | 'MANAGER' | 'DESIGNER'
         }
       }
       calendars: {
@@ -140,25 +146,25 @@ export interface Database {
           id: string
           organisation_id: string | null
           team_id: string | null
-          entity_type: "ORGANISATION" | "TEAM"
+          entity_type: 'ORGANISATION' | 'TEAM'
         }
         Insert: {
           id: string
           organisation_id?: string | null
           team_id?: string | null
-          entity_type: "ORGANISATION" | "TEAM"
+          entity_type: 'ORGANISATION' | 'TEAM'
         }
         Update: {
           id?: string
           organisation_id?: string | null
           team_id?: string | null
-          entity_type?: "ORGANISATION" | "TEAM"
+          entity_type?: 'ORGANISATION' | 'TEAM'
         }
       }
       events: {
         Row: {
           id: string
-          type: "MEETING" | "TRAINING" | "EVENT"
+          type: 'MEETING' | 'TRAINING' | 'EVENT'
           start_date: string
           end_date: string
           name: string
@@ -167,7 +173,7 @@ export interface Database {
         }
         Insert: {
           id: string
-          type: "MEETING" | "TRAINING" | "EVENT"
+          type: 'MEETING' | 'TRAINING' | 'EVENT'
           start_date: string
           end_date: string
           name: string
@@ -176,7 +182,7 @@ export interface Database {
         }
         Update: {
           id?: string
-          type?: "MEETING" | "TRAINING" | "EVENT"
+          type?: 'MEETING' | 'TRAINING' | 'EVENT'
           start_date?: string
           end_date?: string
           name?: string
@@ -358,6 +364,6 @@ export interface Database {
   }
 }
 
-export type Tables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"]
-export type TablesInsert<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Insert"]
-export type TablesUpdate<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Update"]
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert']
+export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
