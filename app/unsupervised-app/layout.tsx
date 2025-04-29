@@ -32,6 +32,7 @@ function PlatformLayoutClient({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-gray-50">
       {isMobile ? (
         <>
+          <MobilePlatformHeader />
           <main
             className={`flex-1 ${isChatPage ? "p-2" : "p-4"} pb-20 overflow-hidden`}
           >

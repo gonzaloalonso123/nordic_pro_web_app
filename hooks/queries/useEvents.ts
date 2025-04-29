@@ -12,7 +12,7 @@ import type { Tables, TablesInsert, TablesUpdate } from "@/utils/database.types"
 type EventRow = Tables<"events">
 type EventInsert = TablesInsert<"events">
 type EventUpdate = TablesUpdate<"events">
-type EventType = "training" | "match" | "other"
+type EventType = "MEETING" | "TRAINING" | "EVENT"
 
 // Get all events
 export const useEvents = <TData = EventRow[]>(
@@ -134,10 +134,8 @@ export const useCreateEvent = (options?: Omit<UseMutationOptions<EventRow, Error
     mutationFn: (event: EventInsert) => eventsService.create(supabase, event),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["events"] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team", data.team_id] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team", data.team_id, "upcoming"] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team", data.team_id, "past"] })
-      queryClient.invalidateQueries({ queryKey: ["events", "type", data.event_type, "team", data.team_id] })
+      queryClient.invalidateQueries({ queryKey: ["calendars", data.calendar_id] })
+      queryClient.invalidateQueries({ queryKey: ["calendars", data.calendar_id, "events"] })
       options?.onSuccess?.(data, variables, context)
     },
     ...options,
@@ -158,10 +156,8 @@ export const useUpdateEvent = (
       queryClient.invalidateQueries({ queryKey: ["events", variables.eventId] })
       queryClient.invalidateQueries({ queryKey: ["events", variables.eventId, "attendance"] })
       queryClient.invalidateQueries({ queryKey: ["events", variables.eventId, "roster"] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team", data.team_id] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team", data.team_id, "upcoming"] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team", data.team_id, "past"] })
-      queryClient.invalidateQueries({ queryKey: ["events", "type", data.event_type, "team", data.team_id] })
+      queryClient.invalidateQueries({ queryKey: ["calendars", data.calendar_id] })
+      queryClient.invalidateQueries({ queryKey: ["calendars", data.calendar_id, "events"] })
       options?.onSuccess?.(data, variables, context)
     },
     ...options,
@@ -178,12 +174,9 @@ export const useDeleteEvent = (options?: Omit<UseMutationOptions<boolean, Error,
     onSuccess: (data, eventId, context) => {
       queryClient.invalidateQueries({ queryKey: ["events"] })
       queryClient.invalidateQueries({ queryKey: ["events", eventId] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team"] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team", undefined, "upcoming"] })
-      queryClient.invalidateQueries({ queryKey: ["events", "team", undefined, "past"] })
+      queryClient.invalidateQueries({ queryKey: ["calendars"] })
       options?.onSuccess?.(data, eventId, context)
     },
     ...options,
   })
 }
-

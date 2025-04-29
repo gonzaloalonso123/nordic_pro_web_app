@@ -39,15 +39,71 @@ export const useTeam = <TData = TeamRow>(
   })
 }
 
-// Get team with members
-export const useTeamWithMembers = <TData = any>(
+// Get teams by user
+export const useTeamsByUser = <TData = TeamRow[]>(
+  userId: string | undefined,
+  options?: Omit<UseQueryOptions<TeamRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+) => {
+  const supabase = useSupabaseBrowser()
+  return useQuery<TeamRow[] | null, Error, TData>({
+    queryKey: ["teams", "user", userId],
+    queryFn: () => (userId ? teamsService.getByUser(supabase, userId) : null),
+    enabled: !!userId,
+    ...options,
+  })
+}
+
+// Get teams by organisation
+export const useTeamsByOrganisation = <TData = TeamRow[]>(
+  organisationId: string | undefined,
+  options?: Omit<UseQueryOptions<TeamRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+) => {
+  const supabase = useSupabaseBrowser()
+  return useQuery<TeamRow[] | null, Error, TData>({
+    queryKey: ["teams", "organisation", organisationId],
+    queryFn: () => (organisationId ? teamsService.getByOrganisation(supabase, organisationId) : null),
+    enabled: !!organisationId,
+    ...options,
+  })
+}
+
+// Get team with users
+export const useTeamWithUsers = <TData = any>(
   teamId: string | undefined,
   options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
 ) => {
   const supabase = useSupabaseBrowser()
   return useQuery<any | null, Error, TData>({
-    queryKey: ["teams", teamId, "members"],
-    queryFn: () => (teamId ? teamsService.getWithMembers(supabase, teamId) : null),
+    queryKey: ["teams", teamId, "users"],
+    queryFn: () => (teamId ? teamsService.getWithUsers(supabase, teamId) : null),
+    enabled: !!teamId,
+    ...options,
+  })
+}
+
+// Get team with organisations
+export const useTeamWithOrganisations = <TData = any>(
+  teamId: string | undefined,
+  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+) => {
+  const supabase = useSupabaseBrowser()
+  return useQuery<any | null, Error, TData>({
+    queryKey: ["teams", teamId, "organisations"],
+    queryFn: () => (teamId ? teamsService.getWithOrganisations(supabase, teamId) : null),
+    enabled: !!teamId,
+    ...options,
+  })
+}
+
+// Get team with calendar
+export const useTeamWithCalendar = <TData = any>(
+  teamId: string | undefined,
+  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+) => {
+  const supabase = useSupabaseBrowser()
+  return useQuery<any | null, Error, TData>({
+    queryKey: ["teams", teamId, "calendar"],
+    queryFn: () => (teamId ? teamsService.getWithCalendar(supabase, teamId) : null),
     enabled: !!teamId,
     ...options,
   })
@@ -80,7 +136,9 @@ export const useUpdateTeam = (
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] })
       queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId] })
-      queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId, "members"] })
+      queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId, "users"] })
+      queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId, "organisations"] })
+      queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId, "calendar"] })
       options?.onSuccess?.(data, variables, context)
     },
     ...options,
@@ -97,10 +155,8 @@ export const useDeleteTeam = (options?: Omit<UseMutationOptions<boolean, Error, 
     onSuccess: (data, teamId, context) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] })
       queryClient.invalidateQueries({ queryKey: ["teams", teamId] })
-      queryClient.invalidateQueries({ queryKey: ["teams", teamId, "members"] })
       options?.onSuccess?.(data, teamId, context)
     },
     ...options,
   })
 }
-
