@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import PlatformHeader from "@/components/platform/platform-header";
-import PlatformSidebar from "@/components/platform/platform-sidebar";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
-import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
+import { ReactQueryProvider } from "@/providers/reactQueryProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,7 +28,7 @@ export default function PlatformLayout({
   children: ReactNode;
 }>) {
   return (
-    <ReactQueryClientProvider>
+    <ReactQueryProvider>
       <html lang="en">
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
@@ -38,6 +36,6 @@ export default function PlatformLayout({
           <div className="min-h-screen flex flex-col">{children}</div>
         </body>
       </html>
-    </ReactQueryClientProvider>
+    </ReactQueryProvider>
   );
 }

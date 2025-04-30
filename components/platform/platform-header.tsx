@@ -17,19 +17,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useNotificationsByUser } from "@/hooks/queries";
-import { signOutAction, type User } from "@/app/actions";
-import useSupabaseBrowser from "@/utils/supabase/client";
-import { useEffect, useState } from "react";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { signOut } from "@/utils/supabase/auth-actions";
+import { useClientData } from "@/utils/data/client";
 
 export default function PlatformHeader() {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
       <div className="flex h-16 items-center justify-between px-6">
         {!isMobile && <NavBar />}
-        <RightMenu />
       </div>
     </header>
   );
@@ -55,41 +52,29 @@ const NavBar = () => (
 );
 
 const RightMenu = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const supabase = useSupabaseBrowser();
+  const { auth } = useClientData();
+  const user = auth.getCurrentUser();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUser(user);
-      }
-    };
-    fetchUser();
-  }, [supabase]);
+  // const {
+  //   data: notifications,
+  //   isPending,
+  //   isError,
+  // } = useNotificationsByUse(currentUser?.id);
 
-  const {
-    data: notifications,
-    isPending,
-    isError,
-  } = useNotificationsByUser(currentUser?.id);
+  // if (!currentUser || isPending || isError) {
+  //   return null;
+  // }
 
-  if (!currentUser || isPending || isError) {
-    return null;
-  }
-
-  const allNotifications = notifications.filter((n) => n.type !== "message");
-  const allMessages = notifications.filter((n) => n.type === "message");
+  // const allNotifications = notifications.filter((n) => n.type !== "message");
+  // const allMessages = notifications.filter((n) => n.type === "message");
 
   return (
     <div className="flex items-center gap-4">
-      <NotificationsButton
+      {/* <NotificationsButton
         notifications={allNotifications as unknown as Notification[]}
-      />
-      <MessagesButton messages={allMessages as unknown as Notification[]} />
-      <ProfileMenu user={currentUser} />
+      /> */}
+      {/* <MessagesButton messages={allMessages as unknown as Notification[]} /> */}
+      <ProfileMenu user={user} />
     </div>
   );
 };
@@ -134,7 +119,7 @@ const MessagesButton = ({ messages }: { messages: Notification[] }) => {
   );
 };
 
-const ProfileMenu = ({ user }: { user: User }) => (
+const ProfileMenu = ({ user }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button
@@ -164,7 +149,7 @@ const ProfileMenu = ({ user }: { user: User }) => (
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        <label onClick={signOutAction} className="flex w-full">
+        <label onClick={signOut} className="flex w-full">
           Log out
         </label>
       </DropdownMenuItem>

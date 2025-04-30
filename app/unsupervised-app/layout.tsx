@@ -8,7 +8,7 @@ import PlatformSidebar from "@/components/platform/platform-sidebar";
 import { usePathname } from "next/navigation";
 
 import { Inter, Montserrat } from "next/font/google";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,7 +24,7 @@ const montserrat = Montserrat({
 });
 
 function PlatformLayoutClient({ children }: { children: React.ReactNode }) {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const pathname = usePathname();
   const isChatPage = pathname === "/platform/chat";
 

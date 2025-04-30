@@ -4,144 +4,183 @@ import {
   useQueryClient,
   type UseQueryOptions,
   type UseMutationOptions,
-} from "@tanstack/react-query"
-import useSupabaseBrowser from "@/utils/supabase/client"
-import { usersService } from "@/utils/supabase/services"
-import type { Tables, TablesInsert, TablesUpdate } from "@/utils/database.types"
+} from "@tanstack/react-query";
+import { usersService } from "@/utils/supabase/services";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/utils/database.types";
+import { createClient } from "@/utils/supabase/client";
 
-type UserRow = Tables<"users">
-type UserInsert = TablesInsert<"users">
-type UserUpdate = TablesUpdate<"users">
+type UserRow = Tables<"users">;
+type UserInsert = TablesInsert<"users">;
+type UserUpdate = TablesUpdate<"users">;
 
 // Get all users
 export const useUsers = <TData = UserRow[]>(
-  options?: Omit<UseQueryOptions<UserRow[], Error, TData>, "queryKey" | "queryFn">,
+  options?: Omit<
+    UseQueryOptions<UserRow[], Error, TData>,
+    "queryKey" | "queryFn"
+  >
 ) => {
-  const supabase = useSupabaseBrowser()
+  const supabase = createClient();
   return useQuery<UserRow[], Error, TData>({
     queryKey: ["users"],
     queryFn: () => usersService.getAll(supabase),
     ...options,
-  })
-}
+  });
+};
 
 // Get user by ID
 export const useUser = <TData = UserRow>(
   userId: string | undefined,
-  options?: Omit<UseQueryOptions<UserRow | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+  options?: Omit<
+    UseQueryOptions<UserRow | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
 ) => {
-  const supabase = useSupabaseBrowser()
+  const supabase = createClient();
   return useQuery<UserRow | null, Error, TData>({
     queryKey: ["users", userId],
     queryFn: () => (userId ? usersService.getById(supabase, userId) : null),
     enabled: !!userId,
     ...options,
-  })
-}
+  });
+};
 
 // Get users by organisation
 export const useUsersByOrganisation = <TData = UserRow[]>(
   organisationId: string | undefined,
-  options?: Omit<UseQueryOptions<UserRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+  options?: Omit<
+    UseQueryOptions<UserRow[] | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
 ) => {
-  const supabase = useSupabaseBrowser()
+  const supabase = createClient();
   return useQuery<UserRow[] | null, Error, TData>({
     queryKey: ["users", "organisation", organisationId],
-    queryFn: () => (organisationId ? usersService.getByOrganisation(supabase, organisationId) : null),
+    queryFn: () =>
+      organisationId
+        ? usersService.getByOrganisation(supabase, organisationId)
+        : null,
     enabled: !!organisationId,
     ...options,
-  })
-}
+  });
+};
 
 // Get users by team
 export const useUsersByTeam = <TData = UserRow[]>(
   teamId: string | undefined,
-  options?: Omit<UseQueryOptions<UserRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+  options?: Omit<
+    UseQueryOptions<UserRow[] | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
 ) => {
-  const supabase = useSupabaseBrowser()
+  const supabase = createClient();
   return useQuery<UserRow[] | null, Error, TData>({
     queryKey: ["users", "team", teamId],
     queryFn: () => (teamId ? usersService.getByTeam(supabase, teamId) : null),
     enabled: !!teamId,
     ...options,
-  })
-}
+  });
+};
 
 // Get user with teams
 export const useUserWithTeams = <TData = any>(
   userId: string | undefined,
-  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+  options?: Omit<
+    UseQueryOptions<any | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
 ) => {
-  const supabase = useSupabaseBrowser()
+  const supabase = createClient();
   return useQuery<any | null, Error, TData>({
     queryKey: ["users", userId, "teams"],
-    queryFn: () => (userId ? usersService.getWithTeams(supabase, userId) : null),
+    queryFn: () =>
+      userId ? usersService.getWithTeams(supabase, userId) : null,
     enabled: !!userId,
     ...options,
-  })
-}
+  });
+};
 
 // Get user with organisations
 export const useUserWithOrganisations = <TData = any>(
   userId: string | undefined,
-  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">,
+  options?: Omit<
+    UseQueryOptions<any | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
 ) => {
-  const supabase = useSupabaseBrowser()
+  const supabase = createClient();
   return useQuery<any | null, Error, TData>({
     queryKey: ["users", userId, "organisations"],
-    queryFn: () => (userId ? usersService.getWithOrganisations(supabase, userId) : null),
+    queryFn: () =>
+      userId ? usersService.getWithOrganisations(supabase, userId) : null,
     enabled: !!userId,
     ...options,
-  })
-}
+  });
+};
 
 // Create user mutation
-export const useCreateUser = (options?: Omit<UseMutationOptions<UserRow, Error, UserInsert>, "mutationFn">) => {
-  const supabase = useSupabaseBrowser()
-  const queryClient = useQueryClient()
+export const useCreateUser = (
+  options?: Omit<UseMutationOptions<UserRow, Error, UserInsert>, "mutationFn">
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
 
   return useMutation<UserRow, Error, UserInsert>({
     mutationFn: (user: UserInsert) => usersService.create(supabase, user),
     onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({ queryKey: ["users"] })
-      options?.onSuccess?.(data, variables, context)
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      options?.onSuccess?.(data, variables, context);
     },
     ...options,
-  })
-}
+  });
+};
 
 // Update user mutation
 export const useUpdateUser = (
-  options?: Omit<UseMutationOptions<UserRow, Error, { userId: string; updates: UserUpdate }>, "mutationFn">,
+  options?: Omit<
+    UseMutationOptions<UserRow, Error, { userId: string; updates: UserUpdate }>,
+    "mutationFn"
+  >
 ) => {
-  const supabase = useSupabaseBrowser()
-  const queryClient = useQueryClient()
+  const supabase = createClient();
+  const queryClient = useQueryClient();
 
   return useMutation<UserRow, Error, { userId: string; updates: UserUpdate }>({
-    mutationFn: ({ userId, updates }) => usersService.update(supabase, userId, updates),
+    mutationFn: ({ userId, updates }) =>
+      usersService.update(supabase, userId, updates),
     onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({ queryKey: ["users"] })
-      queryClient.invalidateQueries({ queryKey: ["users", variables.userId] })
-      queryClient.invalidateQueries({ queryKey: ["users", variables.userId, "teams"] })
-      queryClient.invalidateQueries({ queryKey: ["users", variables.userId, "organisations"] })
-      options?.onSuccess?.(data, variables, context)
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", variables.userId] });
+      queryClient.invalidateQueries({
+        queryKey: ["users", variables.userId, "teams"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["users", variables.userId, "organisations"],
+      });
+      options?.onSuccess?.(data, variables, context);
     },
     ...options,
-  })
-}
+  });
+};
 
 // Soft delete user mutation
-export const useSoftDeleteUser = (options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">) => {
-  const supabase = useSupabaseBrowser()
-  const queryClient = useQueryClient()
+export const useSoftDeleteUser = (
+  options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
 
   return useMutation<boolean, Error, string>({
     mutationFn: (userId: string) => usersService.softDelete(supabase, userId),
     onSuccess: (data, userId, context) => {
-      queryClient.invalidateQueries({ queryKey: ["users"] })
-      queryClient.invalidateQueries({ queryKey: ["users", userId] })
-      options?.onSuccess?.(data, userId, context)
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", userId] });
+      options?.onSuccess?.(data, userId, context);
     },
     ...options,
-  })
-}
+  });
+};

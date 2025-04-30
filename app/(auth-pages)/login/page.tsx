@@ -1,6 +1,5 @@
 "use client";
 
-import { signInAction } from "@/app/actions";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -8,15 +7,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form, FormLabel } from "@/components/ui/form";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { SubmitButton } from "@/components/form/submit-button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
+import { signIn } from "@/utils/supabase/auth-actions";
 import { useTranslation } from "react-i18next";
 
 export default function Login() {
   const { t } = useTranslation();
   const [isPending, startTransition] = useTransition();
-
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const formSchema = z.object({
     email: z
       .string()
@@ -35,20 +38,34 @@ export default function Login() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(() => {
-      signInAction(values);
+    setError(null);
+    startTransition(async () => {
+      const result = await signIn(values.email, values.password);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        router.push("/");
+        router.refresh();
+      }
     });
   }
 
   return (
     <Card className="flex flex-col w-full max-w-xl p-4">
       <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-medium">Sign in</h1>
+        <h1 className="text-2xl font-medium">{t("Sign in")}</h1>
         <DontHaveAccount />
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4 mt-8"
+            className="flex flex-col gap-4 mt-2"
           >
             <FormItemWrapper name="email" label={t("Email")}>
               <Input placeholder={t("you@example.com")} />
@@ -77,7 +94,10 @@ const DontHaveAccount = () => {
     <div className="flex flex-col gap-4">
       <p className="text-sm text-foreground">
         {t("Don't have an account")}?{" "}
-        <Link className="text-foreground font-medium underline" href="/sign-up">
+        <Link
+          className="text-foreground font-medium underline"
+          href="/register"
+        >
           {t("Sign up")}
         </Link>
       </p>

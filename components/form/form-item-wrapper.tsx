@@ -1,3 +1,5 @@
+"use client";
+
 import { useFormContext } from "react-hook-form";
 import {
   FormControl,
@@ -7,7 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import React from "react";
+import React, { useEffect } from "react";
 
 export const FormItemWrapper = ({
   name,

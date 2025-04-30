@@ -9,22 +9,16 @@ import {
   eachDayOfInterval,
   isSameDay,
 } from "date-fns";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Generate calendar data
 const generateCalendarData = () => {
   const today = new Date();
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
-
-  // Get the first day of the month
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
   const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
-
-  // Get the number of days in the month
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-  // Create calendar grid (6 weeks x 7 days)
   const calendarGrid = [];
   let dayCounter = 1;
 
@@ -272,7 +266,7 @@ export default function CalendarView({ view = "month" }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const shortWeekdays = ["S", "M", "T", "W", "T", "F", "S"];
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   // Month View
   const renderMonthView = () => {

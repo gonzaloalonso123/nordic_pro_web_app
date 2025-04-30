@@ -14,7 +14,7 @@ export const SubmitButton = ({
   loading?: boolean;
 }) => {
   return (
-    <Button className="bg-primary hover:bg-primary/90">
+    <Button className="w-fit self-end">
       {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
       {children}
     </Button>

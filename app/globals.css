@@ -34,6 +34,7 @@
 
   /* Popover */
   --popover: 0 0% 100%;
+  --accent-foreground: 0 0% 100%;
 }
 
 @layer base {

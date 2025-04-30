@@ -11,38 +11,54 @@ import { useTransition, useState } from "react";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { SubmitButton } from "@/components/form/submit-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
+import { updatePassword } from "@/utils/supabase/auth-actions";
 import { useTranslation } from "react-i18next";
-import { resetPassword } from "@/utils/supabase/auth-actions";
 
-export default function ForgotPassword() {
+export default function ResetPassword() {
   const { t } = useTranslation();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
-  const formSchema = z.object({
-    email: z
-      .string()
-      .email({ message: t("Please enter a valid email address") }),
-  });
+  const formSchema = z
+    .object({
+      password: z
+        .string()
+        .min(6, { message: t("Password must be at least 6 characters") }),
+      confirmPassword: z
+        .string()
+        .min(6, { message: t("Password must be at least 6 characters") }),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("Passwords do not match"),
+      path: ["confirmPassword"],
+    });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setError(null);
     startTransition(async () => {
-      const result = await resetPassword(values.email);
+      const result = await updatePassword(values.password);
 
       if (result.error) {
         setError(result.error);
       } else if (result.success) {
         setSuccess(true);
         form.reset();
+
+        // Redirect to login after successful password reset
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
       }
     });
   }
@@ -50,11 +66,9 @@ export default function ForgotPassword() {
   return (
     <Card className="flex flex-col w-full max-w-xl p-4">
       <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-medium">{t("Reset your password")}</h1>
+        <h1 className="text-2xl font-medium">{t("Set a new password")}</h1>
         <p className="text-sm text-muted-foreground">
-          {t(
-            "Enter your email address and we'll send you a link to reset your password"
-          )}
+          {t("Create a new password for your account")}
         </p>
 
         {error && (
@@ -67,7 +81,7 @@ export default function ForgotPassword() {
           <Alert>
             <AlertDescription>
               {t(
-                "If an account exists with that email, we've sent a password reset link. Please check your email."
+                "Your password has been updated successfully! Redirecting to login page..."
               )}
             </AlertDescription>
           </Alert>
@@ -78,8 +92,23 @@ export default function ForgotPassword() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-4 mt-2"
           >
-            <FormItemWrapper name="email" label={t("Email")}>
-              <Input placeholder={t("you@example.com")} disabled={success} />
+            <FormItemWrapper name="password" label={t("New password")}>
+              <Input
+                type="password"
+                placeholder={t("Enter new password")}
+                disabled={success}
+              />
+            </FormItemWrapper>
+
+            <FormItemWrapper
+              name="confirmPassword"
+              label={t("Confirm new password")}
+            >
+              <Input
+                type="password"
+                placeholder={t("Confirm new password")}
+                disabled={success}
+              />
             </FormItemWrapper>
 
             <SubmitButton
@@ -87,7 +116,7 @@ export default function ForgotPassword() {
               loading={isPending}
               className="mt-2"
             >
-              {isPending ? t("Sending reset link...") : t("Send reset link")}
+              {isPending ? t("Updating password...") : t("Update password")}
             </SubmitButton>
           </form>
         </Form>

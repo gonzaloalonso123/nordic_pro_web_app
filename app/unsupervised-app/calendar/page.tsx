@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import CalendarView from "@/unsupervised-components/calendar-view";
 import UpcomingEvents from "@/unsupervised-components/upcoming-events";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function CalendarPage() {
   // Get current month and year
@@ -29,7 +29,7 @@ export default function CalendarPage() {
 
   // Add state for the calendar view
   const [view, setView] = useState("month");
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   // Default to day view on mobile
   useState(() => {

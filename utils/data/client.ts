@@ -7,11 +7,11 @@ import * as eventQueries from "@/hooks/queries/useEvents";
 import * as calendarQueries from "@/hooks/queries/useCalendars";
 import * as formQueries from "@/hooks/queries/useForms";
 import * as chatRoomQueries from "@/hooks/queries/useChatRooms";
-import useSupabaseBrowser from "../supabase/client";
+import { createClient } from "../supabase/client";
 import { useCallback } from "react";
 
 export const useClientData = () => {
-  const supabase = useSupabaseBrowser();
+  const supabase = createClient();
 
   const auth = {
     getCurrentUser: useCallback(async () => {
