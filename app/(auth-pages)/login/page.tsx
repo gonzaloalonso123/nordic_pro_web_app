@@ -1,19 +1,19 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Form, FormLabel } from "@/components/ui/form";
+import { FormLabel } from "@/components/ui/form";
 import { useTransition, useState } from "react";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { SubmitButton } from "@/components/form/submit-button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/utils/supabase/auth-actions";
 import { useTranslation } from "react-i18next";
+import { FormWrapper } from "@/components/form/form-wrapper";
+import { Disclaimer } from "@/components/disclaimer";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -51,40 +51,33 @@ export default function Login() {
   }
 
   return (
-    <Card className="flex flex-col w-full max-w-xl p-4">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-medium">{t("Sign in")}</h1>
-        <DontHaveAccount />
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4 mt-2"
-          >
-            <FormItemWrapper name="email" label={t("Email")}>
-              <Input placeholder={t("you@example.com")} />
-            </FormItemWrapper>
-            <PasswordLabel />
-            <FormItemWrapper name="password">
-              <Input type="password" placeholder={t("Your password")} />
-            </FormItemWrapper>
-            <SubmitButton
-              disabled={isPending}
-              loading={isPending}
-              className="mt-2"
-            >
-              {isPending ? t("Signing in...") : t("Sign in")}
-            </SubmitButton>
-          </form>
-        </Form>
+    <FormWrapper title={t("Log in")} onSubmit={onSubmit}>
+      <DontHaveAccount />
+      {error && (
+        <Disclaimer
+          variant="error"
+          title={t("Login failed!")}
+          description={error}
+        />
+      )}
+      <FormItemWrapper name="email" label={t("Email")}>
+        <Input placeholder={t("you@example.com")} />
+      </FormItemWrapper>
+      <FormItemWrapper name="password" label={t("Password")}>
+        <Input type="password" placeholder={t("Your password")} />
+      </FormItemWrapper>
+      <div className="flex justify-between items-center">
+        <Link
+          className="text-xs text-foreground underline"
+          href="/forgot-password"
+        >
+          {t("Forgot Password?")}
+        </Link>
+        <SubmitButton disabled={isPending} loading={isPending} className="mt-2">
+          {isPending ? t("Loging in...") : t("Log in")}
+        </SubmitButton>
       </div>
-    </Card>
+    </FormWrapper>
   );
 }
 
@@ -101,21 +94,6 @@ const DontHaveAccount = () => {
           {t("Sign up")}
         </Link>
       </p>
-    </div>
-  );
-};
-
-const PasswordLabel = () => {
-  const { t } = useTranslation();
-  return (
-    <div className="flex justify-between items-center mt-2">
-      <FormLabel>{t("Password")}</FormLabel>
-      <Link
-        className="text-xs text-foreground underline"
-        href="/forgot-password"
-      >
-        {t("Forgot Password?")}
-      </Link>
     </div>
   );
 };

@@ -230,3 +230,140 @@ export const useDeleteOrganisation = (
     ...options,
   });
 };
+
+export const useAddMemberToOrganisation = (
+  options?: Omit<
+    UseMutationOptions<
+      OrganisationRow,
+      Error,
+      { organisationId: string; userId: string }
+    >,
+    "mutationFn"
+  >
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  return useMutation<
+    OrganisationRow,
+    Error,
+    { organisationId: string; userId: string }
+  >({
+    mutationFn: ({ organisationId, userId }) =>
+      organisationsService.addMember(supabase, organisationId, userId, "USER"),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ["organisations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId, "teams"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId, "users"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId, "calendar"],
+      });
+      options?.onSuccess?.(data, variables, context);
+    },
+  });
+};
+
+export const useRemoveMemberFromOrganisation = (
+  options?: Omit<
+    UseMutationOptions<
+      OrganisationRow,
+      Error,
+      { organisationId: string; userId: string }
+    >,
+    "mutationFn"
+  >
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  return useMutation<
+    boolean,
+    Error,
+    { organisationId: string; userId: string }
+  >({
+    mutationFn: ({ organisationId, userId }) =>
+      organisationsService.removeMember(supabase, organisationId, userId),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ["organisations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId, "teams"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId, "users"],
+      });
+    },
+  });
+};
+
+export const useAddTeamToOrganisation = (
+  options?: Omit<
+    UseMutationOptions<
+      OrganisationRow,
+      Error,
+      { organisationId: string; teamId: string }
+    >,
+    "mutationFn"
+  >
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  return useMutation<
+    OrganisationRow,
+    Error,
+    { organisationId: string; teamId: string }
+  >({
+    mutationFn: ({ organisationId, teamId }) =>
+      organisationsService.addTeam(supabase, organisationId, teamId),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ["organisations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId, "teams"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId, "users"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId, "calendar"],
+      });
+    },
+  });
+};
+
+export const useRemoveTeamFromOrganisation = (
+  options?: Omit<
+    UseMutationOptions<
+      OrganisationRow,
+      Error,
+      { organisationId: string; teamId: string }
+    >,
+    "mutationFn"
+  >
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  return useMutation<
+    boolean,
+    Error,
+    { organisationId: string; teamId: string }
+  >({
+    mutationFn: ({ organisationId, teamId }) =>
+      organisationsService.removeTeam(supabase, organisationId, teamId),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ["organisations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organisations", variables.organisationId],
+      });
+    },
+  });
+};

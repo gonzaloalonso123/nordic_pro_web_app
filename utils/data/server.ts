@@ -1,6 +1,7 @@
 import * as services from "../supabase/services";
 import { createClient } from "../supabase/server";
 
+// Add this to the serverData object
 export const serverData = {
   users: {
     getAll: async () => {
@@ -108,6 +109,39 @@ export const serverData = {
     delete: async (organisationId: string) => {
       const supabase = await createClient();
       return services.organisationsService.delete(supabase, organisationId);
+    },
+    addMember: async (organisationId: string, userId: string) => {
+      const supabase = await createClient();
+      return services.organisationsService.addMember(
+        supabase,
+        organisationId,
+        userId,
+        "USER"
+      );
+    },
+    removeMember: async (organisationId: string, userId: string) => {
+      const supabase = await createClient();
+      return services.organisationsService.removeMember(
+        supabase,
+        organisationId,
+        userId
+      );
+    },
+    addTeam: async (organisationId: string, teamId: string) => {
+      const supabase = await createClient();
+      return services.organisationsService.addTeam(
+        supabase,
+        organisationId,
+        teamId
+      );
+    },
+    removeTeam: async (organisationId: string, teamId: string) => {
+      const supabase = await createClient();
+      return services.organisationsService.removeTeam(
+        supabase,
+        organisationId,
+        teamId
+      );
     },
   },
 
@@ -343,6 +377,50 @@ export const serverData = {
     delete: async (chatRoomId: string) => {
       const supabase = await createClient();
       return services.chatRoomsService.delete(supabase, chatRoomId);
+    },
+  },
+
+  organisationsInvitation: {
+    getAll: async () => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.getAll(supabase);
+    },
+    getById: async (invitationId: string) => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.getById(supabase, invitationId);
+    },
+    getByOrganisation: async (organisationId: string) => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.getByOrganisation(supabase, organisationId);
+    },
+    getByEmail: async (email: string) => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.getByEmail(supabase, email);
+    },
+    create: async (
+      invitation: Parameters<typeof services.organisationsInvitationService.create>[1]
+    ) => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.create(supabase, invitation);
+    },
+    update: async (
+      invitationId: string,
+      updates: Parameters<typeof services.organisationsInvitationService.update>[2]
+    ) => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.update(supabase, invitationId, updates);
+    },
+    delete: async (invitationId: string) => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.deleteInvitation(supabase, invitationId);
+    },
+    accept: async (invitationId: string, userId: string) => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.acceptInvitation(supabase, invitationId, userId);
+    },
+    reject: async (invitationId: string) => {
+      const supabase = await createClient();
+      return services.organisationsInvitationService.rejectInvitation(supabase, invitationId);
     },
   },
 

@@ -12,6 +12,7 @@
   --secondary: 120 61% 50%; /* #32CD32 */
   --background: 0 0% 96%; /* #F5F5F5 */
   --foreground: 0 0% 17%; /* #2C2C2C */
+  --green: 120, 61%, 50%; /* #32CD32 */
 
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;

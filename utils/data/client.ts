@@ -7,6 +7,8 @@ import * as eventQueries from "@/hooks/queries/useEvents";
 import * as calendarQueries from "@/hooks/queries/useCalendars";
 import * as formQueries from "@/hooks/queries/useForms";
 import * as chatRoomQueries from "@/hooks/queries/useChatRooms";
+import * as organisationsInvitationQueries from "@/hooks/queries/useOrganisationsInvitation";
+
 import { createClient } from "../supabase/client";
 import { useCallback } from "react";
 
@@ -53,6 +55,10 @@ export const useClientData = () => {
       useCreate: organisationQueries.useCreateOrganisation,
       useUpdate: organisationQueries.useUpdateOrganisation,
       useDelete: organisationQueries.useDeleteOrganisation,
+      useAddMember: organisationQueries.useAddMemberToOrganisation,
+      useRemoveMember: organisationQueries.useRemoveMemberFromOrganisation,
+      useAddTeam: organisationQueries.useAddTeamToOrganisation,
+      useRemoveTeam: organisationQueries.useRemoveTeamFromOrganisation,
     },
 
     teams: {
@@ -121,6 +127,22 @@ export const useClientData = () => {
       useCreate: chatRoomQueries.useCreateChatRoom,
       useUpdate: chatRoomQueries.useUpdateChatRoom,
       useDelete: chatRoomQueries.useDeleteChatRoom,
+    },
+
+    organisationsInvitation: {
+      // Queries
+      useAll: organisationsInvitationQueries.useOrganisationsInvitations,
+      useById: organisationsInvitationQueries.useOrganisationInvitation,
+      useByOrganisation:
+        organisationsInvitationQueries.useOrganisationInvitationsByOrganisation,
+      useByEmail:
+        organisationsInvitationQueries.useOrganisationInvitationsByEmail,
+      // Mutations
+      useCreate: organisationsInvitationQueries.useCreateOrganisationInvitation,
+      useUpdate: organisationsInvitationQueries.useUpdateOrganisationInvitation,
+      useDelete: organisationsInvitationQueries.useDeleteOrganisationInvitation,
+      useAccept: organisationsInvitationQueries.useAcceptOrganisationInvitation,
+      useReject: organisationsInvitationQueries.useRejectOrganisationInvitation,
     },
 
     auth,

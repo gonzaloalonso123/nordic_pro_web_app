@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclaimer } from "@/components/disclaimer";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { FormWrapper } from "@/components/form/form-wrapper";
 import { SubmitButton } from "@/components/form/submit-button";
@@ -25,6 +26,15 @@ const Page = () => {
       defaultValues={{ name: "" }}
       formSchema={formSchema}
     >
+      {useCreate.isSuccess && (
+        <Disclaimer
+          variant="success"
+          title={t("Organisation created!")}
+          description={t(
+            "Check the available organisations in the organisations list"
+          )}
+        />
+      )}
       <FormItemWrapper
         label="Name"
         description="Enter the name of the organisation"

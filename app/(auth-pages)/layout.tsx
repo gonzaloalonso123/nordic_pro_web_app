@@ -4,7 +4,7 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-screen flex flex-col gap-12 items-center justify-center">
+    <div className="h-screen w-screen flex flex-col gap-12 items-center justify-center p-2">
       {children}
     </div>
   );

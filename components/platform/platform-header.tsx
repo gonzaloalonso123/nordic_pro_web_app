@@ -27,6 +27,7 @@ export default function PlatformHeader() {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
       <div className="flex h-16 items-center justify-between px-6">
         {!isMobile && <NavBar />}
+        <RightMenu />
       </div>
     </header>
   );
@@ -128,7 +129,7 @@ const ProfileMenu = ({ user }) => (
         className="rounded-full"
         aria-label="User menu"
       >
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium"></div>
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">user</div>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-56">

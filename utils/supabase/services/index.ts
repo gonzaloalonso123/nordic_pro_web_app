@@ -1,3 +1,9 @@
+// Add this import to the existing imports
+import * as organisationsInvitationService from "./organisations_invitation";
+
+// Add this to the exports
+export { organisationsInvitationService };
+
 export * from "./users"
 export * from "./organisations"
 export * from "./teams"

@@ -1,12 +1,10 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Form } from "@/components/ui/form";
 import { useTransition, useState } from "react";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { SubmitButton } from "@/components/form/submit-button";
@@ -16,6 +14,8 @@ import { signUp } from "@/utils/supabase/auth-actions";
 import { useTranslation } from "react-i18next";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FormSelect } from "@/components/form/form-select";
+import { FormWrapper } from "@/components/form/form-wrapper";
+import { Disclaimer } from "@/components/disclaimer";
 
 export default function Register() {
   const { t } = useTranslation();
@@ -75,15 +75,12 @@ export default function Register() {
         birthDate: values.birthDate,
         address: values.address,
       });
-
       if (result.error) {
         console.log(result.error);
         setError(result.error);
       } else {
         setSuccess(true);
         form.reset();
-
-        // Redirect to login after a delay
         setTimeout(() => {
           router.push("/login");
         }, 5000);
@@ -92,89 +89,79 @@ export default function Register() {
   }
 
   return (
-    <Card className="flex flex-col w-full max-w-xl p-4">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-medium">{t("Sign up")}</h1>
-        <AlreadyHaveAccount />
+    <FormWrapper title={t("Register")} onSubmit={onSubmit}>
+      <AlreadyHaveAccount />
+      {error && (
+        <Disclaimer
+          variant="error"
+          title={t("Registration failed!")}
+          description={error}
+          className="mt-4"
+        />
+      )}
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      {success && (
+        <Disclaimer
+          variant="success"
+          title={t("Registration successful!")}
+          description={t(
+            "Please check your email to confirm your account. Redirecting to login page..."
+          )}
+          className="mt-4"
+        />
+      )}
 
-        {success && (
-          <Alert className="border-accent bg-accent/10">
-            <AlertDescription>
-              {t(
-                "Registration successful! Please check your email to confirm your account. Redirecting to login page..."
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormItemWrapper name="firstName" label={t("First name")}>
+          <Input placeholder={t("John")} />
+        </FormItemWrapper>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4 mt-2"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormItemWrapper name="firstName" label={t("First name")}>
-                <Input placeholder={t("John")} />
-              </FormItemWrapper>
-
-              <FormItemWrapper name="lastName" label={t("Last name")}>
-                <Input placeholder={t("Doe")} />
-              </FormItemWrapper>
-              <FormItemWrapper name="gender" label={t("Gender")}>
-                <FormSelect
-                  placeholder={t("Select a gender")}
-                  options={[
-                    {
-                      label: t("Man"),
-                      value: "MAN",
-                    },
-                    {
-                      label: t("Woman"),
-                      value: "WOMAN",
-                    },
-                  ]}
-                />
-              </FormItemWrapper>
-              <FormItemWrapper name="birthDate" label={t("Birth date")}>
-                <DatePicker enableYearNavigation />
-              </FormItemWrapper>
-              <FormItemWrapper name="address" label={t("Address")}>
-                <Input placeholder={t("123 Main St")} />
-              </FormItemWrapper>
-            </div>
-
-            <FormItemWrapper name="email" label={t("Email")}>
-              <Input placeholder={t("you@example.com")} />
-            </FormItemWrapper>
-
-            <FormItemWrapper name="password" label={t("Password")}>
-              <Input type="password" placeholder={t("Create a password")} />
-            </FormItemWrapper>
-
-            <FormItemWrapper
-              name="confirmPassword"
-              label={t("Confirm password")}
-            >
-              <Input type="password" placeholder={t("Confirm your password")} />
-            </FormItemWrapper>
-
-            <SubmitButton
-              disabled={isPending || success}
-              loading={isPending}
-              className="mt-2"
-            >
-              {isPending ? t("Creating account...") : t("Sign up")}
-            </SubmitButton>
-          </form>
-        </Form>
+        <FormItemWrapper name="lastName" label={t("Last name")}>
+          <Input placeholder={t("Doe")} />
+        </FormItemWrapper>
+        <FormItemWrapper name="gender" label={t("Gender")}>
+          <FormSelect
+            placeholder={t("Select a gender")}
+            options={[
+              {
+                label: t("Man"),
+                value: "MAN",
+              },
+              {
+                label: t("Woman"),
+                value: "WOMAN",
+              },
+            ]}
+          />
+        </FormItemWrapper>
+        <FormItemWrapper name="birthDate" label={t("Birth date")}>
+          <DatePicker enableYearNavigation />
+        </FormItemWrapper>
+        <FormItemWrapper name="address" label={t("Address")}>
+          <Input placeholder={t("123 Main St")} />
+        </FormItemWrapper>
       </div>
-    </Card>
+
+      <FormItemWrapper name="email" label={t("Email")}>
+        <Input placeholder={t("you@example.com")} />
+      </FormItemWrapper>
+
+      <FormItemWrapper name="password" label={t("Password")}>
+        <Input type="password" placeholder={t("Create a password")} />
+      </FormItemWrapper>
+
+      <FormItemWrapper name="confirmPassword" label={t("Confirm password")}>
+        <Input type="password" placeholder={t("Confirm your password")} />
+      </FormItemWrapper>
+
+      <SubmitButton
+        disabled={isPending || success}
+        loading={isPending}
+        className="mt-2"
+      >
+        {isPending ? t("Creating account...") : t("Sign up")}
+      </SubmitButton>
+    </FormWrapper>
   );
 }
 

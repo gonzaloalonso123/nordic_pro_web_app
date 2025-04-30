@@ -4,20 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3,
   Calendar,
-  Heart,
   Home,
   MessageSquare,
-  Settings,
   Trophy,
   Users,
   Menu,
   X,
+  UserRoundCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import flags from "@/flags.json";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const root = flags.current_app;
 
@@ -35,6 +34,7 @@ const menuItems = [
 export default function PlatformSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { user } = useCurrentUser();
 
   return (
     <>
@@ -82,6 +82,22 @@ export default function PlatformSidebar() {
                 </li>
               );
             })}
+            {user?.is_admin && (
+              <li key="Admin">
+                <Link
+                  href={`${root}/admin`}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                    pathname === `${root}/admin`
+                      ? "bg-primary text-white"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  )}
+                >
+                  <UserRoundCog className="h-5 w-5 flex-shrink-0" />
+                  {!collapsed && <span>Admin</span>}
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
 

@@ -46,7 +46,7 @@ export function FormWrapper({
   return (
     <div
       className={cn(
-        "flex flex-col w-full h-full bg-white rounded-lg overflow-hidden",
+        "flex flex-col w-full bg-white rounded-lg overflow-hidden",
         "border shadow-sm",
         isMobile ? "max-w-full" : "max-w-2xl mx-auto",
         className

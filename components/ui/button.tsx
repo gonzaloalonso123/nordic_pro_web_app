@@ -43,7 +43,7 @@ const buttonVariants = cva(
         ],
         link: [
           "text-primary underline-offset-4",
-          "hover:underline hover:text-primary/80",
+          "hover:text-primary/80",
           "active:text-primary/70",
           "relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-primary after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform after:duration-300",
         ],
