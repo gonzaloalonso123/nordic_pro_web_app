@@ -1,8 +1,8 @@
-import { serverData } from "@/utils/data/server";
+// import { serverData } from "@/utils/data/server";
 import { InfoIcon } from "lucide-react";
 
 export default async function ProtectedPage() {
-  const user = await serverData.auth.getCurrentUser();
+  // const user = await serverData.auth.getCurrentUser();
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <div className="w-full">
@@ -19,7 +19,7 @@ export default async function ProtectedPage() {
       <div className="flex flex-col gap-2 items-start">
         <h2 className="font-bold text-2xl mb-4">Your user details</h2>
         <pre className="text-xs font-mono p-3 rounded border max-h-32 overflow-auto">
-          {JSON.stringify(user, null, 2)}
+          {/* {JSON.stringify(user, null, 2)} */}
         </pre>
       </div>
       <div>

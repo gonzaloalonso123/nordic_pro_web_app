@@ -1,5 +1,4 @@
 "use client";
-
 import type React from "react";
 import MobilePlatformHeader from "@/unsupervised-components/mobile-platform-header";
 import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navbar";

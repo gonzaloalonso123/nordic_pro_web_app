@@ -1,11 +1,13 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { serverData } from "@/utils/data/server";
 import { Tables } from "@/utils/database.types";
 import { Settings } from "lucide-react";
-import Link from "next/link";
 import React from "react";
 import flags from "@/flags.json";
+import Link from "next/link";
 
 const Page = async () => {
   const organisation = await serverData.organisations.getAll();
