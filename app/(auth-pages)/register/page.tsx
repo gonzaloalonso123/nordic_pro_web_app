@@ -135,7 +135,7 @@ export default function Register() {
           />
         </FormItemWrapper>
         <FormItemWrapper name="birthDate" label={t("Birth date")}>
-          <DatePicker enableYearNavigation />
+          <DatePicker enableYearNavigation maxDate={new Date()}/>
         </FormItemWrapper>
         <FormItemWrapper name="address" label={t("Address")}>
           <Input placeholder={t("123 Main St")} />
