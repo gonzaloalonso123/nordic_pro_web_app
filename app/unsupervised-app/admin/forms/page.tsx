@@ -75,7 +75,7 @@ export default function HomePage() {
           </p>
         </CardContent>
         <CardFooter className="flex gap-2">
-          <Link href={`${baseUrl}/questions.create`} className="flex-1">
+          <Link href={`${baseUrl}/questions/create`} className="flex-1">
             <Button variant="outline" className="w-full">
               Create Question
             </Button>
