@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import flags from "@/flags.json";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navbar";
 
 const root = flags.current_app;
 
@@ -40,68 +41,69 @@ export default function PlatformSidebar() {
     <>
       <div
         className={cn(
-          "bg-white border-r border-gray-200 h-[calc(100vh-4rem)] sticky top-16 transition-all duration-300 hidden md:block",
+          "bg-white border-r border-gray-200 h-[calc(100vh-4rem)] sticky top-16 transition-all duration-300 hidden md:flex flex-col justify-between",
           collapsed ? "w-20" : "w-64"
         )}
       >
-        <div className="p-4 flex justify-end">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCollapsed(!collapsed)}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {collapsed ? (
-              <Menu className="h-5 w-5" />
-            ) : (
-              <X className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
+        <div>
+          <div className="p-4 flex justify-end">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {collapsed ? (
+                <Menu className="h-5 w-5" />
+              ) : (
+                <X className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
 
-        <nav className="px-3 py-2">
-          <ul className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
+          <nav className="px-3 py-2">
+            <ul className="space-y-1">
+              {menuItems.map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
 
-              return (
-                <li key={item.name}>
+                return (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                        isActive
+                          ? "bg-primary text-white"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      )}
+                    >
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      {!collapsed && <span>{item.name}</span>}
+                    </Link>
+                  </li>
+                );
+              })}
+              {user?.is_admin && (
+                <li key="Admin">
                   <Link
-                    href={item.href}
+                    href={`${root}/admin`}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-                      isActive
+                      pathname === `${root}/admin`
                         ? "bg-primary text-white"
                         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     )}
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    {!collapsed && <span>{item.name}</span>}
+                    <UserRoundCog className="h-5 w-5 flex-shrink-0" />
+                    {!collapsed && <span>Admin</span>}
                   </Link>
                 </li>
-              );
-            })}
-            {user?.is_admin && (
-              <li key="Admin">
-                <Link
-                  href={`${root}/admin`}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-                    pathname === `${root}/admin`
-                      ? "bg-primary text-white"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                  )}
-                >
-                  <UserRoundCog className="h-5 w-5 flex-shrink-0" />
-                  {!collapsed && <span>Admin</span>}
-                </Link>
-              </li>
-            )}
-          </ul>
-        </nav>
-
-        <div className="absolute bottom-4 left-0 right-0 px-3">
+              )}
+            </ul>
+          </nav>
+        </div>
+        <div className="p-3 self-end">
           <div
             className={cn(
               "bg-primary/5 rounded-lg p-4 border border-primary/10",
@@ -127,8 +129,6 @@ export default function PlatformSidebar() {
           </div>
         </div>
       </div>
-
-      {/* Mobile sidebar toggle */}
       <div className="fixed bottom-4 right-4 md:hidden z-50">
         <Button
           size="icon"
@@ -138,62 +138,7 @@ export default function PlatformSidebar() {
           <Menu className="h-6 w-6" />
         </Button>
       </div>
-
-      {/* Mobile sidebar */}
-      {!collapsed && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setCollapsed(true)}
-        >
-          <div
-            className="bg-white w-64 h-full p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-6">
-              <Link
-                href="/platform"
-                className="font-montserrat font-bold text-xl text-primary"
-              >
-                NordicPro
-              </Link>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCollapsed(true)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-
-            <nav>
-              <ul className="space-y-1">
-                {menuItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  const Icon = item.icon;
-
-                  return (
-                    <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-                          isActive
-                            ? "bg-primary text-white"
-                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        )}
-                        onClick={() => setCollapsed(true)}
-                      >
-                        <Icon className="h-5 w-5 flex-shrink-0" />
-                        <span>{item.name}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      )}
+      <MobilePlatformNavbar />
     </>
   );
 }

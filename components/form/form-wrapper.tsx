@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Form, FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
+import { Form, FormProvider, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodSchema } from "zod";
 
@@ -22,6 +21,7 @@ interface FormWrapperProps {
   defaultValues?: Record<string, any>;
   formSchema?: ZodSchema<any>;
   onSubmit?: (values: any) => void;
+  form?: UseFormReturn<any>;
 }
 
 export function FormWrapper({
@@ -36,12 +36,15 @@ export function FormWrapper({
   defaultValues,
   onSubmit,
   formSchema,
+  form,
 }: FormWrapperProps) {
   const isMobile = useIsMobile();
-  const form = useForm({
-    defaultValues,
-    resolver: formSchema ? zodResolver(formSchema) : undefined,
-  });
+  const f =
+    form ||
+    useForm({
+      defaultValues,
+      resolver: formSchema ? zodResolver(formSchema) : undefined,
+    });
 
   return (
     <div
@@ -65,9 +68,9 @@ export function FormWrapper({
           contentClassName
         )}
       >
-        <FormProvider {...form}>
+        <FormProvider {...f}>
           <form
-            onSubmit={form.handleSubmit((values) => onSubmit?.(values))}
+            onSubmit={f.handleSubmit((values) => onSubmit?.(values))}
             className="flex flex-col gap-4 mt-2"
           >
             {children}

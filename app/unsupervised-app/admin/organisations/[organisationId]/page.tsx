@@ -10,51 +10,18 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { OrganisationPageAnalytics } from "./components/organisation-page-analytics";
 import { MembersSection } from "./components/members-section";
 
-interface PageProps {
+type PageProps = {
   params: {
     organisationId: string;
   };
-}
+};
 
 const Page = async ({ params }: PageProps) => {
   const organisationId = params.organisationId;
-
-  const organisation = await serverData.organisations.getById(organisationId);
   const teams = await serverData.teams.getByOrganisation(organisationId);
   const members = await serverData.users.getByOrganisation(organisationId);
-
-  if (!organisation) {
-    return (
-      <Disclaimer
-        variant="error"
-        title="Organisation not found"
-        description="The organisation you are trying to access does not exist."
-      />
-    );
-  }
-
   return (
-    <div className="container py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold flex gap-2 items-center">
-          <Avatar>
-            <AvatarImage
-              className="p-2"
-              src="/organisation_placeholder.png"
-              alt={organisation.name}
-            />
-          </Avatar>
-          {organisation.name}
-        </h1>
-        <Button asChild variant="outline">
-          <Link
-            href={`${flags.current_app}/admin/organisations/${organisationId}/settings`}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </Button>
-      </div>
+    <div className="py-6">
       <OrganisationPageAnalytics organisationId={organisationId} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section>
@@ -63,15 +30,15 @@ const Page = async ({ params }: PageProps) => {
               <Layers className="mr-2 h-5 w-5" />
               Teams
             </h2>
-            <Button variant="sport" asChild size="sm">
-              <Link
-                className="flex gap-2 items-center"
-                href={`${flags.current_app}/admin/organisations/${organisationId}/add-team`}
-              >
+            <Link
+              className="flex gap-2 items-center"
+              href={`${flags.current_app}/admin/organisations/${organisationId}/add-team`}
+            >
+              <Button variant="sport" size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Add new
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
 
           <div className="space-y-3">
@@ -96,15 +63,15 @@ const TeamCard = ({ team }: { team: Tables<"teams"> }) => {
     <Card>
       <CardHeader className="p-4 flex flex-row items-center justify-between">
         <CardTitle className="text-base">{team.name}</CardTitle>
-        <Button variant="link" size="sm" asChild>
-          <Link
-            href={`${flags.current_app}/admin/teams/${team.id}`}
-            className="flex gap-2 items-center"
-          >
+        <Link
+          href={`${flags.current_app}/admin/teams/${team.id}`}
+          className="flex gap-2 items-center"
+        >
+          <Button variant="link" size="sm">
             <Settings className="h-4 w-4" />
             Manage
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </CardHeader>
     </Card>
   );

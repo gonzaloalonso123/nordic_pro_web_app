@@ -20,6 +20,8 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOut } from "@/utils/supabase/auth-actions";
 import { useClientData } from "@/utils/data/client";
+import { Tables, TablesInsert } from "@/utils/database.types";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function PlatformHeader() {
   const isMobile = useIsMobile();
@@ -53,8 +55,7 @@ const NavBar = () => (
 );
 
 const RightMenu = () => {
-  const { auth } = useClientData();
-  const user = auth.getCurrentUser();
+  const user = useCurrentUser();
 
   // const {
   //   data: notifications,
@@ -75,7 +76,9 @@ const RightMenu = () => {
         notifications={allNotifications as unknown as Notification[]}
       /> */}
       {/* <MessagesButton messages={allMessages as unknown as Notification[]} /> */}
-      <ProfileMenu user={user} />
+      {user.isAuthenticated && !user.isLoading && user.user && (
+        <ProfileMenu user={user.user} />
+      )}
     </div>
   );
 };
@@ -120,7 +123,7 @@ const MessagesButton = ({ messages }: { messages: Notification[] }) => {
   );
 };
 
-const ProfileMenu = ({ user }) => (
+const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button
@@ -129,7 +132,9 @@ const ProfileMenu = ({ user }) => (
         className="rounded-full"
         aria-label="User menu"
       >
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">user</div>
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+          user
+        </div>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-56">

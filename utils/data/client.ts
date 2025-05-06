@@ -5,9 +5,11 @@ import * as organisationQueries from "@/hooks/queries/useOrganisations";
 import * as teamQueries from "@/hooks/queries/useTeams";
 import * as eventQueries from "@/hooks/queries/useEvents";
 import * as calendarQueries from "@/hooks/queries/useCalendars";
-import * as formQueries from "@/hooks/queries/useForms";
 import * as chatRoomQueries from "@/hooks/queries/useChatRooms";
 import * as organisationsInvitationQueries from "@/hooks/queries/useOrganisationsInvitation";
+import * as formQueries from "@/hooks/queries/useForms";
+import * as questionQueries from "@/hooks/queries/useQuestions";
+import * as formResponseQueries from "@/hooks/queries/useFormResponses";
 
 import { createClient } from "../supabase/client";
 import { useCallback } from "react";
@@ -102,20 +104,44 @@ export const useClientData = () => {
       useUpdate: calendarQueries.useUpdateCalendar,
       useDelete: calendarQueries.useDeleteCalendar,
     },
-
     forms: {
-      // Queries
       useAll: formQueries.useForms,
       useById: formQueries.useForm,
-      useByUser: formQueries.useFormsByUser,
-      useByEvent: formQueries.useFormsByEvent,
+      useByCreator: formQueries.useFormsByCreator,
+      useByOrganization: formQueries.useFormsByOrganization,
+      useWithQuestions: formQueries.useFormWithQuestions,
+      useResponses: formQueries.useFormResponses,
       // Mutations
       useCreate: formQueries.useCreateForm,
       useUpdate: formQueries.useUpdateForm,
-      useSoftDelete: formQueries.useSoftDeleteForm,
-      useHardDelete: formQueries.useHardDeleteForm,
+      useDelete: formQueries.useDeleteForm,
+      useAddQuestions: formQueries.useAddQuestionsToForm,
+      useRemoveQuestion: formQueries.useRemoveQuestionFromForm,
+      useUpdateQuestionOrder: formQueries.useUpdateQuestionOrder,
     },
-
+    questions: {
+      useAll: questionQueries.useQuestions,
+      useById: questionQueries.useQuestion,
+      useByCategory: questionQueries.useQuestionsByCategory,
+      useByCreator: questionQueries.useQuestionsByCreator,
+      useCategories: questionQueries.useCategories,
+      // Mutations
+      useCreate: questionQueries.useCreateQuestion,
+      useUpdate: questionQueries.useUpdateQuestion,
+      useDelete: questionQueries.useDeleteQuestion,
+      useCreateCategory: questionQueries.useCreateCategory,
+    },
+    formResponses: {
+      useByForm: formResponseQueries.useFormResponses,
+      useByOrganization: formResponseQueries.useResponsesByOrganization,
+      useByUser: formResponseQueries.useResponsesByUser,
+      useById: formResponseQueries.useResponse,
+      useAnalytics: formResponseQueries.useFormAnalytics,
+      useUserAnalytics: formResponseQueries.useUserAnalytics,
+      // Mutations
+      useSubmit: formResponseQueries.useSubmitFormResponse,
+      useDelete: formResponseQueries.useDeleteFormResponse,
+    },
     chatRooms: {
       // Queries
       useAll: chatRoomQueries.useChatRooms,
@@ -133,10 +159,8 @@ export const useClientData = () => {
       // Queries
       useAll: organisationsInvitationQueries.useOrganisationsInvitations,
       useById: organisationsInvitationQueries.useOrganisationInvitation,
-      useByOrganisation:
-        organisationsInvitationQueries.useOrganisationInvitationsByOrganisation,
-      useByEmail:
-        organisationsInvitationQueries.useOrganisationInvitationsByEmail,
+      useByOrganisation: organisationsInvitationQueries.useOrganisationInvitationsByOrganisation,
+      useByEmail: organisationsInvitationQueries.useOrganisationInvitationsByEmail,
       // Mutations
       useCreate: organisationsInvitationQueries.useCreateOrganisationInvitation,
       useUpdate: organisationsInvitationQueries.useUpdateOrganisationInvitation,
