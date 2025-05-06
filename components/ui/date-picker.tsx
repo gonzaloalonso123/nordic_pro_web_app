@@ -46,7 +46,7 @@ export function DatePicker({
 }: DatePickerProps) {
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(value || new Date());
+  const [currentDate] = useState(value || new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(value);
   const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
   const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
@@ -90,7 +90,7 @@ export function DatePicker({
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
