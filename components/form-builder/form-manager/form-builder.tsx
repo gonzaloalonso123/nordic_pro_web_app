@@ -21,54 +21,103 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, GripVertical, X, Plus, Award } from "lucide-react";
-import type { Form, Question } from "../types";
-import { useRouter } from "next/navigation";
+import {
+  Search,
+  GripVertical,
+  X,
+  Plus,
+  Award,
+  Loader2,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
 import { z } from "zod";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { useQuestions, useCategories } from "@/hooks/queries/useQuestions";
+import {
+  useForm,
+  useCreateForm,
+  useUpdateForm,
+} from "@/hooks/queries/useForms";
+import { useToast } from "@/hooks/use-toast";
 
 interface FormBuilderProps {
-  questions: Question[];
-  categories: string[];
-  initialForm?: Form;
-  onSave: (form: Form) => Promise<void>;
+  formId?: string;
 }
 
-export default function FormBuilder({
-  questions,
-  categories,
-  initialForm,
-  onSave,
-}: FormBuilderProps) {
+export default function FormBuilder({ formId }: FormBuilderProps) {
   const router = useRouter();
+  const params = useParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedQuestions, setSelectedQuestions] = useState<string[]>(
-    initialForm?.questions || []
-  );
+  const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   const [displayMode, setDisplayMode] = useState<"single" | "sequential">(
-    initialForm?.displayMode || "sequential"
+    "sequential"
   );
-  const [totalExperience, setTotalExperience] = useState<number>(
-    initialForm?.totalExperience || 0
-  );
+  const [totalExperience, setTotalExperience] = useState<number>(0);
+
+  const { data: questionsData, isLoading: questionsLoading } = useQuestions();
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const { data: formData, isLoading: formLoading } = useForm(formId);
+  const { toast } = useToast();
+  const createForm = useCreateForm({
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Form created successfully",
+      });
+      router.back();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create form: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateForm = useUpdateForm({
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Form updated successfully",
+      });
+      router.back();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update form: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const questions = questionsData || [];
+
+  useEffect(() => {
+    if (formData) {
+      setSelectedQuestions(formData.question_ids || []);
+      setDisplayMode(
+        (formData.display_mode as "single" | "sequential") || "sequential"
+      );
+      setTotalExperience(formData.total_experience || 0);
+    }
+  }, [formData]);
 
   const formSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().optional(),
   });
 
-  const defaultValues = initialForm || {
-    id: Math.random().toString(36).substring(2, 15),
-    title: "",
-    description: "",
-    questions: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    displayMode: "sequential",
-    totalExperience: 0,
+  const defaultValues = {
+    id: formData?.id || "",
+    title: formData?.title || "",
+    description: formData?.description || "",
   };
 
   const filteredQuestions = questions.filter((question) => {
@@ -76,7 +125,7 @@ export default function FormBuilder({
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesCategory =
-      selectedCategory === "all" || question.category === selectedCategory;
+      selectedCategory === "all" || question.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -88,10 +137,9 @@ export default function FormBuilder({
     (q) => !selectedQuestions.includes(q.id)
   );
 
-  // Calculate total experience whenever selected questions change
   useEffect(() => {
     const total = selectedQuestionObjects.reduce(
-      (sum, q) => sum + q.experience,
+      (sum, q) => sum + (q.experience || 0),
       0
     );
     setTotalExperience(total);
@@ -116,25 +164,39 @@ export default function FormBuilder({
   };
 
   const handleSubmit = async (values: any) => {
-    const formData: Form = {
-      ...values,
-      id: initialForm?.id || Math.random().toString(36).substring(2, 15),
-      questions: selectedQuestions,
-      createdAt: initialForm?.createdAt || new Date(),
-      updatedAt: new Date(),
-      displayMode,
-      totalExperience,
+    const formData = {
+      title: values.title,
+      description: values.description || "",
+      question_ids: selectedQuestions,
+      display_mode: displayMode,
+      total_experience: totalExperience,
+      organisation_id: params.organisationId as string,
     };
 
-    await onSave(formData);
-    router.push("/unsupervised-app/admin/organisations/forms/forms");
+    if (formId) {
+      updateForm.mutate({
+        formId,
+        updates: formData,
+      });
+    } else {
+      createForm.mutate(formData);
+    }
   };
+
+  if (questionsLoading || categoriesLoading || (formId && formLoading)) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="md:col-span-2">
         <FormWrapper
-          title={initialForm ? "Edit Form" : "Create Form"}
+          title={formId ? "Edit Form" : "Create Form"}
           onSubmit={handleSubmit}
           defaultValues={defaultValues}
           formSchema={formSchema}
@@ -196,10 +258,10 @@ export default function FormBuilder({
                     <GripVertical className="h-5 w-5" />
                   </div>
                   <CardHeader className="pl-10 pb-2 pr-10 flex flex-row gap-4">
-                    {question.imageUrl && (
+                    {question.image_url && (
                       <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden">
                         <Image
-                          src={question.imageUrl || "/placeholder.svg"}
+                          src={question.image_url || "/placeholder.svg"}
                           alt={question.question}
                           fill
                           className="object-cover"
@@ -208,7 +270,13 @@ export default function FormBuilder({
                     )}
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
-                        <Badge variant="outline">{question.category}</Badge>
+                        <Badge variant="outline">
+                          {
+                            categories.find(
+                              (c) => c.id === question.category_id
+                            )?.name
+                          }
+                        </Badge>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -231,8 +299,8 @@ export default function FormBuilder({
                   <CardContent className="pb-3 pl-10">
                     <div className="flex gap-2 flex-wrap">
                       <Badge variant="secondary">
-                        {question.inputType.charAt(0).toUpperCase() +
-                          question.inputType.slice(1)}
+                        {question.input_type.charAt(0).toUpperCase() +
+                          question.input_type.slice(1)}
                       </Badge>
                       {question.required && (
                         <Badge variant="outline">Required</Badge>
@@ -251,21 +319,7 @@ export default function FormBuilder({
                         onClick={() => handleMoveQuestion(index, index - 1)}
                         className="h-6 w-6"
                       >
-                        <span className="sr-only">Move up</span>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="lucide lucide-chevron-up"
-                        >
-                          <path d="m18 15-6-6-6 6" />
-                        </svg>
+                        <ChevronUp className="h-4 w-4" />
                       </Button>
                     )}
                     {index < selectedQuestionObjects.length - 1 && (
@@ -275,21 +329,7 @@ export default function FormBuilder({
                         onClick={() => handleMoveQuestion(index, index + 1)}
                         className="h-6 w-6"
                       >
-                        <span className="sr-only">Move down</span>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="lucide lucide-chevron-down"
-                        >
-                          <path d="m6 9 6 6 6-6" />
-                        </svg>
+                        <ChevronDown className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
@@ -298,8 +338,21 @@ export default function FormBuilder({
             </div>
           )}
 
-          <Button type="submit" className="mt-6">
-            {initialForm ? "Update Form" : "Create Form"}
+          <Button
+            type="submit"
+            className="mt-6"
+            disabled={createForm.isPending || updateForm.isPending}
+          >
+            {createForm.isPending || updateForm.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {formId ? "Updating..." : "Creating..."}
+              </>
+            ) : formId ? (
+              "Update Form"
+            ) : (
+              "Create Form"
+            )}
           </Button>
         </FormWrapper>
       </div>
@@ -331,8 +384,8 @@ export default function FormBuilder({
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -352,10 +405,10 @@ export default function FormBuilder({
                       key={question.id}
                       className="p-3 hover:bg-muted/50 flex items-start gap-3"
                     >
-                      {question.imageUrl && (
+                      {question.image_url && (
                         <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
                           <Image
-                            src={question.imageUrl || "/placeholder.svg"}
+                            src={question.image_url || "/placeholder.svg"}
                             alt={question.question}
                             fill
                             className="object-cover"
@@ -369,10 +422,14 @@ export default function FormBuilder({
                           </p>
                           <div className="flex gap-2 mt-1 flex-wrap">
                             <Badge variant="outline" className="text-xs">
-                              {question.category}
+                              {
+                                categories.find(
+                                  (cat) => cat.id === question.category_id
+                                )?.name
+                              }
                             </Badge>
                             <Badge variant="secondary" className="text-xs">
-                              {question.inputType}
+                              {question.input_type}
                             </Badge>
                             <Badge
                               variant="outline"

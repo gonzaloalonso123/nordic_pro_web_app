@@ -3,11 +3,9 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useFormContext } from "react-hook-form";
 
 export const FormSelect = ({
   placeholder,
@@ -25,11 +23,7 @@ export const FormSelect = ({
   onBlur?: () => void;
   name?: string;
 }) => (
-  <Select 
-    value={value} 
-    onValueChange={onChange}
-    {...props}
-  >
+  <Select value={value} onValueChange={onChange} {...props}>
     <SelectTrigger onBlur={onBlur}>
       <SelectValue placeholder={placeholder} />
     </SelectTrigger>

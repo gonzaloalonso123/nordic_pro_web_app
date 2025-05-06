@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { FormWrapper } from "@/components/form/form-wrapper";
 import { Input } from "@/components/ui/input";
@@ -28,60 +28,45 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Tables } from "@/database.types";
 
 interface FormRendererProps {
-  form: FormWithQuestions;
-  onSubmit?: (values: any) => void;
-  readOnly?: boolean;
+  form: Tables<"forms"> & {
+    questions: (Tables<"questions"> & {
+      question_options: Tables<"question_options">;
+    })[];
+  };
 }
 
-export default function FormRenderer({
-  form,
-  onSubmit,
-  readOnly = false,
-}: FormRendererProps) {
+export default function FormRenderer({ form }: FormRendererProps) {
   const router = useRouter();
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [submitted, setSubmitted] = useState(false);
   const [experienceEarned, setExperienceEarned] = useState(0);
 
-  // If form display mode is sequential, render the SequentialForm component
-  if (form.displayMode === "sequential") {
-    return (
-      <SequentialForm
-        form={form}
-        onSubmit={(values) => {
-          if (onSubmit) {
-            onSubmit(values);
-          }
-
-          // Update local storage for experience tracking
-          updateUserExperience(form.totalExperience);
-
-          console.log("Sequential form submitted:", values);
-        }}
-        readOnly={readOnly}
-      />
-    );
+  if (form.display_mode === "sequential") {
+    return <SequentialForm form={form} />;
   }
 
-  // Dynamically build the validation schema based on the questions
+  useEffect(() => {
+    console.log("form", form);
+  }, [form]);
   const buildValidationSchema = () => {
     const schema: Record<string, any> = {};
 
     form.questions.forEach((question) => {
       let fieldSchema;
 
-      switch (question.inputType) {
+      switch (question.input_type) {
         case "text":
           fieldSchema = z.string();
           break;
         case "number":
           fieldSchema = z.number();
-          if (question.min !== undefined)
-            fieldSchema = fieldSchema.min(question.min);
-          if (question.max !== undefined)
-            fieldSchema = fieldSchema.max(question.max);
+          if (question.min_value)
+            fieldSchema = fieldSchema.min(question.min_value);
+          if (question.max_value)
+            fieldSchema = fieldSchema.max(question.max_value);
           break;
         case "emoji":
           fieldSchema = z.string();
@@ -111,51 +96,20 @@ export default function FormRenderer({
 
   const formSchema = buildValidationSchema();
 
-  const updateUserExperience = (points: number) => {
-    // Get current user profile or create a new one
-    const storedProfile = localStorage.getItem("user-profile");
-    const profile = storedProfile
-      ? JSON.parse(storedProfile)
-      : {
-          id: "current-user",
-          totalExperience: 0,
-          completedForms: [],
-        };
-
-    // Check if form already completed
-    if (!profile.completedForms.includes(form.id)) {
-      profile.totalExperience += points;
-      profile.completedForms.push(form.id);
-      localStorage.setItem("user-profile", JSON.stringify(profile));
-    }
-
-    setExperienceEarned(points);
-  };
-
   const handleFormSubmit = (values: any) => {
     setFormValues(values);
     setSubmitted(true);
-
-    // Trigger confetti effect
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
     });
-
-    // Update user experience
-    updateUserExperience(form.totalExperience);
-
-    if (onSubmit) {
-      onSubmit(values);
-    }
-    console.log("Form submitted:", values);
   };
 
   const renderQuestionInput = (question: Question) => {
-    switch (question.inputType) {
+    switch (question.input_type) {
       case "text":
-        return <Input placeholder="Enter your answer" disabled={readOnly} />;
+        return <Input placeholder="Enter your answer" />;
 
       case "number":
         return (
@@ -164,7 +118,6 @@ export default function FormRenderer({
             placeholder="Enter a number"
             min={question.min}
             max={question.max}
-            disabled={readOnly}
           />
         );
 
@@ -173,11 +126,9 @@ export default function FormRenderer({
           const emojiValue = field.value?.emoji || field.value;
           return (
             <EmojiPicker
-              disabled={readOnly}
               value={emojiValue}
               customOptions={question.emojiOptions}
               onChange={(emoji, numericValue) => {
-                // Store both the emoji and its numeric value
                 field.onChange(
                   question.emojiOptions ? { emoji, value: numericValue } : emoji
                 );
@@ -190,27 +141,18 @@ export default function FormRenderer({
         return (field: any) => (
           <div className="pt-4 pb-2">
             <Slider
-              disabled={readOnly}
               value={[field.value || question.min || 0]}
               min={question.min || 0}
               max={question.max || 100}
               step={question.step || 1}
               onValueChange={(value) => field.onChange(value[0])}
             />
-            <div className="flex justify-between mt-1">
-              <span className="text-xs">{question.min || 0}</span>
-              <span className="text-xs font-medium">
-                {field.value || question.min || 0}
-              </span>
-              <span className="text-xs">{question.max || 100}</span>
-            </div>
           </div>
         );
 
       case "yesno":
         return (field: any) => (
           <RadioGroup
-            disabled={readOnly}
             value={field.value?.toString()}
             onValueChange={(value) => field.onChange(value === "true")}
             className="flex gap-4"
@@ -229,11 +171,10 @@ export default function FormRenderer({
       case "multiple":
         return (field: any) => (
           <div className="space-y-2">
-            {question.options?.map((option) => (
+            {question.question_options?.map((option) => (
               <div key={option.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={option.id}
-                  disabled={readOnly}
                   checked={(field.value || []).includes(option.value)}
                   onCheckedChange={(checked) => {
                     const currentValues = field.value || [];
@@ -253,7 +194,7 @@ export default function FormRenderer({
         );
 
       default:
-        return <Input placeholder="Enter your answer" disabled={readOnly} />;
+        return <Input placeholder="Enter your answer" />;
     }
   };
 
@@ -297,7 +238,9 @@ export default function FormRenderer({
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => router.push("/unsupervised-app/admin/organisations/forms/forms")}
+            onClick={() =>
+              router.push("/unsupervised-app/admin/organisations/forms/forms")
+            }
           >
             Back to Forms
           </Button>
@@ -340,7 +283,7 @@ export default function FormRenderer({
                   src={question.imageUrl || "/placeholder.svg"}
                   alt={question.question}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
             )}
@@ -365,12 +308,6 @@ export default function FormRenderer({
             </div>
           </div>
         ))}
-
-        {!readOnly && (
-          <Button type="submit" className="mt-6">
-            Complete Form
-          </Button>
-        )}
       </FormWrapper>
     </div>
   );

@@ -24,19 +24,14 @@ import EmojiPicker from "../input-types/emoji-picker";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import flags from "@/flags.json";
 
 interface SequentialFormProps {
   form: FormWithQuestions;
-  onSubmit: (values: any) => void;
-  readOnly?: boolean;
 }
 
-export default function SequentialForm({
-  form,
-  onSubmit,
-  readOnly = false,
-}: SequentialFormProps) {
+export default function SequentialForm({ form }: SequentialFormProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [progress, setProgress] = useState<FormProgress>({
@@ -50,34 +45,9 @@ export default function SequentialForm({
   const [experienceAnimationComplete, setExperienceAnimationComplete] =
     useState(false);
   const router = useRouter();
+  const params = useParams();
 
-  // Load any saved progress from localStorage
-  useEffect(() => {
-    const savedProgress = localStorage.getItem(`form-progress-${form.id}`);
-    if (savedProgress) {
-      const parsedProgress = JSON.parse(savedProgress);
-      setProgress(parsedProgress);
-      setCurrentQuestionIndex(parsedProgress.currentQuestionIndex);
-
-      // If there are saved answers, restore them
-      const savedAnswers = localStorage.getItem(`form-answers-${form.id}`);
-      if (savedAnswers) {
-        setAnswers(JSON.parse(savedAnswers));
-      }
-
-      // If the form was already completed, show the completion screen
-      if (parsedProgress.completed) {
-        setShowCompletionScreen(true);
-        setExperienceAnimationComplete(true);
-      }
-    }
-  }, [form.id]);
-
-  // Save progress to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem(`form-progress-${form.id}`, JSON.stringify(progress));
-    localStorage.setItem(`form-answers-${form.id}`, JSON.stringify(answers));
-  }, [progress, answers, form.id]);
+  const baseUrl = `${flags.current_app}/admin`;
 
   const currentQuestion = form.questions[currentQuestionIndex];
   const totalQuestions = form.questions.length;
@@ -123,7 +93,6 @@ export default function SequentialForm({
   };
 
   const completeForm = () => {
-    // Trigger completion animation and confetti
     setShowCompletionScreen(true);
 
     const updatedProgress = {
@@ -131,15 +100,12 @@ export default function SequentialForm({
       completed: true,
     };
     setProgress(updatedProgress);
-
-    // Trigger confetti effect
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
     });
 
-    // Submit form data
     setTimeout(() => {
       onSubmit(answers);
     }, 500);
@@ -159,12 +125,11 @@ export default function SequentialForm({
   const renderQuestionInput = (question: Question) => {
     const value = answers[question.id];
 
-    switch (question.inputType) {
+    switch (question.input_type) {
       case "text":
         return (
           <Input
             placeholder="Enter your answer"
-            disabled={readOnly}
             value={value || ""}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
           />
@@ -175,9 +140,8 @@ export default function SequentialForm({
           <Input
             type="number"
             placeholder="Enter a number"
-            min={question.min}
-            max={question.max}
-            disabled={readOnly}
+            min={question.min_value}
+            max={question.max_value}
             value={value || ""}
             onChange={(e) =>
               handleAnswerChange(question.id, Number.parseFloat(e.target.value))
@@ -188,11 +152,9 @@ export default function SequentialForm({
       case "emoji":
         return (
           <EmojiPicker
-            disabled={readOnly}
             value={typeof value === "object" ? value.emoji : value}
             customOptions={question.emojiOptions}
             onChange={(emoji, numericValue) => {
-              // Store both the emoji and its numeric value
               const newValue = question.emojiOptions
                 ? { emoji, value: numericValue }
                 : emoji;
@@ -205,27 +167,18 @@ export default function SequentialForm({
         return (
           <div className="pt-4 pb-2">
             <Slider
-              disabled={readOnly}
-              value={[value !== undefined ? value : question.min || 0]}
-              min={question.min || 0}
-              max={question.max || 100}
-              step={question.step || 1}
+              value={[value !== undefined ? value : question.min_value || 0]}
+              min={question.min_value || 0}
+              max={question.max_value || 100}
+              step={question.step_value || 1}
               onValueChange={(val) => handleAnswerChange(question.id, val[0])}
             />
-            <div className="flex justify-between mt-1">
-              <span className="text-xs">{question.min || 0}</span>
-              <span className="text-xs font-medium">
-                {value !== undefined ? value : question.min || 0}
-              </span>
-              <span className="text-xs">{question.max || 100}</span>
-            </div>
           </div>
         );
 
       case "yesno":
         return (
           <RadioGroup
-            disabled={readOnly}
             value={value !== undefined ? value.toString() : undefined}
             onValueChange={(val) =>
               handleAnswerChange(question.id, val === "true")
@@ -246,11 +199,10 @@ export default function SequentialForm({
       case "multiple":
         return (
           <div className="space-y-2">
-            {question.options?.map((option) => (
+            {question.question_options?.map((option) => (
               <div key={option.id} className="flex items-center space-x-2">
                 <Checkbox
                   id={option.id}
-                  disabled={readOnly}
                   checked={Array.isArray(value) && value.includes(option.value)}
                   onCheckedChange={(checked) => {
                     const currentValues = Array.isArray(value) ? value : [];
@@ -277,7 +229,6 @@ export default function SequentialForm({
         return (
           <Input
             placeholder="Enter your answer"
-            disabled={readOnly}
             value={value || ""}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
           />
@@ -339,7 +290,7 @@ export default function SequentialForm({
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => router.push("/unsupervised-app/admin/organisations/forms/forms")}
+            onClick={() => router.push(`${baseUrl}/forms`)}
           >
             Back to Forms
           </Button>
@@ -380,7 +331,7 @@ export default function SequentialForm({
                   src={currentQuestion.imageUrl || "/placeholder.svg"}
                   alt={currentQuestion.question}
                   fill
-                  className="object-cover rounded-t-lg"
+                  className="object-contain rounded-t-lg"
                 />
               </div>
             )}
@@ -417,8 +368,7 @@ export default function SequentialForm({
               <Button
                 onClick={handleNextQuestion}
                 disabled={
-                  readOnly ||
-                  (currentQuestion.required && !answers[currentQuestion.id])
+                  currentQuestion.required && !answers[currentQuestion.id]
                 }
                 className="flex items-center"
               >

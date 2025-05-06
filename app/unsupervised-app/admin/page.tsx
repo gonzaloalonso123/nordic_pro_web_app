@@ -26,7 +26,7 @@ const Page = () => {
           </Link>
         </Button>
         <Button asChild>
-          <Link href="">Option 2</Link>
+          <Link href={`${flags.current_app}/admin/forms`}>Forms</Link>
         </Button>
         <Button asChild>
           <Link href="">Option 3</Link>

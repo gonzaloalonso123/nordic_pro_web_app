@@ -1,8 +1,6 @@
 "use client";
 
 import type React from "react";
-
-import { useEffect } from "react";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { FormWrapper } from "@/components/form/form-wrapper";
 import { Input } from "@/components/ui/input";
@@ -14,12 +12,20 @@ import { Label } from "@/components/ui/label";
 import { PlusCircle, Trash2, Upload, ImageIcon } from "lucide-react";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
-import type { InputType, Question } from "../types";
+import type { InputType } from "../types";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import EmojiOptionsEditor from "../input-types/emoji-options-editor";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
+import {
+  useCategories,
+  useCreateQuestion,
+  useUpdateQuestion,
+  useQuestion,
+} from "@/hooks/queries/useQuestions";
+import { useEffect } from "react";
 
 const inputTypeOptions = [
   { value: "text", label: "Text" },
@@ -31,9 +37,7 @@ const inputTypeOptions = [
 ];
 
 interface QuestionFormProps {
-  initialQuestion?: Question;
-  categories: string[];
-  onSave: (question: Question) => Promise<void>;
+  questionId?: string;
 }
 
 const questionSchema = z.object({
@@ -54,36 +58,78 @@ const questionSchema = z.object({
     )
     .optional(),
   emojiOptions: z.array(z.any()).optional(),
-  min: z.number().optional(),
-  max: z.number().optional(),
-  step: z.number().optional(),
+  min_value: z.string().optional(),
+  max_value: z.string().optional(),
+  step_value: z.string().optional(),
   imageUrl: z.string().optional(),
   imagePreview: z.string().nullable().optional(),
 });
 
-export default function QuestionForm({
-  initialQuestion,
-  categories,
-  onSave,
-}: QuestionFormProps) {
+export default function QuestionForm({ questionId }: QuestionFormProps) {
   const router = useRouter();
+
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const { data: questionData, isLoading: questionLoading } =
+    useQuestion(questionId);
+
+  const createQuestion = useCreateQuestion();
+  //   {
+  //   onSuccess: () => {
+  //     toast({
+  //       title: "Success",
+  //       description: "Question created successfully",
+  //     });
+  //     router.back();
+  //   },
+  //   onError: (error) => {
+  //     toast({
+  //       title: "Error",
+  //       description: `Failed to create question: ${error.message}`,
+  //       variant: "destructive",
+  //     });
+  //   },
+  // }
+
+  const updateQuestion = useUpdateQuestion();
+  //   {
+  //   onSuccess: () => {
+  //     toast({
+  //       title: "Success",
+  //       description: "Question updated successfully",
+  //     });
+  //     router.back();
+  //   },
+  //   onError: (error) => {
+  //     toast({
+  //       title: "Error",
+  //       description: `Failed to update question: ${error.message}`,
+  //       variant: "destructive",
+  //     });
+  //   },
+  // }
 
   const form = useForm({
     defaultValues: {
-      id: initialQuestion?.id || uuidv4(),
-      category: initialQuestion?.category || "",
-      question: initialQuestion?.question || "",
-      inputType: initialQuestion?.inputType || ("text" as InputType),
-      required: initialQuestion?.required || false,
-      description: initialQuestion?.description || "",
-      options: initialQuestion?.options || [],
-      emojiOptions: initialQuestion?.emojiOptions || [],
-      experience: initialQuestion?.experience || 10,
-      min: initialQuestion?.min,
-      max: initialQuestion?.max,
-      step: initialQuestion?.step,
-      imageUrl: initialQuestion?.imageUrl || "",
-      imagePreview: initialQuestion?.imageUrl || null,
+      id: uuidv4(),
+      category: "",
+      question: "",
+      inputType: "text" as InputType,
+      required: false,
+      description: "",
+      options: [],
+      emojiOptions: [
+        { id: uuidv4(), emoji: "😢", value: 1, label: "Very Dissatisfied" },
+        { id: uuidv4(), emoji: "🙁", value: 2, label: "Dissatisfied" },
+        { id: uuidv4(), emoji: "😐", value: 3, label: "Neutral" },
+        { id: uuidv4(), emoji: "🙂", value: 4, label: "Satisfied" },
+        { id: uuidv4(), emoji: "😄", value: 5, label: "Very Satisfied" },
+      ],
+      experience: 10,
+      min_value: "",
+      max_value: "",
+      step_value: "",
+      imageUrl: "",
+      imagePreview: null,
     },
     resolver: zodResolver(questionSchema),
   });
@@ -91,7 +137,33 @@ export default function QuestionForm({
   const { control, setValue, getValues } = form;
   const inputType = useWatch({ control, name: "inputType" });
   const options = useWatch({ control, name: "options" }) || [];
-  const imagePreview = useWatch({ control, name: "imagePreview" });
+  const imageUrl = useWatch({ control, name: "imageUrl" });
+
+  useEffect(() => {
+    if (questionData) {
+      const question = questionData;
+      form.reset({
+        ...question,
+        category: question.category_id,
+        inputType: question.input_type as InputType,
+        imageUrl: question.image_url || "",
+        options: question.question_options || [],
+        emojiOptions: question.emoji_options || [],
+        min_value:
+          question.input_type === "slider" || question.input_type === "number"
+            ? question.min_value?.toString()
+            : "",
+        max_value:
+          question.input_type === "slider" || question.input_type === "number"
+            ? question.max_value?.toString()
+            : "",
+        step_value:
+          question.input_type === "slider"
+            ? question.step_value?.toString()
+            : "",
+      });
+    }
+  }, [questionData, form]);
 
   const handleAddOption = () => {
     const currentOptions = getValues("options") || [];
@@ -126,10 +198,14 @@ export default function QuestionForm({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size should be less than 5MB");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
-        setValue("imagePreview", result);
         setValue("imageUrl", result);
       };
       reader.readAsDataURL(file);
@@ -137,34 +213,82 @@ export default function QuestionForm({
   };
 
   const handleRemoveImage = () => {
-    setValue("imagePreview", null);
     setValue("imageUrl", "");
   };
 
   const handleSubmit = async (values: any) => {
-    const questionData: Question = {
-      ...values,
-      // Only include relevant fields based on input type
-      options: values.inputType === "multiple" ? values.options : undefined,
-      emojiOptions:
-        values.inputType === "emoji" ? values.emojiOptions : undefined,
+    const formData = { ...values };
+
+    const questionData = {
+      category_id: formData.category,
+      question: formData.question,
+      input_type: formData.inputType,
+      required: formData.required,
+      description: formData.description || null,
+      experience: formData.experience,
+      min_value:
+        formData.inputType === "slider" || formData.inputType === "number"
+          ? Number(formData.min_value)
+          : null,
+      max_value:
+        formData.inputType === "slider" || formData.inputType === "number"
+          ? Number(formData.max_value)
+          : null,
+      step_value:
+        formData.inputType === "slider" ? Number(formData.step_value) : null,
+      image_url: formData.imageUrl || null,
     };
 
-    delete questionData.imageUrl;
+    const questionOptions =
+      formData.inputType === "multiple"
+        ? formData.options.map((opt: any) => ({
+            question_id: formData.id,
+            label: opt.label,
+            value: opt.value,
+          }))
+        : [];
 
-    await onSave(questionData);
-    router.back();
+    const emojiOptions =
+      formData.inputType === "emoji"
+        ? formData.emojiOptions.map((opt: any) => ({
+            question_id: formData.id,
+            emoji: opt.emoji,
+            value: opt.value,
+            label: opt.label,
+          }))
+        : [];
+
+    if (questionId) {
+      updateQuestion.mutate({
+        questionId,
+        updates: questionData,
+        options: {
+          questionOptions,
+          emojiOptions,
+        },
+      });
+    } else {
+      createQuestion.mutate({
+        question: {
+          id: formData.id,
+          ...questionData,
+        },
+        options: {
+          questionOptions,
+          emojiOptions,
+        },
+      });
+    }
   };
 
-  useEffect(() => {
-    console.log(inputType);
-  }, [inputType]);
+  if (questionId && questionLoading) {
+    return <div>Loading question data...</div>;
+  }
 
   return (
     <FormWrapper
-      title={initialQuestion ? "Edit Question" : "Create Question"}
+      title={questionId ? "Edit Question" : "Create Question"}
       onSubmit={handleSubmit}
-      formSchema={questionSchema}
       showBackButton
       onBack={() => router.back()}
       form={form}
@@ -172,7 +296,12 @@ export default function QuestionForm({
       <FormItemWrapper label="Category" name="category">
         <FormSelect
           placeholder="Select a category"
-          options={categories.map((cat) => ({ value: cat, label: cat }))}
+          options={
+            categories?.map((cat) => ({
+              value: cat.id,
+              label: cat.name,
+            })) || []
+          }
         />
       </FormItemWrapper>
 
@@ -195,13 +324,16 @@ export default function QuestionForm({
       <div className="space-y-3">
         <Label htmlFor="image-upload">Question Image (optional)</Label>
         <div className="grid gap-3">
-          {imagePreview ? (
+          {imageUrl ? (
             <div className="relative rounded-md overflow-hidden h-48 bg-muted">
               <Image
-                src={imagePreview || "/placeholder.svg"}
+                src={imageUrl}
                 alt="Question image"
                 fill
-                className="object-cover"
+                className="object-contain w-full h-full"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/placeholder.svg";
+                }}
               />
               <Button
                 variant="destructive"
@@ -261,14 +393,14 @@ export default function QuestionForm({
 
       {(inputType === "number" || inputType === "slider") && (
         <div className="grid grid-cols-2 gap-4">
-          <FormItemWrapper label="Minimum Value" name="min">
+          <FormItemWrapper label="Minimum Value" name="min_value">
             <Input type="number" placeholder="Min value" />
           </FormItemWrapper>
-          <FormItemWrapper label="Maximum Value" name="max">
+          <FormItemWrapper label="Maximum Value" name="max_value">
             <Input type="number" placeholder="Max value" />
           </FormItemWrapper>
           {inputType === "slider" && (
-            <FormItemWrapper label="Step" name="step">
+            <FormItemWrapper label="Step" name="step_value">
               <Input type="number" placeholder="Step value" />
             </FormItemWrapper>
           )}
@@ -338,9 +470,19 @@ export default function QuestionForm({
         </div>
       )}
 
-      <Button type="submit" className="mt-4">
-        {initialQuestion ? "Update Question" : "Create Question"}
+      <Button
+        type="submit"
+        className="mt-4"
+        disabled={createQuestion.isPending || updateQuestion.isPending}
+      >
+        {createQuestion.isPending || updateQuestion.isPending
+          ? "Saving..."
+          : questionId
+            ? "Update Question"
+            : "Create Question"}
       </Button>
     </FormWrapper>
   );
 }
+
+// Add this after your other useEffect

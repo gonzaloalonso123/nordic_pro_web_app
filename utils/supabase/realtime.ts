@@ -4,7 +4,6 @@ import type { Database } from "../database.types"
 type RealtimeSubscriptionCallback<T> = (payload: T) => void
 
 export const supabaseRealtime = {
-  // Subscribe to chat messages
   subscribeToChatMessages: (
     supabase: SupabaseClient<Database>,
     roomId: string,

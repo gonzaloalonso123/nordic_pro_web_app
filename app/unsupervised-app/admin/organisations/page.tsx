@@ -1,8 +1,4 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
 import { serverData } from "@/utils/data/server";
-import Link from "next/link";
 import React from "react";
 import { OrganisationCard } from "./components/organisation-card";
 import { CreateOrganisationButton } from "./components/create-organisation-button";

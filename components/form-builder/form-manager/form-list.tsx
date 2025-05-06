@@ -25,20 +25,30 @@ import {
   Search,
   Eye,
   BarChart,
+  ArrowLeft,
 } from "lucide-react";
-import type { Form } from "../types";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useDeleteForm, useForms } from "@/hooks/queries";
 
-interface FormListProps {
-  forms: Form[];
-  onDelete: (id: string) => Promise<void>;
-}
-
-export default function FormList({ forms, onDelete }: FormListProps) {
+export default function FormList() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
+  const params = useParams();
+  const baseUrl = `/unsupervised-app/admin/forms`;
 
-  const filteredForms = forms.filter((form) =>
+  const { data: forms, isPending, isError } = useForms();
+  const onDelete = useDeleteForm();
+
+  if (isPending) {
+    return <div>Loading...</div>;
+  }
+  if (isError) {
+    return <div>Error loading forms</div>;
+  }
+
+  console.log(forms);
+  const filteredForms = forms?.filter((form) =>
     form.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -53,8 +63,15 @@ export default function FormList({ forms, onDelete }: FormListProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Forms</h1>
-        <Button onClick={() => router.push("/forms/create")}>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" aria-label="Back">
+            <Link href={baseUrl} className="p-3">
+              <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold">Forms</h1>
+        </div>
+        <Button onClick={() => router.push(`${baseUrl}/forms/create`)}>
           <PlusCircle className="h-4 w-4 mr-2" />
           Create Form
         </Button>
@@ -84,9 +101,6 @@ export default function FormList({ forms, onDelete }: FormListProps) {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle>{form.title}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {form.questions.length} questions
-                    </CardDescription>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -96,28 +110,32 @@ export default function FormList({ forms, onDelete }: FormListProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => router.push(`/unsupervised-app/admin/organisations/forms/forms/preview/${form.id}`)}
+                        onClick={() =>
+                          router.push(`${baseUrl}/forms/preview/${form.id}`)
+                        }
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
-                          router.push(`/forms/analytics/${form.id}`)
+                          router.push(`${baseUrl}/analytics/${form.id}`)
                         }
                       >
                         <BarChart className="h-4 w-4 mr-2" />
                         Analytics
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => router.push(`/unsupervised-app/admin/organisations/forms/forms/edit/${form.id}`)}
+                        onClick={() =>
+                          router.push(`${baseUrl}/forms/edit/${form.id}`)
+                        }
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-600"
-                        onClick={() => onDelete(form.id)}
+                        onClick={() => onDelete.mutate(form.id)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete
@@ -135,13 +153,15 @@ export default function FormList({ forms, onDelete }: FormListProps) {
               </CardContent>
               <CardFooter className="flex justify-between border-t pt-4">
                 <p className="text-xs text-muted-foreground">
-                  Updated {formatDate(form.updatedAt)}
+                  Updated {formatDate(new Date(form.updated_at))}
                 </p>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`/unsupervised-app/admin/organisations/forms/analytics/${form.id}`)}
+                    onClick={() =>
+                      router.push(`${baseUrl}/analytics/${form.id}`)
+                    }
                   >
                     <BarChart className="h-3.5 w-3.5 mr-1.5" />
                     Analytics
@@ -149,7 +169,9 @@ export default function FormList({ forms, onDelete }: FormListProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`/unsupervised-app/admin/organisations/forms/forms/preview/${form.id}`)}
+                    onClick={() =>
+                      router.push(`${baseUrl}/forms/preview/${form.id}`)
+                    }
                   >
                     <Eye className="h-3.5 w-3.5 mr-1.5" />
                     Preview

@@ -21,6 +21,7 @@ export const FormItemWrapper = ({
   children: React.ReactNode | ((field: any) => React.ReactNode);
   description?: string;
   label?: string;
+  onChange?: (value: any) => void;
 }) => {
   const form = useFormContext();
   return (
