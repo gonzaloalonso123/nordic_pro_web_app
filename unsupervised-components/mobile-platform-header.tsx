@@ -11,7 +11,7 @@ export default function MobilePlatformHeader() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm h-20 left-0">
+    <header className="sticky top-0 z-30 bg-background border-b border-border shadow-sm h-20 left-0">
       <div className="flex items-center gap-2 h-20">
         <Button
           variant="ghost"
@@ -19,7 +19,7 @@ export default function MobilePlatformHeader() {
           className="h-9 w-9 relative"
           onClick={() => setIsSearchOpen(true)}
         >
-          <Search className="h-5 w-5 text-gray-600" />
+          <Search className="h-5 w-5 text-muted-foreground" />
         </Button>
         <Button
           variant="ghost"
@@ -27,7 +27,7 @@ export default function MobilePlatformHeader() {
           className="h-9 w-9 relative"
           onClick={() => setNotifications(0)}
         >
-          <Bell className="h-5 w-5 text-gray-600" />
+          <Bell className="h-5 w-5 text-muted-foreground" />
           {notifications > 0 && (
             <span className="absolute top-1 right-1 w-4 h-4 bg-accent text-white text-xs rounded-full flex items-center justify-center">
               {notifications}

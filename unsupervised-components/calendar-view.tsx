@@ -294,7 +294,7 @@ export default function CalendarView({ view = "month" }) {
                   day.isToday
                     ? "bg-primary/5"
                     : day.day
-                      ? "bg-white"
+                      ? "bg-background"
                       : "bg-gray-50"
                 } ${weekIndex === 5 ? "border-b-0" : ""} ${dayIndex === 6 ? "border-r-0" : ""}`}
               >

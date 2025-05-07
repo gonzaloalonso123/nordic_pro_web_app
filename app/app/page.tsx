@@ -6,7 +6,7 @@ export default async function ProtectedPage() {
   const user = serverData.auth.getCurrentUser();
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
-      <Alert variant="destructive">
+      <Alert variant="default">
         <InfoIcon size="16" strokeWidth={2} />
         This is a protected page that you can only see as an authenticated user
       </Alert>

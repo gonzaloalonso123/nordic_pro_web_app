@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import flags from "@/flags.json";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navbar";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const root = flags.current_app;
 
@@ -41,7 +42,7 @@ export default function PlatformSidebar() {
     <>
       <div
         className={cn(
-          "bg-white border-r border-gray-200 h-[calc(100vh-4rem)] sticky top-16 transition-all duration-300 hidden md:flex flex-col justify-between",
+          "bg-background border-r border-border h-[calc(100vh-4rem)] sticky top-16 transition-all duration-300 hidden md:flex flex-col justify-between",
           collapsed ? "w-20" : "w-64"
         )}
       >
@@ -74,8 +75,8 @@ export default function PlatformSidebar() {
                       className={cn(
                         "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                         isActive
-                          ? "bg-primary text-white"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       )}
                     >
                       <Icon className="h-5 w-5 flex-shrink-0" />
@@ -91,8 +92,8 @@ export default function PlatformSidebar() {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                       pathname === `${root}/admin`
-                        ? "bg-primary text-white"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
                     <UserRoundCog className="h-5 w-5 flex-shrink-0" />
@@ -104,6 +105,7 @@ export default function PlatformSidebar() {
           </nav>
         </div>
         <div className="p-3 self-end">
+          <ThemeSwitcher />
           <div
             className={cn(
               "bg-primary/5 rounded-lg p-4 border border-primary/10",
@@ -118,7 +120,7 @@ export default function PlatformSidebar() {
                 <h4 className="font-medium text-sm text-center mb-1">
                   Pro Features
                 </h4>
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs text-muted-foreground mb-2">
                   Unlock advanced analytics and team insights.
                 </p>
                 <Button size="sm" className="w-full text-xs">
