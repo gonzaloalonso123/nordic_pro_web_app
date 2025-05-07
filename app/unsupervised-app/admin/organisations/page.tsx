@@ -6,7 +6,7 @@ import { CreateOrganisationButton } from "./components/create-organisation-butto
 const Page = async () => {
   const organisation = await serverData.organisations.getAll();
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 container py-4">
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">Organisations</h1>
         <CreateOrganisationButton />

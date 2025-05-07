@@ -13,7 +13,7 @@ import { FileText, ListChecks, Award, Smartphone } from "lucide-react";
 export default function HomePage() {
   const baseUrl = `/unsupervised-app/admin/forms`;
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 container p-4">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">

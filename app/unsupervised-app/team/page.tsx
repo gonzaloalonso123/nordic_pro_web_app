@@ -22,7 +22,7 @@ import TeamRoster from "@/unsupervised-components/team-roster";
 
 export default function TeamPage() {
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto container">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold font-montserrat">

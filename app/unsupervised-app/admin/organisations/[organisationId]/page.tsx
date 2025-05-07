@@ -21,7 +21,7 @@ const Page = async ({ params }: PageProps) => {
   const teams = await serverData.teams.getByOrganisation(organisationId);
   const members = await serverData.users.getByOrganisation(organisationId);
   return (
-    <div className="py-6">
+    <div className="container py-4">
       <OrganisationPageAnalytics organisationId={organisationId} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section>
