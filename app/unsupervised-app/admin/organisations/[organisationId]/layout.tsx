@@ -32,7 +32,7 @@ const Layout = async ({ params, children }: LayoutProps) => {
 
   return (
     <div>
-      <div className="flex mb-6 bg-white p-4 pb-0 flex-col">
+      <div className="flex bg-white p-4 pb-0 flex-col gap-3">
         <div className="flex justify-between items-center gap-4">
           <h1 className="text-2xl font-bold flex gap-2 items-center">
             <Avatar>
@@ -55,7 +55,7 @@ const Layout = async ({ params, children }: LayoutProps) => {
         </div>
         <NavTabs basePath={basePath} />
       </div>
-      <div className="container">{children}</div>
+      {children}
     </div>
   );
 };

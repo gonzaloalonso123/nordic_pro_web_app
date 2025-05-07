@@ -2,7 +2,7 @@ import QuestionList from "@/components/form-builder/question-manager/question-li
 
 export default function QuestionsPage() {
   return (
-    <div className="py-8">
+    <div className="py-4 container">
       <QuestionList />
     </div>
   );
