@@ -1,17 +1,13 @@
-// import { serverData } from "@/utils/data/server";
+import { Alert } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 
 export default async function ProtectedPage() {
-  // const user = await serverData.auth.getCurrentUser();
   return (
-    <div className="flex-1 w-full flex flex-col gap-12 container">
-      <div className="w-full">
-        <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
-          <InfoIcon size="16" strokeWidth={2} />
-          This is a protected page that you can only see as an authenticated
-          user
-        </div>
-      </div>
+    <div className="flex-1 w-full flex flex-col gap-12 container p-4">
+      <Alert variant="destructive">
+        <InfoIcon size="16" strokeWidth={2} />
+        This is a protected page that you can only see as an authenticated user
+      </Alert>
       <div>
         <h2 className="font-bold text-2xl mb-4">Viewing:</h2>
         <p className="text-lg font-semibold">UNSUPERVISED APP</p>
