@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ReactQueryProvider } from "@/providers/reactQueryProvider";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,18 +23,27 @@ export const metadata: Metadata = {
   description: "Mental health, motivation, and team management in one place.",
 };
 
-export default function PlatformLayout({
+export default function RootLayout({ // Renamed from PlatformLayout to RootLayout for clarity as it's the root layout
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
   return (
     <ReactQueryProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
-          className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
+          className={`${inter.variable} ${montserrat.variable} font-sans antialiased`}
         >
-          <div className="min-h-screen flex flex-col">{children}</div>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="min-h-screen flex flex-col">
+              {children}
+            </div>
+          </ThemeProvider>
         </body>
       </html>
     </ReactQueryProvider>

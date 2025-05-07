@@ -302,7 +302,7 @@ export function DatePicker({
     return (
       <div
         ref={yearDropdownRef}
-        className="absolute z-10 mt-1 w-24 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto"
+        className="absolute z-10 mt-1 w-24 bg-background border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto"
       >
         <div className="py-1">
           {years.map((year) => (
@@ -331,7 +331,7 @@ export function DatePicker({
     return (
       <div
         ref={monthDropdownRef}
-        className="absolute z-10 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto"
+        className="absolute z-10 mt-1 w-32 bg-background border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto"
       >
         <div className="py-1">
           {months.map((month) => (
@@ -417,7 +417,7 @@ export function DatePicker({
       </div>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 p-4 bg-white border border-gray-200 rounded-md shadow-lg w-[320px]">
+        <div className="absolute z-10 mt-1 p-4 bg-background border border-gray-200 rounded-md shadow-lg w-[320px]">
           <div className="mb-4">
             <div className="flex items-center justify-between mb-4">
               <div className="relative">

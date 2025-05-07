@@ -26,7 +26,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 export default function PlatformHeader() {
   const isMobile = useIsMobile();
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <header className="bg-background border-b border-border sticky top-0 z-30">
       <div className="flex h-16 items-center justify-between px-6">
         {!isMobile && <NavBar />}
         <RightMenu />
@@ -44,11 +44,11 @@ const NavBar = () => (
       NordicPro
     </Link>
     <div className="hidden md:flex relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <input
         type="text"
         placeholder="Search..."
-        className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-64"
+        className="pl-10 pr-4 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-64"
       />
     </div>
   </div>
@@ -95,7 +95,7 @@ const NotificationsButton = ({
       className="relative"
       aria-label="Notifications"
     >
-      <Bell className="h-5 w-5 text-gray-600" />
+      <Bell className="h-5 w-5 text-muted-foreground" />
       {notifications.length > 0 && (
         <span className="absolute top-1 right-1 w-4 h-4 bg-accent text-white text-xs rounded-full flex items-center justify-center">
           {notifications.length}
@@ -113,7 +113,7 @@ const MessagesButton = ({ messages }: { messages: Notification[] }) => {
       className="relative"
       aria-label="Messages"
     >
-      <MessageSquare className="h-5 w-5 text-gray-600" />
+      <MessageSquare className="h-5 w-5 text-muted-foreground" />
       {messages.length > 0 && (
         <span className="absolute top-1 right-1 w-4 h-4 bg-accent text-white text-xs rounded-full flex items-center justify-center">
           {messages.length}
@@ -141,7 +141,7 @@ const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
       <DropdownMenuLabel>
         <div className="flex flex-col">
           <span className="font-medium">{user?.email}</span>
-          <span className="text-xs text-gray-500">Head Coach</span>
+          <span className="text-xs text-muted-foreground">Head Coach</span>
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />

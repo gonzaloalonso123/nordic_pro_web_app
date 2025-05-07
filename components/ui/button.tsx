@@ -65,8 +65,8 @@ const buttonVariants = cva(
           "transition-all duration-300",
         ],
         glass: [
-          "bg-white/10 backdrop-blur-md text-white border border-white/20",
-          "hover:bg-white/20 hover:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.3)]",
+          "bg-background/10 backdrop-blur-md text-white border border-white/20",
+          "hover:bg-background/20 hover:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.3)]",
           "active:scale-[0.97] active:shadow-inner",
           "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
           "transition-all duration-300",
