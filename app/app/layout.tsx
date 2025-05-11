@@ -1,14 +1,19 @@
+import type React from "react";
+import MobilePlatformHeader from "@/unsupervised-components/mobile-platform-header";
+import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navbar";
 import PlatformHeader from "@/components/platform/platform-header";
 import PlatformSidebar from "@/components/platform/platform-sidebar";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+function PlatformLayoutClient({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-full w-full">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <PlatformHeader />
       <div className="flex flex-1">
         <PlatformSidebar />
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );
 }
+
+export default PlatformLayoutClient;

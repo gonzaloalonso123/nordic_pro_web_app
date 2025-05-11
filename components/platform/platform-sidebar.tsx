@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   UserRoundCog,
+  TrophyIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,12 +23,13 @@ import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navb
 const root = flags.current_app;
 
 const menuItems = [
-  { name: "Dashboard", href: root, icon: Home },
-  { name: "Team", href: `${root}/team`, icon: Users },
+  // { name: "Dashboard", href: root, icon: Home },
+  // { name: "Team", href: `${root}/team`, icon: Users },
   // { name: "Mental Health", href: "/platform/mental-health", icon: Heart },
   // { name: "Motivation", href: "/platform/motivation", icon: Trophy },
   { name: "Calendar", href: `${root}/calendar`, icon: Calendar },
   { name: "Messages", href: `${root}/chat`, icon: MessageSquare },
+  { name: "Dashboard", href: `${root}/dashboard`, icon: TrophyIcon },
   // { name: "Analytics", href: "/platform/analytics", icon: BarChart3 },
   // { name: "Settings", href: "/platform/settings", icon: Settings },
 ];

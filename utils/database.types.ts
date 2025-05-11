@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 export type Database = {
   public: {
@@ -9,20 +15,44 @@ export type Database = {
           id: string;
           organisation_id: string | null;
           team_id: string | null;
+          user_id: string | null;
         };
         Insert: {
           entity_type: string;
           id?: string;
           organisation_id?: string | null;
           team_id?: string | null;
+          user_id?: string | null;
         };
         Update: {
           entity_type?: string;
           id?: string;
           organisation_id?: string | null;
           team_id?: string | null;
+          user_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "calendars_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "calendars_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user_analytics";
+            referencedColumns: ["user_id"];
+          },
+          {
+            foreignKeyName: "calendars_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "fk_calendars_org";
             columns: ["organisation_id"];
@@ -30,57 +60,84 @@ export type Database = {
             referencedRelation: "organisations";
             referencedColumns: ["id"];
           },
-          {
-            foreignKeyName: "fk_calendars_team";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "teams";
-            referencedColumns: ["id"];
-          },
         ];
       };
       chat_messages: {
         Row: {
-          attachments: Json;
-          chat_room_id: string;
           content: string;
-          created_at: string;
+          created_at: string | null;
           id: string;
-          user_id: string;
+          room_id: string | null;
+          user_id: string | null;
         };
         Insert: {
-          attachments: Json;
-          chat_room_id: string;
           content: string;
-          created_at?: string;
+          created_at?: string | null;
           id?: string;
-          user_id: string;
+          room_id?: string | null;
+          user_id?: string | null;
         };
         Update: {
-          attachments?: Json;
-          chat_room_id?: string;
           content?: string;
-          created_at?: string;
+          created_at?: string | null;
           id?: string;
-          user_id?: string;
+          room_id?: string | null;
+          user_id?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: "fk_chat_messages_room";
-            columns: ["chat_room_id"];
+            foreignKeyName: "chat_messages_room_id_fkey";
+            columns: ["room_id"];
             isOneToOne: false;
             referencedRelation: "chat_rooms";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "fk_chat_messages_user";
+            foreignKeyName: "chat_messages_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "user_analytics";
             referencedColumns: ["user_id"];
           },
           {
-            foreignKeyName: "fk_chat_messages_user";
+            foreignKeyName: "chat_messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chat_room_members: {
+        Row: {
+          room_id: string;
+          user_id: string;
+        };
+        Insert: {
+          room_id: string;
+          user_id: string;
+        };
+        Update: {
+          room_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_room_members_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "chat_rooms";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chat_room_members_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user_analytics";
+            referencedColumns: ["user_id"];
+          },
+          {
+            foreignKeyName: "chat_room_members_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "users";
@@ -90,25 +147,19 @@ export type Database = {
       };
       chat_rooms: {
         Row: {
-          created_at: string;
-          description: string;
+          created_at: string | null;
           id: string;
-          image: string;
-          name: string;
+          name: string | null;
         };
         Insert: {
-          created_at: string;
-          description: string;
-          id: string;
-          image: string;
-          name: string;
+          created_at?: string | null;
+          id?: string;
+          name?: string | null;
         };
         Update: {
-          created_at?: string;
-          description?: string;
+          created_at?: string | null;
           id?: string;
-          image?: string;
-          name?: string;
+          name?: string | null;
         };
         Relationships: [];
       };
@@ -307,30 +358,63 @@ export type Database = {
           },
         ];
       };
+      events_calendars: {
+        Row: {
+          calendar_id: string | null;
+          event_id: string;
+          id: string;
+        };
+        Insert: {
+          calendar_id?: string | null;
+          event_id?: string;
+          id?: string;
+        };
+        Update: {
+          calendar_id?: string | null;
+          event_id?: string;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "events_calendars_calendar_id_fkey";
+            columns: ["calendar_id"];
+            isOneToOne: false;
+            referencedRelation: "calendars";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "events_calendars_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       events_invitation: {
         Row: {
           description: string;
           event_id: string;
           id: string;
-          reason: string;
+          reason: string | null;
           user_id: string;
-          will_attend: boolean;
+          will_attend: boolean | null;
         };
         Insert: {
           description: string;
           event_id: string;
           id?: string;
-          reason: string;
+          reason?: string | null;
           user_id: string;
-          will_attend: boolean;
+          will_attend?: boolean | null;
         };
         Update: {
           description?: string;
           event_id?: string;
           id?: string;
-          reason?: string;
+          reason?: string | null;
           user_id?: string;
-          will_attend?: boolean;
+          will_attend?: boolean | null;
         };
         Relationships: [
           {
@@ -591,6 +675,49 @@ export type Database = {
           },
         ];
       };
+      message_reads: {
+        Row: {
+          id: string;
+          message_id: string | null;
+          read_at: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          message_id?: string | null;
+          read_at?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          message_id?: string | null;
+          read_at?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_message_id_fkey";
+            columns: ["message_id"];
+            isOneToOne: false;
+            referencedRelation: "chat_messages";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "user_analytics";
+            referencedColumns: ["user_id"];
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       organisations: {
         Row: {
           id: string;
@@ -612,6 +739,7 @@ export type Database = {
           created_at: string;
           id: string;
           organisation_id: string;
+          team_id: string | null;
           user_email: string;
         };
         Insert: {
@@ -619,6 +747,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           organisation_id?: string;
+          team_id?: string | null;
           user_email: string;
         };
         Update: {
@@ -626,6 +755,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           organisation_id?: string;
+          team_id?: string | null;
           user_email?: string;
         };
         Relationships: [
@@ -634,6 +764,13 @@ export type Database = {
             columns: ["organisation_id"];
             isOneToOne: false;
             referencedRelation: "organisations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "organisations_invitation_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
             referencedColumns: ["id"];
           },
         ];
@@ -832,14 +969,14 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "fk_teams_organisations_org";
+            foreignKeyName: "teams_organisations_organisation_id_fkey";
             columns: ["organisation_id"];
             isOneToOne: false;
             referencedRelation: "organisations";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "fk_teams_organisations_team";
+            foreignKeyName: "teams_organisations_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
             referencedRelation: "teams";
@@ -895,46 +1032,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      users_chats: {
-        Row: {
-          chat_room_id: string;
-          id: string;
-          user_id: string;
-        };
-        Insert: {
-          chat_room_id: string;
-          id?: string;
-          user_id: string;
-        };
-        Update: {
-          chat_room_id?: string;
-          id?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "fk_users_chats_room";
-            columns: ["chat_room_id"];
-            isOneToOne: false;
-            referencedRelation: "chat_rooms";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "fk_users_chats_user";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "user_analytics";
-            referencedColumns: ["user_id"];
-          },
-          {
-            foreignKeyName: "fk_users_chats_user";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       users_organisations: {
         Row: {
           id: string;
@@ -984,21 +1081,21 @@ export type Database = {
           position: string;
           role: string;
           team_id: string;
-          users_id: string;
+          user_id: string;
         };
         Insert: {
           id?: string;
           position: string;
           role: string;
           team_id: string;
-          users_id: string;
+          user_id: string;
         };
         Update: {
           id?: string;
           position?: string;
           role?: string;
           team_id?: string;
-          users_id?: string;
+          user_id?: string;
         };
         Relationships: [
           {
@@ -1009,15 +1106,15 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "fk_users_teams_user";
-            columns: ["users_id"];
+            foreignKeyName: "users_teams_user_id_fkey";
+            columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "user_analytics";
             referencedColumns: ["user_id"];
           },
           {
-            foreignKeyName: "fk_users_teams_user";
-            columns: ["users_id"];
+            foreignKeyName: "users_teams_user_id_fkey";
+            columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "users";
             referencedColumns: ["id"];
@@ -1139,8 +1236,10 @@ export type Tables<
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R;
       }
       ? R
@@ -1148,7 +1247,9 @@ export type Tables<
     : never;
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof Database },
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database;
   }
@@ -1169,7 +1270,9 @@ export type TablesInsert<
     : never;
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"] | { schema: keyof Database },
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database;
   }
@@ -1190,7 +1293,9 @@ export type TablesUpdate<
     : never;
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"] | { schema: keyof Database },
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof Database },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof Database;
   }
@@ -1203,7 +1308,9 @@ export type Enums<
     : never;
 
 export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"] | { schema: keyof Database },
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database;
   }

@@ -4,10 +4,11 @@ import * as organisationsInvitationService from "./organisations_invitation";
 // Add this to the exports
 export { organisationsInvitationService };
 
-export * from "./users"
-export * from "./organisations"
-export * from "./teams"
-export * from "./calendars"
-export * from "./events"
-export * from "./forms"
-export * from "./chat-rooms"
+export * from "./users";
+export * from "./organisations";
+export * from "./teams";
+export * from "./calendars";
+export * from "./events";
+export * from "./forms";
+export * from "./chat-rooms";
+export * from "./events-calendars";

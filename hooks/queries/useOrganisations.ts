@@ -17,7 +17,6 @@ type OrganisationRow = Tables<"organisations">;
 type OrganisationInsert = TablesInsert<"organisations">;
 type OrganisationUpdate = TablesUpdate<"organisations">;
 
-// Get all organisations
 export const useOrganisations = <TData = OrganisationRow[]>(
   options?: Omit<
     UseQueryOptions<OrganisationRow[], Error, TData>,
@@ -32,7 +31,6 @@ export const useOrganisations = <TData = OrganisationRow[]>(
   });
 };
 
-// Get organisation by ID
 export const useOrganisation = <TData = OrganisationRow>(
   organisationId: string | undefined,
   options?: Omit<
@@ -52,7 +50,6 @@ export const useOrganisation = <TData = OrganisationRow>(
   });
 };
 
-// Get organisations by user
 export const useOrganisationsByUser = <TData = OrganisationRow[]>(
   userId: string | undefined,
   options?: Omit<
@@ -70,7 +67,6 @@ export const useOrganisationsByUser = <TData = OrganisationRow[]>(
   });
 };
 
-// Get organisations by team
 export const useOrganisationsByTeam = <TData = OrganisationRow[]>(
   teamId: string | undefined,
   options?: Omit<
@@ -148,7 +144,6 @@ export const useOrganisationWithCalendar = <TData = any>(
   });
 };
 
-// Create organisation mutation
 export const useCreateOrganisation = (
   options?: Omit<
     UseMutationOptions<OrganisationRow, Error, OrganisationInsert>,

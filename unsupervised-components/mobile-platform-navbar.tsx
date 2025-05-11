@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Home, MessageSquare, Users } from "lucide-react";
+import { Calendar, Home, MessageSquare, TrophyIcon, Users } from "lucide-react";
 import flags from "@/flags.json";
 
 export default function MobilePlatformNavbar() {
@@ -10,8 +10,8 @@ export default function MobilePlatformNavbar() {
   const root = flags.current_app;
 
   const navItems = [
-    { name: "Dashboard", href: root, icon: Home },
-    { name: "Team", href: `${root}/team`, icon: Users },
+    { name: "Dashboard", href: `${root}/dashboard`, icon: TrophyIcon },
+    // { name: "Team", href: `${root}/team`, icon: Users },
     // { name: "Mental Health", href: "/platform/mental-health", icon: Heart },
     // { name: "Motivation", href: "/platform/motivation", icon: Trophy },
     { name: "Calendar", href: `${root}/calendar`, icon: Calendar },

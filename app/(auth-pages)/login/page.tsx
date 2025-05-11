@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { FormLabel } from "@/components/ui/form";
-import { useTransition, useState } from "react";
+import { useTransition, useState, useEffect, use } from "react";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { SubmitButton } from "@/components/form/submit-button";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,8 @@ import { signIn } from "@/utils/supabase/auth-actions";
 import { useTranslation } from "react-i18next";
 import { FormWrapper } from "@/components/form/form-wrapper";
 import { Disclaimer } from "@/components/disclaimer";
+import { useClientData } from "@/utils/data/client";
+import { Content } from "@/components/content";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -51,33 +53,39 @@ export default function Login() {
   }
 
   return (
-    <FormWrapper title={t("Log in")} onSubmit={onSubmit}>
-      <DontHaveAccount />
-      {error && (
-        <Disclaimer
-          variant="error"
-          title={t("Login failed!")}
-          description={error}
-        />
-      )}
-      <FormItemWrapper name="email" label={t("Email")}>
-        <Input placeholder={t("you@example.com")} />
-      </FormItemWrapper>
-      <FormItemWrapper name="password" label={t("Password")}>
-        <Input type="password" placeholder={t("Your password")} />
-      </FormItemWrapper>
-      <div className="flex justify-between items-center">
-        <Link
-          className="text-xs text-foreground underline"
-          href="/forgot-password"
-        >
-          {t("Forgot Password?")}
-        </Link>
-        <SubmitButton disabled={isPending} loading={isPending} className="mt-2">
-          {isPending ? t("Loging in...") : t("Log in")}
-        </SubmitButton>
-      </div>
-    </FormWrapper>
+    <Content>
+      <FormWrapper title={t("Log in")} onSubmit={onSubmit}>
+        <DontHaveAccount />
+        {error && (
+          <Disclaimer
+            variant="error"
+            title={t("Login failed!")}
+            description={error}
+          />
+        )}
+        <FormItemWrapper name="email" label={t("Email")}>
+          <Input placeholder={t("you@example.com")} />
+        </FormItemWrapper>
+        <FormItemWrapper name="password" label={t("Password")}>
+          <Input type="password" placeholder={t("Your password")} />
+        </FormItemWrapper>
+        <div className="flex justify-between items-center">
+          <Link
+            className="text-xs text-foreground underline"
+            href="/forgot-password"
+          >
+            {t("Forgot Password?")}
+          </Link>
+          <SubmitButton
+            disabled={isPending}
+            loading={isPending}
+            className="mt-2"
+          >
+            {isPending ? t("Loging in...") : t("Log in")}
+          </SubmitButton>
+        </div>
+      </FormWrapper>
+    </Content>
   );
 }
 

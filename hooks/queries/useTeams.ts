@@ -205,3 +205,43 @@ export const useDeleteTeam = (
     ...options,
   });
 };
+
+export const useAddUserToTeam = (
+  options?: Omit<
+    UseMutationOptions<boolean, Error, { teamId: string; userId: string }>,
+    "mutationFn"
+  >
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  return useMutation<
+    boolean,
+    Error,
+    { teamId: string; userId: string; role: string; position: string }
+  >({
+    mutationFn: ({ teamId, userId, role, position }) =>
+      teamsService.addUserToTeam(supabase, teamId, userId, role, position),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId] });
+    },
+  });
+};
+
+export const useRemoveUserFromTeam = (
+  options?: Omit<
+    UseMutationOptions<boolean, Error, { teamId: string; userId: string }>,
+    "mutationFn"
+  >
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  return useMutation<boolean, Error, { teamId: string; userId: string }>({
+    mutationFn: ({ teamId, userId }) =>
+      teamsService.removeUserFromTeam(supabase, teamId, userId),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId] });
+    },
+  });
+};

@@ -239,7 +239,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
             variant="outline"
             className="w-full"
             onClick={() =>
-              router.push("/unsupervised-app/admin/organisations/forms/forms")
+              router.push("/app/admin/organisations/forms/forms")
             }
           >
             Back to Forms

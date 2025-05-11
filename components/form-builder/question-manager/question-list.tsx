@@ -49,7 +49,7 @@ export default function QuestionList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const params = useParams();
-  const baseUrl = `/unsupervised-app/admin/forms/questions`;
+  const baseUrl = `/app/admin/forms/questions`;
 
   const {
     data: questionsData,
@@ -120,7 +120,7 @@ export default function QuestionList() {
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center">
           <Button variant="ghost" size="icon" aria-label="Back">
-            <Link href={`/unsupervised-app/admin/forms`} className="p-3">
+            <Link href={`/app/admin/forms`} className="p-3">
               <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             </Link>
           </Button>

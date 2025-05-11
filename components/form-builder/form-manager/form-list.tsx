@@ -35,7 +35,7 @@ export default function FormList() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const params = useParams();
-  const baseUrl = `/unsupervised-app/admin/forms`;
+  const baseUrl = `/app/admin/forms`;
 
   const { data: forms, isPending, isError } = useForms();
   const onDelete = useDeleteForm();

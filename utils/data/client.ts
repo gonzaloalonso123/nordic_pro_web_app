@@ -10,9 +10,10 @@ import * as organisationsInvitationQueries from "@/hooks/queries/useOrganisation
 import * as formQueries from "@/hooks/queries/useForms";
 import * as questionQueries from "@/hooks/queries/useQuestions";
 import * as formResponseQueries from "@/hooks/queries/useFormResponses";
+import * as eventsInvitationQueries from "@/hooks/queries/useEventsInvitation";
 
 import { createClient } from "../supabase/client";
-import { useCallback } from "react";
+import { use, useCallback } from "react";
 
 export const useClientData = () => {
   const supabase = createClient();
@@ -75,6 +76,8 @@ export const useClientData = () => {
       useCreate: teamQueries.useCreateTeam,
       useUpdate: teamQueries.useUpdateTeam,
       useDelete: teamQueries.useDeleteTeam,
+      useAddMember: teamQueries.useAddUserToTeam,
+      useRemoveMember: teamQueries.useRemoveUserFromTeam,
     },
 
     events: {
@@ -86,10 +89,15 @@ export const useClientData = () => {
       useByTypeAndTeam: eventQueries.useEventsByTypeAndTeam,
       useWithAttendance: eventQueries.useEventWithAttendance,
       useWithRoster: eventQueries.useEventWithRoster,
+      useByOrganisationId: eventQueries.useEventsByOrganisationId,
+      useByTeamId: eventQueries.useEventsByTeamId,
+      useByUserId: eventQueries.useEventsByUserId,
       // Mutations
       useCreate: eventQueries.useCreateEvent,
       useUpdate: eventQueries.useUpdateEvent,
       useDelete: eventQueries.useDeleteEvent,
+      useAddToCalendar: eventQueries.useAddEventToCalendar,
+      useRemoveFromCalendar: eventQueries.useRemoveEventFromCalendar,
     },
 
     calendars: {
@@ -98,11 +106,12 @@ export const useClientData = () => {
       useById: calendarQueries.useCalendar,
       useByTeam: calendarQueries.useCalendarByTeam,
       useByOrganisation: calendarQueries.useCalendarByOrganisation,
+      useByUser: calendarQueries.useCalendarByUser,
       useWithEvents: calendarQueries.useCalendarWithEvents,
-      // Mutations
       useCreate: calendarQueries.useCreateCalendar,
       useUpdate: calendarQueries.useUpdateCalendar,
       useDelete: calendarQueries.useDeleteCalendar,
+      useSendEventsToCalendars: calendarQueries.useSendEventsToCalendars,
     },
     forms: {
       useAll: formQueries.useForms,
@@ -148,7 +157,20 @@ export const useClientData = () => {
       useById: chatRoomQueries.useChatRoom,
       useByUser: chatRoomQueries.useChatRoomsByUser,
       useWithMessages: chatRoomQueries.useChatRoomWithMessages,
-      useWithUsers: chatRoomQueries.useChatRoomWithUsers,
+
+      // Message methods
+      useMessagesByRoom: chatRoomQueries.useChatMessagesByRoom,
+      useSendMessage: chatRoomQueries.useSendChatMessage,
+
+      // Chat room members methods
+      useMembers: chatRoomQueries.useChatRoomMembers,
+      useAddMember: chatRoomQueries.useAddChatRoomMember,
+      useRemoveMember: chatRoomQueries.useRemoveChatRoomMember,
+
+      // Message reads methods
+      useMarkAsRead: chatRoomQueries.useMarkMessageAsRead,
+      useUnreadCount: chatRoomQueries.useUnreadMessageCount,
+
       // Mutations
       useCreate: chatRoomQueries.useCreateChatRoom,
       useUpdate: chatRoomQueries.useUpdateChatRoom,
@@ -159,8 +181,10 @@ export const useClientData = () => {
       // Queries
       useAll: organisationsInvitationQueries.useOrganisationsInvitations,
       useById: organisationsInvitationQueries.useOrganisationInvitation,
-      useByOrganisation: organisationsInvitationQueries.useOrganisationInvitationsByOrganisation,
-      useByEmail: organisationsInvitationQueries.useOrganisationInvitationsByEmail,
+      useByOrganisation:
+        organisationsInvitationQueries.useOrganisationInvitationsByOrganisation,
+      useByEmail:
+        organisationsInvitationQueries.useOrganisationInvitationsByEmail,
       // Mutations
       useCreate: organisationsInvitationQueries.useCreateOrganisationInvitation,
       useUpdate: organisationsInvitationQueries.useUpdateOrganisationInvitation,
@@ -169,6 +193,20 @@ export const useClientData = () => {
       useReject: organisationsInvitationQueries.useRejectOrganisationInvitation,
     },
 
+    eventsInvitation: {
+      // Queries
+      useAll: eventsInvitationQueries.useEventsInvitations,
+      useById: eventsInvitationQueries.useEventInvitation,
+      useByEvent: eventsInvitationQueries.useEventInvitationsByEvent,
+      useByUser: eventsInvitationQueries.useEventInvitationsByUser,
+      useByEventAndUser: eventsInvitationQueries.useEventInvitationByEventAndUser,
+      useWithUserDetails: eventsInvitationQueries.useEventInvitationWithUserDetails,
+      // Mutations
+      useCreate: eventsInvitationQueries.useCreateEventInvitation,
+      useUpdate: eventsInvitationQueries.useUpdateEventInvitation,
+      useDelete: eventsInvitationQueries.useDeleteEventInvitation,
+      useBulkCreate: eventsInvitationQueries.useBulkCreateEventInvitations,
+    },
     auth,
   };
 };

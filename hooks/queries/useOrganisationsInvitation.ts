@@ -199,7 +199,6 @@ export const useDeleteOrganisationInvitation = (
   });
 };
 
-// Accept invitation mutation
 export const useAcceptOrganisationInvitation = (
   options?: Omit<
     UseMutationOptions<
@@ -226,17 +225,12 @@ export const useAcceptOrganisationInvitation = (
         queryKey: ["organisations_invitation", variables.invitationId],
       });
       queryClient.invalidateQueries({ queryKey: ["organisations"] });
-      queryClient.invalidateQueries({ queryKey: ["users", variables.userId] });
-      queryClient.invalidateQueries({
-        queryKey: ["users", variables.userId, "organisations"],
-      });
       options?.onSuccess?.(data, variables, context);
     },
     ...options,
   });
 };
 
-// Reject invitation mutation
 export const useRejectOrganisationInvitation = (
   options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">
 ) => {

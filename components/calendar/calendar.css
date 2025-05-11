@@ -1,0 +1,97 @@
+/* Calendar Styles */
+.styled-calendar-container .fc {
+  --fc-border-color: hsl(var(--border));
+  --fc-button-text-color: hsl(var(--foreground));
+  --fc-button-bg-color: hsl(var(--primary));
+  --fc-button-border-color: hsl(var(--primary));
+  --fc-button-hover-bg-color: hsl(var(--primary) / 0.9);
+  --fc-button-hover-border-color: hsl(var(--primary) / 0.9);
+  --fc-button-active-bg-color: hsl(var(--primary) / 0.8);
+  --fc-button-active-border-color: hsl(var(--primary) / 0.8);
+  --fc-event-bg-color: hsl(var(--primary));
+  --fc-event-border-color: hsl(var(--primary));
+  --fc-event-text-color: hsl(var(--primary-foreground));
+  --fc-today-bg-color: hsl(var(--muted) / 0.3);
+  --fc-now-indicator-color: hsl(var(--destructive));
+  font-family: var(--font-sans);
+}
+
+.calendar-wrapper {
+  @apply rounded-none rounded-b-lg border-none;
+}
+
+/* Table headers */
+.styled-calendar-container .fc th {
+  /* padding: 10px; */
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  background-color: hsl(var(--muted) / 0.1);
+}
+
+/* Day cells */
+.styled-calendar-container .fc td {
+  border-color: hsl(var(--border));
+}
+
+/* Event styling */
+.styled-calendar-container .fc-event {
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Today highlight */
+.styled-calendar-container .fc .fc-day-today {
+  background-color: hsl(var(--muted) / 0.2) !important;
+}
+
+/* Week view time slots */
+.styled-calendar-container .fc-timegrid-slot {
+  height: 40px !important;
+}
+
+.styled-calendar-container .fc-timegrid-slot-label {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* More events popover */
+.styled-calendar-container .fc-more-popover {
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.styled-calendar-container .fc-more-popover .fc-popover-title {
+  padding: 8px 12px;
+  font-weight: 500;
+  background-color: hsl(var(--muted) / 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .styled-calendar-container .fc-toolbar-title {
+    font-size: 1rem;
+  }
+
+  .styled-calendar-container .fc-col-header-cell {
+    padding: 6px 2px;
+  }
+
+  .styled-calendar-container .fc-col-header-cell-cushion {
+    font-size: 0.75rem;
+  }
+
+  .styled-calendar-container .fc-daygrid-day-number {
+    font-size: 0.75rem;
+    padding: 4px;
+  }
+
+  .styled-calendar-container .fc-event {
+    font-size: 0.7rem;
+    padding: 1px 2px;
+  }
+}

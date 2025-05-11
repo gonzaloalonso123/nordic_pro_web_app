@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+
 type DisclaimerVariant = "primary" | "error" | "success" | "custom";
 
 interface DisclaimerProps {

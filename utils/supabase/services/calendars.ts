@@ -1,90 +1,192 @@
-import type { SupabaseClient } from "@supabase/supabase-js"
-import type { Database } from "../../database.types"
-import type { Tables, TablesInsert, TablesUpdate } from "../../database.types"
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../../database.types";
+import type { Tables, TablesInsert, TablesUpdate } from "../../database.types";
 
-type CalendarRow = Tables<"calendars">
-type CalendarInsert = TablesInsert<"calendars">
-type CalendarUpdate = TablesUpdate<"calendars">
+type CalendarRow = Tables<"calendars">;
+type CalendarInsert = TablesInsert<"calendars">;
+type CalendarUpdate = TablesUpdate<"calendars">;
 
 export const calendarsService = {
   // Get all calendars
   async getAll(supabase: SupabaseClient<Database>): Promise<CalendarRow[]> {
-    const { data, error } = await supabase.from("calendars").select("*")
+    const { data, error } = await supabase.from("calendars").select("*");
 
-    if (error) throw error
-    return data || []
+    if (error) throw error;
+    return data || [];
   },
 
   // Get calendar by ID
-  async getById(supabase: SupabaseClient<Database>, calendarId: string): Promise<CalendarRow | null> {
-    const { data, error } = await supabase.from("calendars").select("*").eq("id", calendarId).single()
+  async getById(
+    supabase: SupabaseClient<Database>,
+    calendarId: string
+  ): Promise<CalendarRow | null> {
+    const { data, error } = await supabase
+      .from("calendars")
+      .select("*")
+      .eq("id", calendarId)
+      .single();
 
-    if (error && error.code !== "PGRST116") throw error
-    return data
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   },
 
   // Get calendar by team
-  async getByTeam(supabase: SupabaseClient<Database>, teamId: string): Promise<CalendarRow | null> {
+  async getByTeam(
+    supabase: SupabaseClient<Database>,
+    teamId: string
+  ): Promise<CalendarRow | null> {
     const { data, error } = await supabase
       .from("calendars")
       .select("*")
       .eq("team_id", teamId)
       .eq("entity_type", "TEAM")
-      .single()
+      .single();
 
-    if (error && error.code !== "PGRST116") throw error
-    return data
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   },
 
   // Get calendar by organisation
-  async getByOrganisation(supabase: SupabaseClient<Database>, organisationId: string): Promise<CalendarRow | null> {
+  async getByOrganisation(
+    supabase: SupabaseClient<Database>,
+    organisationId: string
+  ): Promise<CalendarRow | null> {
     const { data, error } = await supabase
       .from("calendars")
       .select("*")
       .eq("organisation_id", organisationId)
       .eq("entity_type", "ORGANISATION")
-      .single()
+      .single();
 
-    if (error && error.code !== "PGRST116") throw error
-    return data
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   },
 
-  // Create calendar
-  async create(supabase: SupabaseClient<Database>, calendar: CalendarInsert): Promise<CalendarRow> {
-    const { data, error } = await supabase.from("calendars").insert(calendar).select().single()
+  async getByUser(
+    supabase: SupabaseClient<Database>,
+    userId: string
+  ): Promise<CalendarRow[]> {
+    const { data, error } = await supabase
+      .from("calendars")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("entity_type", "USER");
+    if (error && error.code !== "PGRST116") throw error;
+    return data || [];
+  },
 
-    if (error) throw error
-    return data
+  async sendEventsToCalendars(
+    supabase: SupabaseClient<Database>,
+    calendars: {
+      usersIds?: string[];
+      teamIds?: string[];
+      organisationIds?: [];
+      eventId: string;
+    }
+  ): Promise<boolean> {
+    const { usersIds, teamIds, organisationIds, eventId } = calendars;
+    const allUserCalendars = await Promise.all(
+      (usersIds ?? []).map(async (userId) => {
+        return await calendarsService.getByUser(supabase, userId);
+      })
+    );
+    const allTeamCalendars = await Promise.all(
+      (teamIds ?? []).map(async (teamId) => {
+        return await calendarsService.getByTeam(supabase, teamId);
+      })
+    );
+    const allOrganisationCalendars = await Promise.all(
+      (organisationIds ?? []).map(async (organisationId) => {
+        return await calendarsService.getByOrganisation(
+          supabase,
+          organisationId
+        );
+      })
+    );
+    const allCalendars = [
+      ...allUserCalendars,
+      ...allTeamCalendars,
+      ...allOrganisationCalendars,
+    ];
+    const allCalendarsIds = allCalendars.flatMap((calendars) =>
+      (Array.isArray(calendars) ? calendars : [calendars])
+        .filter((cal): cal is CalendarRow => cal !== null)
+        .map((calendar) => calendar.id)
+    );
+    const { data, error } = await supabase.from("events_calendars").insert(
+      allCalendarsIds.map((calendarId) => {
+        return {
+          calendar_id: calendarId,
+          event_id: eventId,
+        };
+      })
+    );
+    if (error) throw error;
+    return true;
+  },
+
+  async create(
+    supabase: SupabaseClient<Database>,
+    calendar: CalendarInsert
+  ): Promise<CalendarRow> {
+    const { data, error } = await supabase
+      .from("calendars")
+      .insert(calendar)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
   // Update calendar
-  async update(supabase: SupabaseClient<Database>, calendarId: string, updates: CalendarUpdate): Promise<CalendarRow> {
-    const { data, error } = await supabase.from("calendars").update(updates).eq("id", calendarId).select().single()
+  async update(
+    supabase: SupabaseClient<Database>,
+    calendarId: string,
+    updates: CalendarUpdate
+  ): Promise<CalendarRow> {
+    const { data, error } = await supabase
+      .from("calendars")
+      .update(updates)
+      .eq("id", calendarId)
+      .select()
+      .single();
 
-    if (error) throw error
-    return data
+    if (error) throw error;
+    return data;
   },
 
   // Delete calendar
-  async delete(supabase: SupabaseClient<Database>, calendarId: string): Promise<boolean> {
-    const { error } = await supabase.from("calendars").delete().eq("id", calendarId)
+  async delete(
+    supabase: SupabaseClient<Database>,
+    calendarId: string
+  ): Promise<boolean> {
+    const { error } = await supabase
+      .from("calendars")
+      .delete()
+      .eq("id", calendarId);
 
-    if (error) throw error
-    return true
+    if (error) throw error;
+    return true;
   },
 
   // Get calendar with events
-  async getWithEvents(supabase: SupabaseClient<Database>, calendarId: string): Promise<any> {
+  async getWithEvents(
+    supabase: SupabaseClient<Database>,
+    calendarId: string
+  ): Promise<any> {
     const { data, error } = await supabase
       .from("calendars")
-      .select(`
+      .select(
+        `
         *,
         events(*)
-      `)
+      `
+      )
       .eq("id", calendarId)
-      .single()
+      .single();
 
-    if (error && error.code !== "PGRST116") throw error
-    return data
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   },
-}
+};

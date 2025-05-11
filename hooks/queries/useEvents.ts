@@ -5,7 +5,10 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import { eventsService } from "@/utils/supabase/services";
+import {
+  eventsCalendarsService,
+  eventsService,
+} from "@/utils/supabase/services";
 import type {
   Tables,
   TablesInsert,
@@ -242,6 +245,89 @@ export const useDeleteEvent = (
       queryClient.invalidateQueries({ queryKey: ["calendars"] });
       options?.onSuccess?.(data, eventId, context);
     },
+    ...options,
+  });
+};
+
+export const useAddEventToCalendar = (
+  options?: UseMutationOptions<
+    Tables<"events_calendars"> | null,
+    Error,
+    TablesInsert<"events_calendars">
+  >
+) => {
+  const supabase = createClient();
+  return useMutation<
+    Tables<"events_calendars"> | null,
+    Error,
+    TablesInsert<"events_calendars">
+  >({
+    mutationFn: (eventCalendar) =>
+      eventsCalendarsService.addEventToCalendar(supabase, eventCalendar),
+    ...options,
+  });
+};
+
+export const useRemoveEventFromCalendar = (
+  options?: UseMutationOptions<boolean, Error, string>
+) => {
+  const supabase = createClient();
+  return useMutation<boolean, Error, string>({
+    mutationFn: (eventCalendarId) =>
+      eventsCalendarsService.removeEventFromCalendar(supabase, eventCalendarId),
+    ...options,
+  });
+};
+
+export const useEventsByOrganisationId = <TData = EventRow[]>(
+  organisationId: string | undefined,
+  options?: Omit<
+    UseQueryOptions<EventRow[] | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
+) => {
+  const supabase = createClient();
+  return useQuery<EventRow[] | null, Error, TData>({
+    queryKey: ["events", "organisationId", organisationId],
+    queryFn: () =>
+      organisationId
+        ? eventsService.getByOrganisationId(supabase, organisationId)
+        : null,
+    enabled: !!organisationId,
+    ...options,
+  });
+};
+
+export const useEventsByTeamId = <TData = EventRow[]>(
+  teamId: string | undefined,
+  options?: Omit<
+    UseQueryOptions<EventRow[] | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
+) => {
+  const supabase = createClient();
+  return useQuery<EventRow[] | null, Error, TData>({
+    queryKey: ["events", "teamId", teamId],
+    queryFn: () =>
+      teamId ? eventsService.getByTeamId(supabase, teamId) : null,
+    enabled: !!teamId,
+    ...options,
+  });
+};
+
+export const useEventsByUserId = <TData = EventRow[]>(
+  userId: string | undefined,
+  options?: Omit<
+    UseQueryOptions<EventRow[] | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
+) => {
+  const supabase = createClient();
+  return useQuery<EventRow[] | null, Error, TData>({
+    queryKey: ["events", "userId", userId],
+    queryFn: () =>
+      userId ? eventsService.getByUserId(supabase, userId) : null,
+    enabled: !!userId,
     ...options,
   });
 };

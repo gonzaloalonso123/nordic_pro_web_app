@@ -1,5 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/utils/database.types";
+import { serverData } from "@/utils/data/server";
+import { usersService } from "./users";
+import { teamsService } from "./teams";
 
 type OrganisationInvitationRow =
   Database["public"]["Tables"]["organisations_invitation"]["Row"];
@@ -33,7 +36,6 @@ export const getById = async (
   return data;
 };
 
-// Get invitations by organisation
 export const getByOrganisation = async (
   supabase: SupabaseClient<Database>,
   organisationId: string
@@ -112,19 +114,30 @@ export const acceptInvitation = async (
   invitationId: string,
   userId: string
 ): Promise<boolean> => {
-  // First get the invitation
   const invitation = await getById(supabase, invitationId);
   if (!invitation) throw new Error("Invitation not found");
+  if (userId) {
+    const { error: userOrgError } = await supabase
+      .from("users_organisations")
+      .insert({
+        user_id: userId,
+        organisation_id: invitation.organisation_id,
+        role: "USER",
+      });
 
-  const { error: userOrgError } = await supabase
-    .from("users_organisations")
-    .insert({
-      user_id: userId,
-      organisation_id: invitation.organisation_id,
-      role: "USER",
-    });
+    if (invitation.team_id) {
+      teamsService.addUserToTeam(
+        supabase,
+        invitation.team_id,
+        userId,
+        "MEMBER",
+        "PLAYER"
+      );
+    }
 
-  if (userOrgError) throw userOrgError;
+    if (userOrgError) throw userOrgError;
+  }
+
   return await deleteInvitation(supabase, invitationId);
 };
 
