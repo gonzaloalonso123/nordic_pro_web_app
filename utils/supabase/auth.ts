@@ -1,11 +1,9 @@
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import type { Database } from "../database.types"
+import { createClient } from "./server"
 
 // Sign in with email and password
 export async function signIn(email: string, password: string) {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const supabase = await createClient()
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -21,7 +19,7 @@ export async function signIn(email: string, password: string) {
 
 // Sign up with email and password
 export async function signUp(email: string, password: string, metadata: { firstName: string; lastName: string }) {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const supabase = await createClient()
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -44,14 +42,15 @@ export async function signUp(email: string, password: string, metadata: { firstN
 
 // Sign out
 export async function signOut() {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const supabase = await createClient()
+
   await supabase.auth.signOut()
   redirect("/login")
 }
 
 // Reset password
 export async function resetPassword(email: string) {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const supabase = await createClient()
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
@@ -66,7 +65,7 @@ export async function resetPassword(email: string) {
 
 // Update password
 export async function updatePassword(password: string) {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const supabase = await createClient()
 
   const { error } = await supabase.auth.updateUser({
     password,
@@ -81,7 +80,7 @@ export async function updatePassword(password: string) {
 
 // Get current session
 export async function getCurrentSession() {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const supabase = await createClient()
 
   const { data, error } = await supabase.auth.getSession()
 
@@ -94,7 +93,7 @@ export async function getCurrentSession() {
 
 // Get current user
 export async function getCurrentUser() {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const supabase = await createClient()
 
   const { data, error } = await supabase.auth.getUser()
 
