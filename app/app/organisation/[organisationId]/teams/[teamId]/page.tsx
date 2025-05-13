@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarPlus, Clock, Plus, Users } from "lucide-react";
 import { format } from "date-fns";
-import Calendar from "@/app/app/calendar/components/calendar";
+import Calendar from "@/app/app/team/[teamSlug]/calendar/components/calendar";
 import { Content } from "@/components/content";
 
 type PageProps = {

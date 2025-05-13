@@ -23,13 +23,11 @@ export default function ChatPage() {
   const { data: chatRooms, isLoading } = useChatRoomsByUser(user?.id);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Get all room IDs for batch unread count query
   const roomIds = useMemo(
     () => chatRooms?.map((room) => room.id) || [],
     [chatRooms]
   );
 
-  // Get unread counts for all rooms in a single query
   const { data: unreadCounts = {} } = useUnreadMessageCountBatch(
     roomIds,
     user?.id

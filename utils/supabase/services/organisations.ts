@@ -159,7 +159,9 @@ export const organisationsService = {
       .eq("id", organisationId)
       .single();
 
-    if (error && error.code !== "PGRST116") throw error;
+    if (error && error.code !== "PGRST116") {
+      throw error;
+    }
     return data;
   },
 
