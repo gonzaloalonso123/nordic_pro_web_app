@@ -2,28 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Home, MessageSquare, TrophyIcon, Users } from "lucide-react";
-import flags from "@/flags.json";
+import { useMenuItems } from "@/hooks/use-menu-items";
 
 export default function MobilePlatformNavbar() {
   const pathname = usePathname();
-  const root = flags.current_app;
-
-  const navItems = [
-    { name: "Dashboard", href: `${root}/dashboard`, icon: TrophyIcon },
-    // { name: "Team", href: `${root}/team`, icon: Users },
-    // { name: "Mental Health", href: "/platform/mental-health", icon: Heart },
-    // { name: "Motivation", href: "/platform/motivation", icon: Trophy },
-    { name: "Calendar", href: `${root}/calendar`, icon: Calendar },
-    { name: "Messages", href: `${root}/chat`, icon: MessageSquare },
-    // { name: "Analytics", href: "/platform/analytics", icon: BarChart3 },
-    // { name: "Settings", href: "/platform/settings", icon: Settings },
-  ];
-
+  const items = useMenuItems();
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg md:hidden z-50">
       <nav className="flex justify-around w-full">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 

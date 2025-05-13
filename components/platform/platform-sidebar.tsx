@@ -5,39 +5,26 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Calendar,
-  Home,
   MessageSquare,
   Trophy,
-  Users,
   Menu,
   X,
   UserRoundCog,
   TrophyIcon,
+  Settings,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import flags from "@/flags.json";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navbar";
-
-const root = flags.current_app;
-
-const menuItems = [
-  // { name: "Dashboard", href: root, icon: Home },
-  // { name: "Team", href: `${root}/team`, icon: Users },
-  // { name: "Mental Health", href: "/platform/mental-health", icon: Heart },
-  // { name: "Motivation", href: "/platform/motivation", icon: Trophy },
-  { name: "Calendar", href: `${root}/calendar`, icon: Calendar },
-  { name: "Messages", href: `${root}/chat`, icon: MessageSquare },
-  { name: "Dashboard", href: `${root}/dashboard`, icon: TrophyIcon },
-  // { name: "Analytics", href: "/platform/analytics", icon: BarChart3 },
-  // { name: "Settings", href: "/platform/settings", icon: Settings },
-];
+import { useMenuItems } from "@/hooks/use-menu-items";
 
 export default function PlatformSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const { user } = useCurrentUser();
+  const items = useMenuItems();
 
   return (
     <>
@@ -65,7 +52,7 @@ export default function PlatformSidebar() {
 
           <nav className="px-3 py-2">
             <ul className="space-y-1">
-              {menuItems.map((item) => {
+              {items.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
 
@@ -86,22 +73,6 @@ export default function PlatformSidebar() {
                   </li>
                 );
               })}
-              {user?.is_admin && (
-                <li key="Admin">
-                  <Link
-                    href={`${root}/admin`}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-                      pathname === `${root}/admin`
-                        ? "bg-primary text-white"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    )}
-                  >
-                    <UserRoundCog className="h-5 w-5 flex-shrink-0" />
-                    {!collapsed && <span>Admin</span>}
-                  </Link>
-                </li>
-              )}
             </ul>
           </nav>
         </div>

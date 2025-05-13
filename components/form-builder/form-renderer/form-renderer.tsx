@@ -280,7 +280,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
             {question.imageUrl && (
               <div className="relative w-full h-48 sm:h-64 mb-4 rounded-lg overflow-hidden">
                 <Image
-                  src={question.imageUrl || "/placeholder.svg"}
+                  src={question.image_Url || "/placeholder.svg"}
                   alt={question.question}
                   fill
                   className="object-contain"
