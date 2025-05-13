@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -61,7 +61,6 @@ export default function ManagementPage() {
   const { data: team, isLoading } = clientData.teams.useWithUsers(teamId);
   const addUserToTeam = clientData.teams.useAddMember();
   const removeUserFromTeam = clientData.teams.useRemoveMember();
-
   const handleAddMember = async () => {
     if (newMember.name && newMember.position) {
     }
@@ -73,7 +72,6 @@ export default function ManagementPage() {
         teamId,
         userId,
       });
-
       toast({
         title: "Success",
         description: "Member removed from team successfully",
