@@ -3,10 +3,10 @@
 import { useParams } from "next/navigation";
 import {
   useChatRoom,
-  useChatMessagesByRoom,
-  useSendChatMessage,
-  useMarkMessageAsRead,
+  useChatMessagesByRoom, // We'll use this for initial messages
   useChatRoomMembers,
+  // useSendChatMessage, // ChatInterface handles sending, or you can pass a callback
+  // useMarkMessageAsRead, // This logic can be integrated or kept separate
 } from "@/hooks/queries/useChatRooms";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,77 +14,121 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { RealtimeChat } from "@/components/realtime-chat";
+import { ChatInterface, UserProfileSnippet, DisplayMessage } from "@/components/chat/chat-interface";
 import { useMemo } from "react";
-import { type ChatMessage } from "@/hooks/use-realtime-chat";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export default function ChatPage() {
+export default function ChatRoomPage() {
   const params = useParams();
-  const { user } = useCurrentUser();
+  const { user: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const chatId = params.chatId as string;
+
   const { data: chatRoom, isLoading: isLoadingRoom } = useChatRoom(chatId);
-  const { data: chatMessages = [], isLoading: isLoadingMessages } =
+  const { data: initialDbMessages = [], isLoading: isLoadingMessages } =
     useChatMessagesByRoom(chatId);
+
   const { data: roomMembers = [] } = useChatRoomMembers(chatId);
-  const { mutate: sendMessage } = useSendChatMessage();
-  const { mutate: markAsRead } = useMarkMessageAsRead();
+  // const { mutate: sendChatMessageMutation } = useSendChatMessage(); // If you want to use the hook for sending
+  // const { mutate: markAsRead } = useMarkMessageAsRead(); // For read receipts
+
   const isMobile = useIsMobile();
-  const username = useMemo(() => {
-    return user ? `${user.first_name} ${user.last_name}` : "Unknown User";
-  }, [user]);
 
-  // const formattedMessages = useMemo(() => {
-  //   return chatMessages.map((msg) => ({
-  //     id: msg.id,
-  //     content: msg.content,
-  //     createdAt: msg.created_at || new Date().toISOString(),
-  //     user: {
-  //       id: msg.user_id || "",
-  //       name:
-  //         msg.users?.first_name && msg.users?.last_name
-  //           ? `${msg.users.first_name} ${msg.users.last_name}`
-  //           : "Unknown User",
-  //       avatar: msg.users?.avatar || "",
-  //     },
-  //   }));
-  // }, [chatMessages]);
-
-  // // Mark messages as read
-  // useEffect(() => {
-  //   if (!user || !chatId || chatMessages.length === 0) return;
-  //   const unreadMessages = chatMessages.filter((msg) => {
-  //     if (msg.user_id === user.id) return false;
-  //     const hasRead = msg.message_reads?.some(
-  //       (read) => read.user_id === user.id
-  //     );
-  //     return !hasRead;
-  //   });
-  //   unreadMessages.forEach((msg) => {
-  //     markAsRead({
-  //       message_id: msg.id,
-  //       user_id: user.id,
-  //       read_at: new Date().toISOString(),
-  //     });
-  //   });
-  // }, [chatMessages, user, chatId, markAsRead]);
-
-  // Handle new messages from the realtime chat
-  const handleNewMessage = (message: ChatMessage, messageId: string) => {
-    if (!user) return;
-    sendMessage({
-      id: `db_${messageId}`,
-      content: message.content,
-      user_id: user.id,
-      room_id: chatId,
-      created_at: message.createdAt,
+  // Transform initial DB messages to DisplayMessage format if needed
+  // This assumes your useChatMessagesByRoom hook might return messages
+  // with a nested 'users' object for author info, or just user_id.
+  // The ChatInterface component can also fetch profiles if not provided.
+  const initialMessagesForInterface: DisplayMessage[] = useMemo(() => {
+    return initialDbMessages.map((msg: any) => { // Use 'any' or a more specific type from your hook
+      let author: UserProfileSnippet | null = null;
+      if (msg.users) { // If your hook joins user data into a 'users' field
+        author = {
+          id: msg.users.id,
+          first_name: msg.users.first_name,
+          last_name: msg.users.last_name,
+          email: msg.users.email, // Assuming email is available
+          avatar: msg.users.avatar,
+        };
+      } else if (msg.user_id) {
+        // If only user_id is present, ChatInterface will try to fetch it.
+        // You could pre-fetch here too if preferred.
+      }
+      return {
+        id: msg.id,
+        content: msg.content,
+        created_at: msg.created_at,
+        room_id: msg.room_id,
+        user_id: msg.user_id,
+        author: author, // Pass whatever author info is available
+      };
     });
-  };
+  }, [initialDbMessages]);
+
+
+  // Example of how you might use useSendChatMessage if you prefer
+  // const handleSendMessageWithHook = (messageContent: string) => {
+  //   if (!currentUser || !chatId) return;
+  //   sendChatMessageMutation({
+  //     // id: `db_${Date.now()}`, // ID will be generated by DB
+  //     content: messageContent,
+  //     user_id: currentUser.id,
+  //     room_id: chatId,
+  //     // created_at: new Date().toISOString(), // Will be set by DB
+  //   });
+  // };
+
+  // Loading state for the page
+  if (isLoadingUser || isLoadingRoom || isLoadingMessages) {
+    return (
+      <div className="flex flex-col h-full pb-16 md:pb-0">
+        <Card className="rounded-none border-x-0 border-t-0">
+          <CardHeader className="px-4 py-3 flex flex-row items-center space-y-0 gap-3 border-b">
+            {isMobile && (
+              <Link href="/app/chat" className="md:hidden">
+                <Button variant="ghost" size="icon" className="mr-2">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <Skeleton className="h-5 w-40" />
+            </div>
+            <Button variant="ghost" size="icon" className="ml-auto"> {/* Added ml-auto for positioning */}
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </CardHeader>
+        </Card>
+        <div className="flex-grow flex items-center justify-center">
+          <p className="text-muted-foreground">Loading chat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!chatRoom) {
+    return (
+      <div className="flex flex-col h-full">
+        <Card className="rounded-none border-x-0 border-t-0">
+          <CardHeader className="px-4 py-3 flex flex-row items-center space-y-0 gap-3 border-b">
+            {isMobile && (
+              <Link href="/app/chat" className="md:hidden">
+                <Button variant="ghost" size="icon" className="mr-2">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+            <p>Chat room not found.</p>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
+
 
   return (
     <div className="flex flex-col h-full pb-16 md:pb-0">
-      <Card className="rounded-none border-x-0 border-t-0">
+      <Card className="rounded-none border-x-0 border-t-0 flex-shrink-0">
         <CardHeader className="px-4 py-3 flex flex-row items-center space-y-0 gap-3 border-b">
           {isMobile && (
             <Link href="/app/chat" className="md:hidden">
@@ -93,54 +137,48 @@ export default function ChatPage() {
               </Button>
             </Link>
           )}
-
-          {isLoadingRoom ? (
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <Skeleton className="h-5 w-40" />
-            </div>
-          ) : (
-            <>
-              <Avatar>
-                <AvatarImage
-                  src={chatRoom?.avatar_url}
-                  alt={chatRoom?.name || ""}
-                />
-                <AvatarFallback>
-                  {chatRoom?.name
-                    ? chatRoom.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                    : "CH"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <CardTitle className="text-base">
-                  {chatRoom?.name || "Chat"}
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  {roomMembers.length > 0
-                    ? `${roomMembers.length} members`
-                    : "No members"}
-                </p>
-              </div>
-            </>
-          )}
-
-          <Button variant="ghost" size="icon">
+          <Avatar>
+            <AvatarImage
+              src={(chatRoom as any)?.avatar_url || undefined} // Cast if type is too strict from hook
+              alt={chatRoom?.name || ""}
+            />
+            <AvatarFallback>
+              {chatRoom?.name
+                ? chatRoom.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()
+                : "CR"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <CardTitle className="text-base">
+              {chatRoom?.name || "Chat"}
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              {roomMembers.length > 0
+                ? `${roomMembers.length} member${roomMembers.length > 1 ? 's' : ''}`
+                : "No members"}
+            </p>
+          </div>
+          <Button variant="ghost" size="icon" className="ml-auto">
             <MoreVertical className="h-5 w-5" />
           </Button>
         </CardHeader>
       </Card>
-      <div className="overflow-y-auto h-full">
-        {user && chatRoom && (
-          <RealtimeChat
-            roomName={chatId}
-            username={username}
-            messages={[]}
-            // onMessage={handleNewMessage}
+      <div className="flex-grow overflow-hidden">
+        {currentUser && chatRoom && (
+          <ChatInterface
+            roomId={chatId}
+            currentUser={currentUser}
+            initialMessages={initialMessagesForInterface}
           />
+        )}
+        {!currentUser && !isLoadingUser && (
+          <div className="h-full flex items-center justify-center text-muted-foreground">
+            Please log in to view this chat.
+          </div>
         )}
       </div>
     </div>
