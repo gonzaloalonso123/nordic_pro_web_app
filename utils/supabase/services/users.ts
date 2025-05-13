@@ -158,7 +158,10 @@ export const usersService = {
       .is("deleted_at", null)
       .single();
 
-    if (error && error.code !== "PGRST116") throw error;
+    if (error && error.code !== "PGRST116") {
+      console.log("here", error);
+      throw error;
+    }
     return data;
   },
 

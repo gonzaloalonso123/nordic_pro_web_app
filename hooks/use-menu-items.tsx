@@ -7,11 +7,11 @@ import {
   TrophyIcon,
   UserRoundCog,
 } from "lucide-react";
-import { useCurrentUser } from "./useCurrentUser";
+import { useRole } from "@/app/app/(role-provider)/role-provider";
 
 const root = flags.current_app;
 
-const generalMenuItems = [
+const generalTeamMenuItems = [
   { name: "Calendar", href: `${root}/calendar`, icon: Calendar },
   { name: "Messages", href: `${root}/chat`, icon: MessageSquare },
 ];
@@ -30,17 +30,27 @@ const adminMenuItems = [
   { name: "Admin", href: `${root}/admin`, icon: UserRoundCog },
 ];
 
-const role: string = "COACH";
+const organisationMenuItems = [
+  { name: "Organisation", href: `${root}/organisation`, icon: Settings },
+];
 
 export const useMenuItems = () => {
-  const { user } = useCurrentUser();
-  const isAdmin = user?.is_admin;
-  const isCoach = role === "COACH";
-  const isUser = role === "USER";
+  const { app, organisation, team } = useRole();
+
+  if (app.role === "ADMIN") {
+    return adminMenuItems;
+  }
+
+  if (organisation.role === "MANAGER") {
+    return organisationMenuItems;
+  }
+
+  const isCoach = team.role === "COACH";
+  const isUser = team.role === "PLAYER";
+
   const combinedMenuItems = [
-    ...(isAdmin ? adminMenuItems : []),
     ...(isCoach ? coachMenuItems : isUser ? userMenuItems : []),
-    ...generalMenuItems,
+    ...generalTeamMenuItems,
   ];
 
   return combinedMenuItems;

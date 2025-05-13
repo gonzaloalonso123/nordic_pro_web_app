@@ -42,10 +42,10 @@ export const teamsService = {
       .select(
         `
         *,
-        users_teams!inner(users_id)
+        users_teams!inner(user_id)
       `
       )
-      .eq("users_teams.users_id", userId);
+      .eq("users_teams.user_id", userId);
 
     if (error) throw error;
     return data || [];
@@ -210,7 +210,7 @@ export const teamsService = {
       .from("users_teams")
       .delete()
       .eq("team_id", teamId)
-      .eq("users_id", userId);
+      .eq("user_id", userId);
     if (error) throw error;
     return true;
   },

@@ -18,7 +18,7 @@ export const OrganisationCard = ({
       <Button variant="ghost" asChild>
         <Link
           className="flex items-center gap-2"
-          href={`${flags.current_app}/admin/organisations/${organisation.id}`}
+          href={`${flags.current_app}/organisation/${organisation.id}`}
         >
           <Settings />
           Manage

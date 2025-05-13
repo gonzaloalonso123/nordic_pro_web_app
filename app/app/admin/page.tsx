@@ -21,7 +21,7 @@ const Page = () => {
           alt="Hero image"
         />
         <Button asChild>
-          <Link href={`${flags.current_app}/admin/organisations/`}>
+          <Link href={`${flags.current_app}/admin/organisation/`}>
             Organisations
           </Link>
         </Button>

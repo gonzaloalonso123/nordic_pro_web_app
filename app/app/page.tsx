@@ -1,26 +1,32 @@
-import { Alert } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+"use client";
 
-export default async function ProtectedPage() {
+import { redirect } from "next/navigation";
+import { useRole } from "./(role-provider)/role-provider";
+
+const DEFAULT_COACH_URL = "/calendar";
+const DEFAULT_USER_URL = "/dashboard";
+
+const Page = () => {
+  const { app, organisation, team } = useRole();
+  if (app.role === "ADMIN") {
+    redirect("/app/admin");
+  }
+  if (organisation.role === "MANAGER") {
+    redirect(`/app/organisation/${organisation.id}`);
+  }
+  if (team.role === "COACH") {
+    redirect(`/app/team/${team.id}${DEFAULT_COACH_URL}`);
+  }
+  if (team.role === "PLAYER") {
+    redirect(`/app/team/${team.id}${DEFAULT_USER_URL}`);
+  }
+
   return (
-    <div className="flex-1 w-full flex flex-col gap-12 container p-4">
-      <Alert variant="destructive">
-        <InfoIcon size="16" strokeWidth={2} />
-        This is a protected page that you can only see as an authenticated user
-      </Alert>
-      <div>
-        <h2 className="font-bold text-2xl mb-4">Viewing:</h2>
-        <p className="text-lg font-semibold">UNSUPERVISED APP</p>
-      </div>
-      <div className="flex flex-col gap-2 items-start">
-        <h2 className="font-bold text-2xl mb-4">Your user details</h2>
-        <pre className="text-xs font-mono p-3 rounded border max-h-32 overflow-auto">
-          {/* {JSON.stringify(user, null, 2)} */}
-        </pre>
-      </div>
-      <div>
-        <h2 className="font-bold text-2xl mb-4">Next steps</h2>
-      </div>
+    <div>
+      No authorisation retrieved. Get in touch with the administrator of your
+      organisation.
     </div>
   );
-}
+};
+
+export default Page;

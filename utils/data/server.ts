@@ -554,6 +554,13 @@ export const serverData = {
       const { data } = await supabase.auth.getUser();
       return data.user;
     },
+    getCurrentDBUser: async () => {
+      const supabase = await createClient();
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return null;
+      const user = await serverData.users.getById(data.user.id);
+      return user;
+    },
     getCurrentSession: async () => {
       const supabase = await createClient();
       const { data } = await supabase.auth.getSession();
