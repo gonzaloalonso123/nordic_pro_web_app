@@ -140,7 +140,7 @@ export function ChatInterface({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, supabase, messages]);
+  }, [roomId, supabase]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
