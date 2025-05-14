@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Tables } from "@/utils/database.types";
+import type { Tables } from "@/types/database.types";
 import flags from "@/flags.json";
 import { Clock, Plus, Settings, Users, X } from "lucide-react";
 import Link from "next/link";

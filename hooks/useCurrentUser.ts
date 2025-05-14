@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useClientData } from "@/utils/data/client";
-import { Tables } from "@/utils/database.types";
+import { Tables } from "@/types/database.types";
 import { useState, useEffect } from "react";
 
 export function useCurrentUser() {

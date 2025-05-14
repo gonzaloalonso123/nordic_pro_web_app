@@ -20,7 +20,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOut } from "@/utils/supabase/auth-actions";
 import { useClientData } from "@/utils/data/client";
-import { Tables, TablesInsert } from "@/utils/database.types";
+import { Tables, TablesInsert } from "@/types/database.types";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function PlatformHeader() {

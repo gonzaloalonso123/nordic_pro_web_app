@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EventPopup } from "./event-popup";
-import type { Tables } from "@/utils/database.types";
+import type { Tables } from "@/types/database.types";
 import { CalendarEvent, StyledCalendar } from "@/components/calendar/calendar";
 
 function convertEvents(dbEvents: Tables<"events">[]): CalendarEvent[] {

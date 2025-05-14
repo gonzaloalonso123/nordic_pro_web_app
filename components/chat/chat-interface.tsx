@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, FormEvent, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
-import type { Tables, TablesInsert } from "@/utils/database.types";
+import type { Tables, TablesInsert } from "@/types/database.types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

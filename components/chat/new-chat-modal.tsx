@@ -18,7 +18,7 @@ import { Search, UserPlus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/useCurrentUser'; // Your existing hook
 import { useUsersByOrganisation } from '@/hooks/queries/useUsers'; // Your existing hook
 import { useStartDirectChat } from '@/hooks/queries/useChatRooms'; // From your consolidated file
-import type { Tables } from '@/utils/database.types';
+import type { Tables } from '@/types/database.types';
 import { createClient } from '@/utils/supabase/client'; // For fetching org ID if needed
 
 interface NewChatModalProps {
