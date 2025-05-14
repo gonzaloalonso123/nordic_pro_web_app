@@ -3,7 +3,7 @@ import { serverData } from "@/utils/data/server";
 import Link from "next/link";
 import flags from "@/flags.json";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Tables } from "@/utils/database.types";
+import type { Tables } from "@/types/database.types";
 import { Settings, Layers, Plus } from "lucide-react";
 import { OrganisationPageAnalytics } from "./components/organisation-page-analytics";
 import { MembersSection } from "./components/members-section";

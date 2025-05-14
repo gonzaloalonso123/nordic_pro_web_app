@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/utils/database.types";
+import { Database } from "@/types/database.types";
 import { serverData } from "@/utils/data/server";
 import { usersService } from "./users";
 import { teamsService } from "./teams";

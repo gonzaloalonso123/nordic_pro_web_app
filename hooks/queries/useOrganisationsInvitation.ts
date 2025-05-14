@@ -10,7 +10,7 @@ import type {
   Tables,
   TablesInsert,
   TablesUpdate,
-} from "@/utils/database.types";
+} from "@/types/database.types";
 import { createClient } from "@/utils/supabase/client";
 
 type OrganisationInvitationRow = Tables<"organisations_invitation">;

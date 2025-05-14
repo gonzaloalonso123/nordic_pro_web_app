@@ -2,7 +2,7 @@
 import { Resend } from "resend";
 import { JOIN_TEAM_SWEDISH } from "../email-templates/join-team-swedish";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/utils/database.types";
+import { Database } from "@/types/database.types";
 import * as organisationsInvitation from "../supabase/services/organisations_invitation";
 import { createClient } from "../supabase/server";
 

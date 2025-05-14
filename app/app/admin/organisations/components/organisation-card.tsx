@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tables } from "@/utils/database.types";
+import { Tables } from "@/types/database.types";
 import { Settings } from "lucide-react";
 import Link from "next/link";
 import flags from "@/flags.json";

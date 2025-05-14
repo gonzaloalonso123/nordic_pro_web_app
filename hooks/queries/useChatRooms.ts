@@ -12,7 +12,7 @@ import type {
   Tables,
   TablesInsert,
   TablesUpdate,
-} from "@/utils/database.types";
+} from "@/types/database.types";
 
 type ChatRoomRow = Tables<"chat_rooms">;
 type ChatRoomInsert = TablesInsert<"chat_rooms">;

@@ -5,7 +5,7 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import type { Tables } from "@/utils/database.types";
+import type { Tables } from "@/types/database.types";
 import { createClient } from "@/utils/supabase/client";
 import { formResponsesService } from "@/utils/supabase/services/forms-responses";
 
