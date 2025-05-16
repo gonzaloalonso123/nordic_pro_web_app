@@ -1,7 +1,7 @@
 "use server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { Database } from "../database.types";
+import type { Database } from "@/types/database.types";
 import { toPostgresTimestamp } from "../utils";
 import { createClient } from "./server";
 

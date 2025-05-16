@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "../../database.types";
-import type { Tables, TablesInsert, TablesUpdate } from "../../database.types";
+import type { Database } from "@/types/database.types";
+import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
 
 type FormRow = Tables<"forms">;
 type FormInsert = TablesInsert<"forms">;
