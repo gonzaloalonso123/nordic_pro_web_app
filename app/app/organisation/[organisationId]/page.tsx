@@ -8,6 +8,7 @@ import { Settings, Layers, Plus } from "lucide-react";
 import { OrganisationPageAnalytics } from "./components/organisation-page-analytics";
 import { MembersSection } from "./components/members-section";
 import { Content } from "@/components/content";
+import { useUrl } from "@/hooks/use-url";
 
 type PageProps = {
   params: Promise<{
@@ -20,6 +21,7 @@ const Page = async (props: PageProps) => {
   const organisationId = params.organisationId;
   const teams = await serverData.teams.getByOrganisation(organisationId);
   const members = await serverData.users.getByOrganisation(organisationId);
+
   return (
     <Content>
       <OrganisationPageAnalytics organisationId={organisationId} />

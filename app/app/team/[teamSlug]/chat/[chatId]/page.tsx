@@ -14,15 +14,21 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { ChatInterface, UserProfileSnippet, DisplayMessage } from "@/components/chat/chat-interface";
+import {
+  ChatInterface,
+  UserProfileSnippet,
+  DisplayMessage,
+} from "@/components/chat/chat-interface";
 import { useMemo } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUrl } from "@/hooks/use-url";
 
 export default function ChatRoomPage() {
   const params = useParams();
   const { user: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const chatId = params.chatId as string;
+  const path = useUrl();
 
   const { data: chatRoom, isLoading: isLoadingRoom } = useChatRoom(chatId);
   const { data: initialDbMessages = [], isLoading: isLoadingMessages } =
@@ -39,9 +45,11 @@ export default function ChatRoomPage() {
   // with a nested 'users' object for author info, or just user_id.
   // The ChatInterface component can also fetch profiles if not provided.
   const initialMessagesForInterface: DisplayMessage[] = useMemo(() => {
-    return initialDbMessages.map((msg: any) => { // Use 'any' or a more specific type from your hook
+    return initialDbMessages.map((msg: any) => {
+      // Use 'any' or a more specific type from your hook
       let author: UserProfileSnippet | null = null;
-      if (msg.users) { // If your hook joins user data into a 'users' field
+      if (msg.users) {
+        // If your hook joins user data into a 'users' field
         author = {
           id: msg.users.id,
           first_name: msg.users.first_name,
@@ -64,7 +72,6 @@ export default function ChatRoomPage() {
     });
   }, [initialDbMessages]);
 
-
   // Example of how you might use useSendChatMessage if you prefer
   // const handleSendMessageWithHook = (messageContent: string) => {
   //   if (!currentUser || !chatId) return;
@@ -84,7 +91,7 @@ export default function ChatRoomPage() {
         <Card className="rounded-none border-x-0 border-t-0">
           <CardHeader className="px-4 py-3 flex flex-row items-center space-y-0 gap-3 border-b">
             {isMobile && (
-              <Link href="/app/chat" className="md:hidden">
+              <Link href={`${path}/chat`} className="md:hidden">
                 <Button variant="ghost" size="icon" className="mr-2">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -94,7 +101,9 @@ export default function ChatRoomPage() {
               <Skeleton className="h-10 w-10 rounded-full" />
               <Skeleton className="h-5 w-40" />
             </div>
-            <Button variant="ghost" size="icon" className="ml-auto"> {/* Added ml-auto for positioning */}
+            <Button variant="ghost" size="icon" className="ml-auto">
+              {" "}
+              {/* Added ml-auto for positioning */}
               <MoreVertical className="h-5 w-5" />
             </Button>
           </CardHeader>
@@ -112,7 +121,7 @@ export default function ChatRoomPage() {
         <Card className="rounded-none border-x-0 border-t-0">
           <CardHeader className="px-4 py-3 flex flex-row items-center space-y-0 gap-3 border-b">
             {isMobile && (
-              <Link href="/app/chat" className="md:hidden">
+              <Link href={`${path}/chat`} className="md:hidden">
                 <Button variant="ghost" size="icon" className="mr-2">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -122,16 +131,15 @@ export default function ChatRoomPage() {
           </CardHeader>
         </Card>
       </div>
-    )
+    );
   }
-
 
   return (
     <div className="flex flex-col h-full pb-16 md:pb-0">
       <Card className="rounded-none border-x-0 border-t-0 flex-shrink-0">
         <CardHeader className="px-4 py-3 flex flex-row items-center space-y-0 gap-3 border-b">
           {isMobile && (
-            <Link href="/app/chat" className="md:hidden">
+            <Link href={`${path}/chat`} className="md:hidden">
               <Button variant="ghost" size="icon" className="mr-2">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -145,10 +153,10 @@ export default function ChatRoomPage() {
             <AvatarFallback>
               {chatRoom?.name
                 ? chatRoom.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
                 : "CR"}
             </AvatarFallback>
           </Avatar>
@@ -158,7 +166,7 @@ export default function ChatRoomPage() {
             </CardTitle>
             <p className="text-xs text-muted-foreground">
               {roomMembers.length > 0
-                ? `${roomMembers.length} member${roomMembers.length > 1 ? 's' : ''}`
+                ? `${roomMembers.length} member${roomMembers.length > 1 ? "s" : ""}`
                 : "No members"}
             </p>
           </div>

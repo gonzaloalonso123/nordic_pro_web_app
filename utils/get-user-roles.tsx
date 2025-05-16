@@ -40,3 +40,12 @@ export const getUserRoles = async () => {
     organisation,
   };
 };
+
+export const getRootUrl = async () => {
+  const { app, organisation, team } = await getUserRoles();
+  return app.role === "ADMIN"
+    ? "/admin"
+    : organisation.role === "MANAGER"
+      ? `/organisation/${organisation.id}`
+      : `/team/${team.id}`;
+};

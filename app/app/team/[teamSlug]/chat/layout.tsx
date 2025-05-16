@@ -8,7 +8,8 @@ export default function ChatLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isChatRoom = pathname !== "/app/chat";
+  const path = useUrl();
+  const isChatRoom = pathname !== `${path}/chat`;
   const isMobile = useIsMobile();
   return (
     <div className="h-full">
@@ -50,13 +51,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUnreadMessageCount } from "@/hooks/queries/useChatRooms";
+import { useUrl } from "@/hooks/use-url";
 
 function ChatListSidebar() {
   const { user } = useCurrentUser();
   const { data: chatRooms, isLoading } = useChatRoomsByUser(user?.id);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Get all room IDs for batch unread count query
+  const path = useUrl();
   const roomIds = useMemo(
     () => chatRooms?.map((room) => room.id) || [],
     [chatRooms]
@@ -114,7 +116,7 @@ function ChatListSidebar() {
 
               return (
                 <Link
-                  href={`/app/chat/${room.id}`}
+                  href={`${path}/chat/${room.id}`}
                   key={room.id}
                   className="block"
                 >

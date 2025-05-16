@@ -52,7 +52,7 @@ const AddTeamMemberPage = () => {
         description: "User added to team successfully",
       });
       router.push(
-        `${flags.current_app}/admin/organisations/${organisationId}/teams/${teamId}`
+        `${flags.current_app}/organisation/${organisationId}/teams/${teamId}`
       );
     } catch (error) {
       console.error("Error adding user to team:", error);

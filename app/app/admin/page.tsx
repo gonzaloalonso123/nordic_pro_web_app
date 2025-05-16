@@ -4,9 +4,10 @@ import { Card, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import flags from "@/flags.json";
+import { useUrl } from "@/hooks/use-url";
 
 const Page = () => {
+  const path = useUrl();
   return (
     <div className="w-full h-full flex items-center justify-center">
       <Card className="p-4 flex flex-col gap-2 w-full max-w-md">
@@ -21,12 +22,10 @@ const Page = () => {
           alt="Hero image"
         />
         <Button asChild>
-          <Link href={`${flags.current_app}/admin/organisations`}>
-            Organisations
-          </Link>
+          <Link href={`${path}/organisations`}>Organisations</Link>
         </Button>
         <Button asChild>
-          <Link href={`${flags.current_app}/admin/forms`}>Forms</Link>
+          <Link href={`${path}/forms`}>Forms</Link>
         </Button>
         <Button asChild>
           <Link href="">Option 3</Link>

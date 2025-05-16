@@ -63,7 +63,7 @@ export function MembersSection({
           <Button variant="sport" asChild size="sm">
             <Link
               className="flex gap-2 items-center"
-              href={`${flags.current_app}/admin/organisations/${organisationId}/add-member`}
+              href={`${flags.current_app}/organisation/${organisationId}/add-member`}
             >
               <Plus className="mr-2 h-4 w-4" />
               Add new
@@ -115,7 +115,7 @@ const MemberCard = ({ member }: { member: Tables<"users"> }) => {
         </div>
         <Button variant="ghost" size="sm" asChild>
           <Link
-            href={`${flags.current_app}/admin/members/${member.id}`}
+            href={`${flags.current_app}/organisation/members/${member.id}`}
             className="flex gap-2 items-center"
           >
             <Settings className="h-4 w-4" />

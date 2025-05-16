@@ -31,7 +31,7 @@ export const OrganisationPageAnalytics = ({
         </h2>
         <Button variant="link" size="sm">
           <Link
-            href={`${flags.current_app}/admin/organisations/${organisationId}/analytics`}
+            href={`${flags.current_app}/organisation/${organisationId}/analytics`}
           >
             View Full Report
           </Link>

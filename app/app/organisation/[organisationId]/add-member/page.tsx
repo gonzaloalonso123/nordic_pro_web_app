@@ -42,9 +42,7 @@ const AddInvitationForm = () => {
         invitationId: invitation.id,
       });
       setTimeout(() => {
-        router.push(
-          `${flags.current_app}/admin/organisations/${organisationId}`
-        );
+        router.push(`${flags.current_app}/organisation/${organisationId}`);
         setDisabled(false);
       }, 1000);
     }

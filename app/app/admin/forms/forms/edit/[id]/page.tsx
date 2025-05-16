@@ -31,7 +31,7 @@ export default function EditFormPage() {
         })
       } else {
         // Form not found, redirect back to forms list
-        router.push("/app/admin/organisations/forms/forms")
+        router.push("/app/organisation/forms/forms")
       }
     }
 

@@ -113,7 +113,7 @@ const AddTeamEventPage = () => {
         });
       }
       router.push(
-        `${flags.current_app}/admin/organisations/${organisationId}/teams/${teamId}`
+        `${flags.current_app}/organisation/${organisationId}/teams/${teamId}`
       );
     } catch (error: any) {
       console.error("Error creating event:", error);

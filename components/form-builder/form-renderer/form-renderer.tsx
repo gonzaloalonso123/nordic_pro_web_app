@@ -238,9 +238,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() =>
-              router.push("/app/admin/organisations/forms/forms")
-            }
+            onClick={() => router.push("/app/organisation/forms/forms")}
           >
             Back to Forms
           </Button>

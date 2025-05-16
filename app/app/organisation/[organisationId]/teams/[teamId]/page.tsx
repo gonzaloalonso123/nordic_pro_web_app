@@ -43,7 +43,7 @@ const Page = async (props: PageProps) => {
             <Button variant="sport" size="sm" asChild>
               <Link
                 className="flex gap-2 items-center"
-                href={`${flags.current_app}/admin/organisations/${organisationId}/teams/${teamId}/add-member`}
+                href={`${flags.current_app}/organisation/${organisationId}/teams/${teamId}/add-member`}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Member
@@ -74,7 +74,7 @@ const Page = async (props: PageProps) => {
             <Button variant="sport" size="sm" asChild>
               <Link
                 className="flex gap-2 items-center"
-                href={`${flags.current_app}/admin/organisations/${organisationId}/teams/${teamId}/add-event`}
+                href={`${flags.current_app}/organisation/${organisationId}/teams/${teamId}/add-event`}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Event

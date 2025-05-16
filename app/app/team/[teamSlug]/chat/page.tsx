@@ -16,11 +16,13 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { NewChatModal } from "@/components/chat/new-chat-modal";
+import { useUrl } from "@/hooks/use-url";
 
 export default function ChatPage() {
   const { user, isLoading: isLoadingUser } = useCurrentUser();
 
-  const { data: chatRoomsData, isLoading: isLoadingChatRooms } = useChatRoomsByUser(user?.id);
+  const { data: chatRoomsData, isLoading: isLoadingChatRooms } =
+    useChatRoomsByUser(user?.id);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
@@ -33,11 +35,19 @@ export default function ChatPage() {
     user?.id
   );
 
-  const filteredRooms = useMemo(() =>
-    chatRooms.filter((room) => {
-      const roomName = room.name;
-      return typeof roomName === 'string' && roomName.toLowerCase().includes(searchQuery.toLowerCase());
-    }), [chatRooms, searchQuery]);
+  const path = useUrl();
+
+  const filteredRooms = useMemo(
+    () =>
+      chatRooms.filter((room) => {
+        const roomName = room.name;
+        return (
+          typeof roomName === "string" &&
+          roomName.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }),
+    [chatRooms, searchQuery]
+  );
 
   const isLoading = isLoadingUser || isLoadingChatRooms;
 
@@ -94,7 +104,7 @@ export default function ChatPage() {
 
                   return (
                     <Link
-                      href={`/app/chat/${room.id}`}
+                      href={`${path}/chat/${room.id}`}
                       key={room.id}
                       className="block"
                       aria-label={`Open chat with ${roomName}`}
@@ -124,7 +134,7 @@ export default function ChatPage() {
                             variant="default"
                             className="rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center text-xs"
                           >
-                            {unreadCount > 99 ? '99+' : unreadCount}
+                            {unreadCount > 99 ? "99+" : unreadCount}
                           </Badge>
                         )}
                       </div>

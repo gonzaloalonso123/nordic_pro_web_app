@@ -84,7 +84,7 @@ const CreateTeamForm = () => {
           description: `Successfully sent ${invitees.length} invitations.`,
         });
       }
-      router.push(`${flags.current_app}/admin/organisations/${organisationId}`);
+      router.push(`${flags.current_app}/organisation/${organisationId}`);
     } catch (error) {
       console.error("Error creating team:", error);
       toast({

@@ -1,7 +1,6 @@
 import type React from "react";
 import PlatformHeader from "@/components/platform/platform-header";
 import PlatformSidebar from "@/components/platform/platform-sidebar";
-import { serverData } from "@/utils/data/server";
 import { RoleProvider } from "./(role-provider)/role-provider";
 import { getUserRoles } from "@/utils/get-user-roles";
 
