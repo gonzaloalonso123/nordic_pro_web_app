@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 export default async function Layout({
   children,
 }: {
@@ -5,7 +7,9 @@ export default async function Layout({
 }) {
   return (
     <div className="min-h-screen w-screen flex flex-col gap-12 items-center justify-center p-2">
-      {children}
+      <Suspense fallback={<div className="w-full h-full flex items-center justify-center">Loading...</div>}>
+        {children}
+      </Suspense>
     </div>
   );
 }

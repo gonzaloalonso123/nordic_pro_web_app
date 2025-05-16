@@ -32,7 +32,7 @@ const Page = async (props: PageProps) => {
             </h2>
             <Link
               className="flex gap-2 items-center"
-              href={`${flags.current_app}/admin/organisations/${organisationId}/add-team`}
+              href={`${flags.current_app}/organisation/${organisationId}/add-team`}
             >
               <Button variant="sport" size="sm">
                 <Plus className="mr-2 h-4 w-4" />
@@ -76,7 +76,7 @@ const TeamCard = ({
       <CardHeader className="p-4 flex flex-row items-center justify-between">
         <CardTitle className="text-base">{team.name}</CardTitle>
         <Link
-          href={`${flags.current_app}/admin/organisations/${organisationId}/teams/${team.id}`}
+          href={`${flags.current_app}/organisation/${organisationId}/teams/${team.id}`}
           className="flex gap-2 items-center"
         >
           <Button variant="link" size="sm">

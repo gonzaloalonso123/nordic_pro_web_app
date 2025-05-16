@@ -5,7 +5,6 @@ import { serverData } from "@/utils/data/server";
 import { Settings } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import flags from "@/flags.json";
 import NavTabs from "./nav-tabs";
 
 interface LayoutProps {
@@ -23,7 +22,7 @@ const Layout = async (props: LayoutProps) => {
 
   const organisationId = params.organisationId;
   const organisation = await serverData.organisations.getById(organisationId);
-  const basePath = `/app/admin/organisations/${organisationId}`;
+  const basePath = `/app/organisation/${organisationId}`;
 
   if (!organisation) {
     return (
@@ -50,7 +49,7 @@ const Layout = async (props: LayoutProps) => {
             {organisation.name}
           </h1>
           <Link
-            href={`${flags.current_app}/admin/organisations/${organisationId}/settings`}
+            href={`${basePath}/settings`}
           >
             <Button variant="outline">
               <Settings className="h-4 w-4" />
