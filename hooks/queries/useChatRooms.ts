@@ -5,7 +5,6 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { chatRoomsService } from "@/utils/supabase/services";
 import { createClient } from "@/utils/supabase/client";
 import type {
@@ -407,6 +406,26 @@ export const useUnreadMessageCountBatch = (
     ...options,
   });
 };
+
+export const useChatRoomUnreadCount = (
+  roomId: string | undefined,
+  userId: string | undefined,
+  options?: Omit<
+    UseQueryOptions<number, Error, number>,
+    "queryKey" | "queryFn" | "enabled"
+  >
+) => {
+  const supabase = createClient();
+  return useQuery<number, Error, number>({
+    queryKey: ["chatRoomUnreadCount", roomId, userId],
+    queryFn: () =>
+      roomId && userId
+        ? chatRoomsService.getChatRoomUnreadCount(supabase, roomId, userId)
+        : 0,
+    enabled: !!roomId && !!userId,
+    ...options,
+  });
+}
 
 // --- NEW: Logic and Hook for Starting a Direct Chat ---
 
