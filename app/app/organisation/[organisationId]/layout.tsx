@@ -39,13 +39,11 @@ const Layout = async (props: LayoutProps) => {
       <div className="flex bg-white p-4 pb-0 flex-col gap-3">
         <div className="flex justify-between items-center gap-4">
           <h1 className="text-2xl font-bold flex gap-2 items-center">
-            <Avatar>
-              <AvatarImage
-                className="p-2"
+              <img
+                className="h-4/6 w-8 object-cover p-1"
                 src="/organisation_placeholder.png"
                 alt={organisation.name}
               />
-            </Avatar>
             {organisation.name}
           </h1>
           <Button variant="outline">
