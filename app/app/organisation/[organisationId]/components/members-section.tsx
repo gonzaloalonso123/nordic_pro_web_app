@@ -74,7 +74,7 @@ export function MembersSection({
         <TabsContent value="members" className="space-y-3">
           {members.length > 0 ? (
             members.map((member) => (
-              <MemberCard key={member.id} member={member} />
+              <MemberCard key={member.id} member={member} organisationId={organisationId} />
             ))
           ) : (
             <Card className="p-4 text-center text-muted-foreground">
@@ -103,7 +103,7 @@ export function MembersSection({
   );
 }
 
-const MemberCard = ({ member }: { member: Tables<"users"> }) => {
+const MemberCard = ({ member, organisationId }: { member: Tables<"users">, organisationId: Tables<"organisations">['id'] }) => {
   return (
     <Card>
       <CardHeader className="p-4 flex flex-row items-center justify-between">
@@ -113,9 +113,9 @@ const MemberCard = ({ member }: { member: Tables<"users"> }) => {
           </CardTitle>
           <p className="text-sm text-muted-foreground">{member.email}</p>
         </div>
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="link" asChild>
           <Link
-            href={`${flags.current_app}/organisation/members/${member.id}`}
+            href={`${flags.current_app}/organisation/${organisationId}/members/${member.id}`}
             className="flex gap-2 items-center"
           >
             <Settings className="h-4 w-4" />
@@ -142,7 +142,7 @@ const InvitationCard = ({
           <div className="flex items-center text-sm text-muted-foreground">
             <Clock className="h-3 w-3 mr-1" />
             <span>
-              Sent: {new Date(invitation.created_at).toLocaleDateString()}
+              Sent: {new Date(invitation.created_at).toLocaleString()}
             </span>
           </div>
         </div>

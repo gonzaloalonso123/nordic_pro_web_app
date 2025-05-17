@@ -76,7 +76,7 @@ function ChatListSidebar() {
     ) || [];
 
   return (
-    <div className="h-full flex flex-col">
+    <Card className="h-full flex flex-col">
       <CardHeader className="px-4 py-3 border-b flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Conversations</CardTitle>
@@ -176,6 +176,6 @@ function ChatListSidebar() {
           )}
         </div>
       </CardContent>
-    </div>
+    </Card>
   );
 }

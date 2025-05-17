@@ -3,23 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Calendar,
-  MessageSquare,
-  Trophy,
-  Menu,
-  X,
-  UserRoundCog,
-  TrophyIcon,
-  Settings,
-  BarChart3,
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import flags from "@/flags.json";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navbar";
 import { useMenuItems } from "@/hooks/use-menu-items";
+import ProFeatures from "./pro-features";
 
 export default function PlatformSidebar() {
   const pathname = usePathname();
@@ -76,32 +65,10 @@ export default function PlatformSidebar() {
             </ul>
           </nav>
         </div>
-        <div className="p-3 self-end">
-          <div
-            className={cn(
-              "bg-primary/5 rounded-lg p-4 border border-primary/10",
-              collapsed ? "text-center" : ""
-            )}
-          >
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-2">
-              <Trophy className="h-4 w-4" />
-            </div>
-            {!collapsed && (
-              <>
-                <h4 className="font-medium text-sm text-center mb-1">
-                  Pro Features
-                </h4>
-                <p className="text-xs text-gray-500 mb-2">
-                  Unlock advanced analytics and team insights.
-                </p>
-                <Button size="sm" className="w-full text-xs">
-                  Upgrade
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
+
+        <ProFeatures collapsed={collapsed} />
       </div>
+
       <div className="fixed bottom-4 right-4 md:hidden z-50">
         <Button
           size="icon"

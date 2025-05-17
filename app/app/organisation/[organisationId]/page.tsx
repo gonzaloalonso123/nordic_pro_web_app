@@ -77,15 +77,15 @@ const TeamCard = ({
     <Card>
       <CardHeader className="p-4 flex flex-row items-center justify-between">
         <CardTitle className="text-base">{team.name}</CardTitle>
-        <Link
-          href={`${flags.current_app}/organisation/${organisationId}/teams/${team.id}`}
-          className="flex gap-2 items-center"
-        >
-          <Button variant="link" size="sm">
+        <Button variant="link">
+          <Link
+            href={`${flags.current_app}/organisation/${organisationId}/teams/${team.id}`}
+            className="flex gap-2 items-center"
+          >
             <Settings className="h-4 w-4" />
             Manage
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </CardHeader>
     </Card>
   );

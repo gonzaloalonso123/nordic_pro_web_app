@@ -12,3 +12,4 @@ export * from "./events";
 export * from "./forms";
 export * from "./chat-rooms";
 export * from "./events-calendars";
+export * from "./chatMessagesService";

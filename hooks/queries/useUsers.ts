@@ -34,7 +34,7 @@ export const useUsers = <TData = UserRow[]>(
 
 // Get user by ID
 export const useUser = <TData = UserRow>(
-  userId: string | undefined,
+  userId: string | undefined | null,
   options?: Omit<
     UseQueryOptions<UserRow | null, Error, TData>,
     "queryKey" | "queryFn" | "enabled"
