@@ -1,6 +1,6 @@
 import { Content } from "@/components/content";
 
-export default function OrganisationSettings() {
+export default function MemberPage() {
   return (
     <Content>
       <h1>To be done</h1>

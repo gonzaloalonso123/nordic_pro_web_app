@@ -48,14 +48,12 @@ const Layout = async (props: LayoutProps) => {
             </Avatar>
             {organisation.name}
           </h1>
-          <Link
-            href={`${basePath}/settings`}
-          >
-            <Button variant="outline">
+          <Button variant="outline">
+            <Link href={`${basePath}/settings`} className="flex gap-2 items-center">
               <Settings className="h-4 w-4" />
-              <span className="hidden md:block ml-2">Settings</span>
-            </Button>
-          </Link>
+              <span className="hidden md:block">Settings</span>
+            </Link>
+          </Button>
         </div>
         <NavTabs basePath={basePath} />
       </div>
