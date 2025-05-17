@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Calendar from "./components/calendar";
+import Calendar from "../../../../../components/calendar/event-calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Content } from "@/components/content";

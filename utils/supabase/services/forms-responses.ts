@@ -7,8 +7,10 @@ type FormResponseInsert = TablesInsert<"form_responses">;
 type QuestionResponseInsert = TablesInsert<"question_responses">;
 
 export const formResponsesService = {
-  // Get all responses for a form
-  async getByForm(supabase: SupabaseClient<Database>, formId: string): Promise<any[]> {
+  async getByForm(
+    supabase: SupabaseClient<Database>,
+    formId: string
+  ): Promise<any[]> {
     const { data, error } = await supabase
       .from("form_responses")
       .select(
@@ -35,8 +37,10 @@ export const formResponsesService = {
     return data || [];
   },
 
-  // Get responses by organization
-  async getByOrganization(supabase: SupabaseClient<Database>, organizationId: string): Promise<any[]> {
+  async getByOrganization(
+    supabase: SupabaseClient<Database>,
+    organizationId: string
+  ): Promise<any[]> {
     const { data, error } = await supabase
       .from("form_responses")
       .select(
@@ -64,8 +68,41 @@ export const formResponsesService = {
     return data || [];
   },
 
-  // Get responses by user
-  async getByUser(supabase: SupabaseClient<Database>, userId: string): Promise<any[]> {
+  async getByInvitation(
+    supabase: SupabaseClient<Database>,
+    invitationId: string
+  ): Promise<any[]> {
+    const { data, error } = await supabase
+      .from("form_responses")
+      .select(
+        `
+        *,
+        forms(id, title),
+        question_responses(
+          id,
+          question_id,
+          response,
+          questions(
+            id,
+            question,
+            input_type,
+            question_options(
+              *
+            )
+          )
+        )
+          `
+      )
+      .eq("invitation_id", invitationId)
+      .order("submitted_at", { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getByUser(
+    supabase: SupabaseClient<Database>,
+    userId: string
+  ): Promise<any[]> {
     const { data, error } = await supabase
       .from("form_responses")
       .select(
@@ -91,8 +128,10 @@ export const formResponsesService = {
     return data || [];
   },
 
-  // Get a single response by ID
-  async getById(supabase: SupabaseClient<Database>, responseId: string): Promise<any | null> {
+  async getById(
+    supabase: SupabaseClient<Database>,
+    responseId: string
+  ): Promise<any | null> {
     const { data, error } = await supabase
       .from("form_responses")
       .select(
@@ -120,22 +159,18 @@ export const formResponsesService = {
     return data;
   },
 
-  // Submit a form response
   async submit(
     supabase: SupabaseClient<Database>,
+    invitationId: string,
     formId: string,
-    userId: string,
-    organizationId: string,
     answers: Record<string, any>,
     earnedExperience: number
   ): Promise<FormResponseRow> {
-    // Create the form response
     const { data: formResponse, error: formError } = await supabase
       .from("form_responses")
       .insert({
         form_id: formId,
-        user_id: userId,
-        organization_id: organizationId,
+        invitation_id: invitationId,
         earned_experience: earnedExperience,
         completed: true,
       })
@@ -143,28 +178,20 @@ export const formResponsesService = {
       .single();
 
     if (formError) throw formError;
-
-    // Create question responses
-    const questionResponses: QuestionResponseInsert[] = Object.entries(answers).map(([questionId, response]) => ({
+    const questionResponses: QuestionResponseInsert[] = Object.entries(
+      answers
+    ).map(([questionId, response]) => ({
       form_response_id: formResponse.id,
       question_id: questionId,
       response,
     }));
 
-    const { error: qrError } = await supabase.from("question_responses").insert(questionResponses);
+    const { error: qrError } = await supabase
+      .from("question_responses")
+      .insert(questionResponses);
 
     if (qrError) throw qrError;
 
-    // Add to completed forms
-    const { error: cfError } = await supabase.from("completed_forms").insert({
-      user_id: userId,
-      form_id: formId,
-      organization_id: organizationId,
-    });
-
-    if (cfError && cfError.code !== "23505") throw cfError; // Ignore unique constraint violations
-
-    // Update user experience
     const { error: expError } = await supabase.rpc("add_user_experience", {
       p_user_id: userId,
       p_experience_points: earnedExperience,
@@ -175,16 +202,24 @@ export const formResponsesService = {
     return formResponse;
   },
 
-  // Delete a response
-  async delete(supabase: SupabaseClient<Database>, responseId: string): Promise<boolean> {
-    const { error } = await supabase.from("form_responses").delete().eq("id", responseId);
+  async delete(
+    supabase: SupabaseClient<Database>,
+    responseId: string
+  ): Promise<boolean> {
+    const { error } = await supabase
+      .from("form_responses")
+      .delete()
+      .eq("id", responseId);
 
     if (error) throw error;
     return true;
   },
 
-  // Get analytics for a form
-  async getAnalytics(supabase: SupabaseClient<Database>, formId: string, organizationId?: string): Promise<any> {
+  async getAnalytics(
+    supabase: SupabaseClient<Database>,
+    formId: string,
+    organizationId?: string
+  ): Promise<any> {
     let query = supabase.rpc("get_form_analytics", {
       p_form_id: formId,
     });
@@ -203,7 +238,10 @@ export const formResponsesService = {
   },
 
   // Get user analytics
-  async getUserAnalytics(supabase: SupabaseClient<Database>, userId: string): Promise<any> {
+  async getUserAnalytics(
+    supabase: SupabaseClient<Database>,
+    userId: string
+  ): Promise<any> {
     const { data, error } = await supabase.rpc("get_user_analytics", {
       p_user_id: userId,
     });

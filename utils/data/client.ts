@@ -11,6 +11,7 @@ import * as formQueries from "@/hooks/queries/useForms";
 import * as questionQueries from "@/hooks/queries/useQuestions";
 import * as formResponseQueries from "@/hooks/queries/useFormResponses";
 import * as eventsInvitationQueries from "@/hooks/queries/useEventsInvitation";
+import * as formInvitationQueries from "@/hooks/queries/useFormInvitations";
 
 import { createClient } from "../supabase/client";
 import { use, useCallback } from "react";
@@ -199,13 +200,29 @@ export const useClientData = () => {
       useById: eventsInvitationQueries.useEventInvitation,
       useByEvent: eventsInvitationQueries.useEventInvitationsByEvent,
       useByUser: eventsInvitationQueries.useEventInvitationsByUser,
-      useByEventAndUser: eventsInvitationQueries.useEventInvitationByEventAndUser,
-      useWithUserDetails: eventsInvitationQueries.useEventInvitationWithUserDetails,
+      useByEventAndUser:
+        eventsInvitationQueries.useEventInvitationByEventAndUser,
+      useWithUserDetails:
+        eventsInvitationQueries.useEventInvitationWithUserDetails,
       // Mutations
       useCreate: eventsInvitationQueries.useCreateEventInvitation,
       useUpdate: eventsInvitationQueries.useUpdateEventInvitation,
       useDelete: eventsInvitationQueries.useDeleteEventInvitation,
       useBulkCreate: eventsInvitationQueries.useBulkCreateEventInvitations,
+    },
+    formInvitations: {
+      useAll: formInvitationQueries.useFormInvitations,
+      useById: formInvitationQueries.useFormInvitation,
+      useByForm: formInvitationQueries.useFormInvitationsByForm,
+      useByUser: formInvitationQueries.useFormInvitationsByUser,
+      useByFormAndUser: formInvitationQueries.useFormInvitationByFormAndUser,
+      useByTeam: formInvitationQueries.useFormInvitationsByTeam,
+      // Mutations
+      useCreate: formInvitationQueries.useCreateFormInvitation,
+      useUpdate: formInvitationQueries.useUpdateFormInvitation,
+      useDelete: formInvitationQueries.useDeleteFormInvitation,
+      useBulkCreate: formInvitationQueries.useBulkCreateFormInvitations,
+      useSendToTeam: formInvitationQueries.useSendInvitationsToTeam,
     },
     auth,
   };

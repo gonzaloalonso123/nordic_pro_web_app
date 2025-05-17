@@ -5,7 +5,6 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { chatRoomsService } from "@/utils/supabase/services";
 import { createClient } from "@/utils/supabase/client";
 import type {

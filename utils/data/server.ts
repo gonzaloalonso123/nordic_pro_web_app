@@ -1,6 +1,7 @@
 import * as services from "../supabase/services";
 import { createClient } from "../supabase/server";
 import { eventsInvitationService } from "../supabase/services/events-invitation";
+import { formInvitationsService } from "../supabase/services/form-invitations";
 
 export const serverData = {
   users: {
@@ -545,6 +546,34 @@ export const serverData = {
     delete: async (id: string) => {
       const supabase = await createClient();
       return eventsInvitationService.delete(supabase, id);
+    },
+  },
+
+  formInvitations: {
+    getById: async (id: string) => {
+      const supabase = await createClient();
+      return formInvitationsService.getById(supabase, id);
+    },
+    getByForm: async (formId: string) => {
+      const supabase = await createClient();
+      return formInvitationsService.getByForm(supabase, formId);
+    },
+    create: async (
+      invitation: Parameters<typeof formInvitationsService.create>[0]
+    ) => {
+      const supabase = await createClient();
+      return formInvitationsService.create(supabase, invitation);
+    },
+    update: async (
+      id: string,
+      updates: Parameters<typeof formInvitationsService.update>[1]
+    ) => {
+      const supabase = await createClient();
+      return formInvitationsService.update(supabase, id, updates);
+    },
+    delete: async (id: string) => {
+      const supabase = await createClient();
+      return formInvitationsService.delete(supabase, id);
     },
   },
 

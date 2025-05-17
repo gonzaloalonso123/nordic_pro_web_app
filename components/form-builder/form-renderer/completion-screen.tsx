@@ -1,6 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Card,
   CardContent,
@@ -9,30 +11,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Award, Check } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import confetti from "canvas-confetti";
 
-interface FormCompletionProps {
+interface CompletionScreenProps {
   formTitle: string;
-  experienceEarned: number;
-  questionsAnswered: number;
+  earnedExperience: number;
+  answeredQuestions: number;
   totalQuestions: number;
-  redirectPath: string;
-  animate?: boolean;
+  redirectUrl: string;
 }
 
-export default function FormCompletion({
+export function CompletionScreen({
   formTitle,
-  experienceEarned,
-  questionsAnswered,
+  earnedExperience,
+  answeredQuestions,
   totalQuestions,
-  redirectPath,
-  animate = false,
-}: FormCompletionProps) {
+  redirectUrl,
+}: CompletionScreenProps) {
   const router = useRouter();
-  const [experienceAnimationComplete, setExperienceAnimationComplete] = useState(!animate);
+  const [experienceAnimationComplete, setExperienceAnimationComplete] =
+    useState(false);
+
+  useEffect(() => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  }, []);
 
   const handleAnimationComplete = () => {
     setExperienceAnimationComplete(true);
@@ -60,7 +68,7 @@ export default function FormCompletion({
           <p className="text-sm text-muted-foreground">Experience Earned</p>
           <div className="flex items-center justify-center gap-2">
             <AnimatePresence>
-              {!experienceAnimationComplete && animate ? (
+              {!experienceAnimationComplete ? (
                 <motion.span
                   className="text-3xl font-bold text-amber-500"
                   initial={{ scale: 1 }}
@@ -68,11 +76,11 @@ export default function FormCompletion({
                   transition={{ duration: 0.8 }}
                   onAnimationComplete={handleAnimationComplete}
                 >
-                  +{experienceEarned}
+                  +{earnedExperience}
                 </motion.span>
               ) : (
                 <span className="text-3xl font-bold text-amber-500">
-                  +{experienceEarned}
+                  +{earnedExperience}
                 </span>
               )}
             </AnimatePresence>
@@ -83,17 +91,17 @@ export default function FormCompletion({
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">Questions Answered</p>
           <p className="text-xl font-semibold">
-            {questionsAnswered} / {totalQuestions}
+            {answeredQuestions} / {totalQuestions}
           </p>
         </div>
       </CardContent>
       <CardFooter>
         <Button
-          variant="outline"
+          variant="sport"
           className="w-full"
-          onClick={() => router.push(redirectPath)}
+          onClick={() => router.push(redirectUrl)}
         >
-          Back to Forms
+          Great!
         </Button>
       </CardFooter>
     </Card>

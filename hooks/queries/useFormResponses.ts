@@ -11,7 +11,6 @@ import { formResponsesService } from "@/utils/supabase/services/forms-responses"
 
 type FormResponseRow = Tables<"form_responses">;
 
-// Get responses by form
 export const useFormResponses = <TData = any[]>(
   formId: string | undefined,
   options?: Omit<
@@ -29,7 +28,6 @@ export const useFormResponses = <TData = any[]>(
   });
 };
 
-// Get responses by organization
 export const useResponsesByOrganization = <TData = any[]>(
   organizationId: string | undefined,
   options?: Omit<
@@ -49,7 +47,6 @@ export const useResponsesByOrganization = <TData = any[]>(
   });
 };
 
-// Get responses by user
 export const useResponsesByUser = <TData = any[]>(
   userId: string | undefined,
   options?: Omit<
@@ -67,7 +64,6 @@ export const useResponsesByUser = <TData = any[]>(
   });
 };
 
-// Get response by ID
 export const useResponse = <TData = any>(
   responseId: string | undefined,
   options?: Omit<
@@ -85,7 +81,6 @@ export const useResponse = <TData = any>(
   });
 };
 
-// Get form analytics
 export const useFormAnalytics = <TData = any>(
   formId: string | undefined,
   organizationId?: string,
@@ -106,7 +101,6 @@ export const useFormAnalytics = <TData = any>(
   });
 };
 
-// Get user analytics
 export const useUserAnalytics = <TData = any>(
   userId: string | undefined,
   options?: Omit<
@@ -124,7 +118,6 @@ export const useUserAnalytics = <TData = any>(
   });
 };
 
-// Submit form response mutation
 export const useSubmitFormResponse = (
   options?: Omit<
     UseMutationOptions<
@@ -132,10 +125,9 @@ export const useSubmitFormResponse = (
       Error,
       {
         formId: string;
-        userId: string;
-        organizationId: string;
         answers: Record<string, any>;
         earnedExperience: number;
+        invitationId: string;
       }
     >,
     "mutationFn"
@@ -149,24 +141,16 @@ export const useSubmitFormResponse = (
     Error,
     {
       formId: string;
-      userId: string;
-      organizationId: string;
+      invitationId: string;
       answers: Record<string, any>;
       earnedExperience: number;
     }
   >({
-    mutationFn: ({
-      formId,
-      userId,
-      organizationId,
-      answers,
-      earnedExperience,
-    }) =>
+    mutationFn: ({ formId, answers, earnedExperience, invitationId }) =>
       formResponsesService.submit(
         supabase,
+        invitationId,
         formId,
-        userId,
-        organizationId,
         answers,
         earnedExperience
       ),
@@ -175,24 +159,15 @@ export const useSubmitFormResponse = (
         queryKey: ["form-responses", "form", variables.formId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["form-responses", "user", variables.userId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["form-responses", "organization", variables.organizationId],
-      });
-      queryClient.invalidateQueries({
         queryKey: ["form-analytics", variables.formId],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["user-analytics", variables.userId],
-      });
+
       options?.onSuccess?.(data, variables, context);
     },
     ...options,
   });
 };
 
-// Delete form response mutation
 export const useDeleteFormResponse = (
   options?: Omit<
     UseMutationOptions<
