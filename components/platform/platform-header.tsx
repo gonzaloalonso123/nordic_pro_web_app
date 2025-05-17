@@ -19,8 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOut } from "@/utils/supabase/auth-actions";
-import { useClientData } from "@/utils/data/client";
-import { Tables, TablesInsert } from "@/types/database.types";
+import { Tables } from "@/types/database.types";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function PlatformHeader() {
@@ -56,19 +55,6 @@ const NavBar = () => (
 
 const RightMenu = () => {
   const user = useCurrentUser();
-
-  // const {
-  //   data: notifications,
-  //   isPending,
-  //   isError,
-  // } = useNotificationsByUse(currentUser?.id);
-
-  // if (!currentUser || isPending || isError) {
-  //   return null;
-  // }
-
-  // const allNotifications = notifications.filter((n) => n.type !== "message");
-  // const allMessages = notifications.filter((n) => n.type === "message");
 
   return (
     <div className="flex items-center gap-4">
@@ -133,7 +119,7 @@ const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
         aria-label="User menu"
       >
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-          user
+          {`${user.first_name[0]}${user.last_name[0]}`.toUpperCase()}
         </div>
       </Button>
     </DropdownMenuTrigger>
@@ -141,7 +127,7 @@ const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
       <DropdownMenuLabel>
         <div className="flex flex-col">
           <span className="font-medium">{user?.email}</span>
-          <span className="text-xs text-gray-500">Head Coach</span>
+          <span className="text-xs text-gray-500">{user.is_admin ? 'Admin' : 'User'}</span>
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
@@ -154,8 +140,8 @@ const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
         <span>Settings</span>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>
-        <label onClick={signOut} className="flex w-full">
+      <DropdownMenuItem className="cursor-pointer">
+        <label onClick={signOut} className="flex w-full cursor-pointer">
           Log out
         </label>
       </DropdownMenuItem>
