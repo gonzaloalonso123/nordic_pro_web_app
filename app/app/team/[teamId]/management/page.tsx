@@ -7,6 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,26 +22,28 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { PlusCircle, Trash2, BarChart } from "lucide-react";
+import {
+  PlusCircle,
+  Trash2,
+  BarChart,
+  User,
+  Briefcase,
+  Shield,
+} from "lucide-react";
 import { useClientData } from "@/utils/data/client";
 import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Content } from "@/components/content";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 export default function ManagementPage() {
   const { user } = useCurrentUser();
@@ -61,8 +64,10 @@ export default function ManagementPage() {
   const { data: team, isLoading } = clientData.teams.useWithUsers(teamId);
   const addUserToTeam = clientData.teams.useAddMember();
   const removeUserFromTeam = clientData.teams.useRemoveMember();
+
   const handleAddMember = async () => {
     if (newMember.name && newMember.position) {
+      // Implementation would go here
     }
   };
 
@@ -92,11 +97,28 @@ export default function ManagementPage() {
 
   const teamMembers = team?.users || [];
 
+  // Helper function to get initials from name
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // Helper function to get role badge variant
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case "COACH":
+        return "default";
+      case "LEADER":
+        return "secondary";
+      default:
+        return "outline";
+    }
+  };
+
   return (
     <Content>
       <div className="space-y-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <div>
               <CardTitle>Team Members</CardTitle>
               <CardDescription>Manage your team roster</CardDescription>
@@ -105,7 +127,8 @@ export default function ManagementPage() {
               <DialogTrigger asChild>
                 <Button>
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Member
+                  <span className="hidden sm:inline">Add Member</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -151,47 +174,34 @@ export default function ManagementPage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-4">Loading team members...</div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-4">
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-[150px]" />
+                          <Skeleton className="h-4 w-[100px]" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {teamMembers.map((member: any) => (
-                    <TableRow key={member.user.id}>
-                      <TableCell className="font-medium">
-                        {member.user.first_name} {member.user.last_name}
-                      </TableCell>
-                      <TableCell>{member.position}</TableCell>
-                      <TableCell>{member.role}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setSelectedMember(member)}
-                        >
-                          <BarChart className="h-4 w-4" />
-                          <span className="sr-only">View analytics</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveMember(member.user.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Remove</span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {teamMembers.map((member: any) => (
+                  <MemberCard
+                    key={member.user.id}
+                    member={member}
+                    onViewDetails={() => setSelectedMember(member)}
+                    onRemove={() => handleRemoveMember(member.user.id)}
+                    getInitials={getInitials}
+                    getRoleBadgeVariant={getRoleBadgeVariant}
+                  />
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -214,26 +224,141 @@ export default function ManagementPage() {
                   <CardTitle>Member Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Email:</span>
-                      <span>{selectedMember?.user.email}</span>
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <Avatar className="h-16 w-16 mr-4">
+                        <AvatarFallback>
+                          {selectedMember &&
+                            getInitials(
+                              selectedMember.user.first_name,
+                              selectedMember.user.last_name
+                            )}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-medium">
+                          {selectedMember?.user.first_name}{" "}
+                          {selectedMember?.user.last_name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedMember?.position}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Role:</span>
-                      <span>{selectedMember?.role}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Position:</span>
-                      <span>{selectedMember?.position}</span>
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-center">
+                        <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground mr-2">
+                          Email:
+                        </span>
+                        <span className="text-sm">
+                          {selectedMember?.user.email}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground mr-2">
+                          Role:
+                        </span>
+                        <Badge
+                          variant={
+                            selectedMember &&
+                            getRoleBadgeVariant(selectedMember.role)
+                          }
+                        >
+                          {selectedMember?.role}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center">
+                        <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground mr-2">
+                          Position:
+                        </span>
+                        <span className="text-sm">
+                          {selectedMember?.position}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
+                <CardFooter className="border-t pt-4 flex justify-end">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      if (selectedMember) {
+                        handleRemoveMember(selectedMember.user.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remove from Team
+                  </Button>
+                </CardFooter>
               </Card>
             </div>
           </SheetContent>
         </Sheet>
       </div>
     </Content>
+  );
+}
+
+interface MemberCardProps {
+  member: any;
+  onViewDetails: () => void;
+  onRemove: () => void;
+  getInitials: (firstName: string, lastName: string) => string;
+  getRoleBadgeVariant: (role: string) => string;
+}
+
+function MemberCard({
+  member,
+  onViewDetails,
+  onRemove,
+  getInitials,
+  getRoleBadgeVariant,
+}: MemberCardProps) {
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-0">
+        <div className="p-4 flex items-center space-x-4">
+          <Avatar className="h-12 w-12">
+            <AvatarFallback>
+              {getInitials(member.user.first_name, member.user.last_name)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium truncate">
+              {member.user.first_name} {member.user.last_name}
+            </h3>
+            <p className="text-sm text-muted-foreground truncate">
+              {member.position}
+            </p>
+          </div>
+          <Badge variant={getRoleBadgeVariant(member.role)} className="ml-auto">
+            {member.role}
+          </Badge>
+        </div>
+        <div className="border-t flex divide-x">
+          <Button
+            variant="ghost"
+            className="flex-1 rounded-none h-10"
+            onClick={onViewDetails}
+          >
+            <BarChart className="h-4 w-4 mr-2" />
+            Details
+          </Button>
+          <Button
+            variant="ghost"
+            className="flex-1 rounded-none h-10 text-destructive hover:text-destructive"
+            onClick={onRemove}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Remove
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
