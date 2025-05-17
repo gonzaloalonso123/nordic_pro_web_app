@@ -3,6 +3,7 @@ import PlatformHeader from "@/components/platform/platform-header";
 import PlatformSidebar from "@/components/platform/platform-sidebar";
 import { RoleProvider } from "./(role-provider)/role-provider";
 import { getUserRoles } from "@/utils/get-user-roles";
+import InstallPrompt from "@/components/platform/install-prompt";
 
 async function PlatformLayoutClient({
   children,
@@ -16,6 +17,7 @@ async function PlatformLayoutClient({
         <PlatformHeader />
         <div className="flex flex-1">
           <PlatformSidebar />
+          <InstallPrompt />
           <main className="flex-1">{children}</main>
         </div>
       </div>
