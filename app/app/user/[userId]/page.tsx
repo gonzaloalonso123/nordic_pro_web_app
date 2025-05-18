@@ -6,9 +6,12 @@ import { useClientData } from '@/utils/data/client';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Content } from '@/components/content';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 export default function UserProfilePage() {
-  const { userId } = useParams<{ userId: string }>();
+  const params = useParams();
+  const userId = params.userId as string;
   const dataClient = useClientData();
   const { user: currentUser, isLoading: authLoading } = useCurrentUser();
 
@@ -40,32 +43,64 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl">
+    <Content>
       <h1 className="text-3xl font-bold mb-6 text-center">User Profile</h1>
 
-      <div className="bg-white shadow-md rounded-lg p-6 flex flex-col gap-4 items-center md:flex-row md:items-start mb-6">
-        <Avatar>
-          <AvatarImage
-            src={user.avatar ?? undefined}
-            alt="User Avatar"
-          />
-          <AvatarFallback>
-            {user.first_name?.charAt(0).toUpperCase()}
-            {user.last_name?.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+      <Card className="mx-auto p-4 max-w-2xl">
+        <CardHeader className="flex items-center gap-4">
+          <Avatar>
+            <AvatarImage
+              src={user.avatar ?? undefined}
+              alt="User Avatar"
+            />
+            <AvatarFallback>
+              {user.first_name?.charAt(0).toUpperCase()}
+              {user.last_name?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
 
-        <div className="text-center md:text-left flex-grow">
-          <h2 className="text-2xl font-semibold">
-            {user.first_name}
-            {' '}
-            {user.last_name}
-          </h2>
-          <p className="text-gray-600">
-            {user?.email}
-          </p>
+          <div className="text-center md:text-left flex-grow">
+            <h2 className="text-2xl font-semibold">
+              {user.first_name}
+              {' '}
+              {user.last_name}
+            </h2>
+            <p className="text-gray-600">
+              {user?.email}
+            </p>
+          </div>
+        </CardHeader>
 
+        <CardContent>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-500">Date of Birth</span>
+              <span className="text-gray-700">{new Date(user.birth_date).toLocaleDateString()}</span>
+            </div>
 
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-500">Gender</span>
+              <span className="text-gray-700 capitalize">{user.gender}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-500">Address</span>
+              <span className="text-gray-700">{user.address}</span>
+            </div>
+
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-500">Experience</span>
+              <span className="text-gray-700 flex items-center">
+                <span className="bg-blue-100 text-blue-800 font-medium px-2.5 py-0.5 rounded-full mr-2">
+                  {user.total_experience}
+                </span>
+                points
+              </span>
+            </div>
+          </div>
+        </CardContent>
+
+        <CardFooter>
           {isOwnProfile && (
             <Link href={`/app/user/${userId}/edit`} passHref>
               <Button>
@@ -73,8 +108,8 @@ export default function UserProfilePage() {
               </Button>
             </Link>
           )}
-        </div>
-      </div>
-    </div>
+        </CardFooter>
+      </Card>
+    </Content>
   );
 }
