@@ -39,7 +39,7 @@ export default function PlatformHeader() {
 const NavBar = () => (
   <div className="flex items-center">
     <Link
-      href="/platform"
+      href="/"
       className="font-montserrat font-bold text-2xl text-primary mr-8"
     >
       NordicPro
