@@ -21,6 +21,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { signOut } from "@/utils/supabase/auth-actions";
 import { Tables } from "@/types/database.types";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { AvatarFallback } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage } from "../ui/avatar";
 
 export default function PlatformHeader() {
   const isMobile = useIsMobile();
@@ -118,9 +120,18 @@ const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
         className="rounded-full"
         aria-label="User menu"
       >
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-          {`${user.first_name[0]}${user.last_name[0]}`.toUpperCase()}
-        </div>
+        <Avatar className="w-8 h-8">
+          <AvatarImage
+            src={user.avatar ?? undefined}
+            alt="User Avatar"
+            className="w-8 h-8 rounded-full object-cover border-2 border-gray-300"
+          />
+          <AvatarFallback>
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+              {`${user.first_name[0]}${user.last_name[0]}`.toUpperCase()}
+            </div>
+          </AvatarFallback>
+        </Avatar>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-56">
@@ -131,13 +142,17 @@ const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>
-        <UserIcon className="mr-2 h-4 w-4" />
-        <span>Profile</span>
+      <DropdownMenuItem className="cursor-pointer">
+        <Link className="flex gap-2 justify-start align-middle" href={`/app/user/${user.id}`}>
+          <UserIcon className="h-4 w-4" />
+          <span>Profile</span>
+        </Link>
       </DropdownMenuItem>
-      <DropdownMenuItem>
-        <Settings className="mr-2 h-4 w-4" />
-        <span>Settings</span>
+      <DropdownMenuItem className="cursor-pointer">
+        <Link className="flex gap-2 justify-start align-middle" href={`/app/user/${user.id}/edit`}>
+          <Settings className="h-4 w-4" />
+          <span>Settings</span>
+        </Link>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem className="cursor-pointer">
@@ -146,5 +161,5 @@ const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
         </label>
       </DropdownMenuItem>
     </DropdownMenuContent>
-  </DropdownMenu>
+  </DropdownMenu >
 );

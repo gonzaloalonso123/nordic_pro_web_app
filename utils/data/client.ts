@@ -12,9 +12,10 @@ import * as questionQueries from "@/hooks/queries/useQuestions";
 import * as formResponseQueries from "@/hooks/queries/useFormResponses";
 import * as eventsInvitationQueries from "@/hooks/queries/useEventsInvitation";
 import * as formInvitationQueries from "@/hooks/queries/useFormInvitations";
+import * as avatarsQueries from "@/hooks/queries/useAvatars";
 
 import { createClient } from "../supabase/client";
-import { use, useCallback } from "react";
+import { useCallback } from "react";
 
 export const useClientData = () => {
   const supabase = createClient();
@@ -223,6 +224,9 @@ export const useClientData = () => {
       useDelete: formInvitationQueries.useDeleteFormInvitation,
       useBulkCreate: formInvitationQueries.useBulkCreateFormInvitations,
       useSendToTeam: formInvitationQueries.useSendInvitationsToTeam,
+    },
+    avatars: {
+      useUpload: avatarsQueries.useUploadAvatar,
     },
     auth,
   };

@@ -47,7 +47,6 @@ const buttonVariants = cva(
           "active:text-primary/70",
           "relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-primary after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform after:duration-300",
         ],
-        // New premium variants
         premium: [
           "bg-gradient-to-r from-violet-600 to-indigo-600 text-white",
           "hover:from-violet-700 hover:to-indigo-700 hover:shadow-[0_8px_25px_-5px_rgba(99,102,241,0.5)]",
