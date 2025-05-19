@@ -36,6 +36,20 @@ export const usersService = {
     return data;
   },
 
+  async getByIds(
+    supabase: SupabaseClient<Database>,
+    userIds: string[]
+  ): Promise<UserRow[]> {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .in("id", userIds)
+      .is("deleted_at", null);
+
+    if (error) throw error;
+    return data || [];
+  },
+
   // Get users by organisation
   async getByOrganisation(
     supabase: SupabaseClient<Database>,

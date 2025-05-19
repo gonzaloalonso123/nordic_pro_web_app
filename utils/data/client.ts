@@ -12,6 +12,7 @@ import * as questionQueries from "@/hooks/queries/useQuestions";
 import * as formResponseQueries from "@/hooks/queries/useFormResponses";
 import * as eventsInvitationQueries from "@/hooks/queries/useEventsInvitation";
 import * as formInvitationQueries from "@/hooks/queries/useFormInvitations";
+import * as chatMessagesQueries from "@/hooks/queries/useChatMessages";
 import * as avatarsQueries from "@/hooks/queries/useAvatars";
 
 import { createClient } from "../supabase/client";
@@ -38,6 +39,7 @@ export const useClientData = () => {
     users: {
       useAll: userQueries.useUsers,
       useById: userQueries.useUser,
+      useByIds: userQueries.useUserByIds,
       useByOrganisation: userQueries.useUsersByOrganisation,
       useByTeam: userQueries.useUsersByTeam,
       useWithTeams: userQueries.useUserWithTeams,
@@ -177,6 +179,11 @@ export const useClientData = () => {
       useCreate: chatRoomQueries.useCreateChatRoom,
       useUpdate: chatRoomQueries.useUpdateChatRoom,
       useDelete: chatRoomQueries.useDeleteChatRoom,
+    },
+
+    chatMessages: {
+      useChatMessagesByRoom: chatMessagesQueries.useChatMessagesByRoom,
+      useCreateChatMessage: chatMessagesQueries.useCreateChatMessage,
     },
 
     organisationsInvitation: {

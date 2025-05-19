@@ -1,12 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Tables } from "@/types/database.types";
 import type { DisplayMessage } from "@/components/chat/chat-interface";
-import { useUser } from "./queries/useUsers";
-
-import {
-  useChatMessagesByRoom,
-  useCreateChatMessage
-} from "./queries/useChatMessages";
+import { useClientData } from "@/utils/data/client";
 
 export function useMessages(
   roomId: string,
@@ -18,8 +13,10 @@ export function useMessages(
   const previousMessagesRef = useRef<string[]>([]);
   const pendingRealtimeMessagesRef = useRef<Map<string, Tables<"chat_messages">>>(new Map());
 
+  const { users, chatMessages } = useClientData();
+
   // Fetch messages for the room
-  const { data: roomMessages, isLoading } = useChatMessagesByRoom(roomId, {
+  const { data: roomMessages, isPending } = chatMessages.useChatMessagesByRoom(roomId, {
     initialData: () => initialMessages.map(m => ({
       id: m.id,
       room_id: m.room_id,
@@ -30,7 +27,7 @@ export function useMessages(
   });
 
   // Setup message creation mutation
-  const { mutateAsync: createMessage } = useCreateChatMessage({
+  const { mutateAsync: createMessage } = chatMessages.useCreateChatMessage({
     onError: (err) => setError(`Failed to send message: ${err.message}`)
   });
 
@@ -46,22 +43,17 @@ export function useMessages(
       .map(msg => msg.user_id as string)
   )];
 
-  // Fetch user data for each unique user
-  const userQueries = userIds.map(userId => ({
-    userId,
-    query: useUser(userId)
-  }));
+  // Fetch user data for all unique user IDs at once using useByIds
+  const { data: userDataList, isPending: usersLoading } = users.useByIds(userIds);
 
   // Create a map of user data for easy lookup
-  const userDataMap = Object.fromEntries(
-    userQueries
-      .filter(query => query.query.data)
-      .map(query => [query.userId, query.query.data])
-  );
+  const userDataMap = userDataList
+    ? Object.fromEntries(userDataList.map(user => [user.id, user]))
+    : {};
 
   // Process messages and add author information
   useEffect(() => {
-    if (!roomMessages || userQueries.some(query => query.query.isLoading)) {
+    if (!roomMessages || usersLoading) {
       return;
     }
 
@@ -92,13 +84,21 @@ export function useMessages(
       };
     });
 
+    // Sort messages by creation time
+    processedMessages.sort((a, b) => {
+      return new Date(a.created_at!).getTime() - new Date(b.created_at!).getTime();
+    });
+
     // Clear processed realtime messages
     pendingRealtimeMessagesRef.current.clear();
 
     setMessages(processedMessages);
-  }, [roomMessages, userQueries]);
+  }, [roomMessages, userDataList, usersLoading, messages]);
 
-  const messageAlreadyExists = (messageId: Tables<"chat_messages">['id']) => messages.some(msg => msg.id === messageId);
+  const messageAlreadyExists = useCallback((messageId: Tables<"chat_messages">['id']) => {
+    return messages.some(msg => msg.id === messageId);
+  }, [messages]);
+
   const handleNewRealtimeMessage = useCallback((newMessage: Tables<"chat_messages">) => {
     if (messageAlreadyExists(newMessage.id)) return;
 
@@ -108,8 +108,7 @@ export function useMessages(
       // Force a re-render to process the message with author data
       setMessages(prev => [...prev]);
     }
-  }, [messages]);
-
+  }, [messageAlreadyExists]);
 
   // Send a new message
   const sendMessage = useCallback(async (content: string) => {
@@ -156,7 +155,7 @@ export function useMessages(
 
   return {
     messages,
-    isLoading,
+    isLoading: isPending || usersLoading,
     error,
     sendMessage,
     handleNewRealtimeMessage

@@ -49,6 +49,22 @@ export const useUser = <TData = UserRow>(
   });
 };
 
+export const useUserByIds = <TData = UserRow[]>(
+  userIds: string[] | undefined,
+  options?: Omit<
+    UseQueryOptions<UserRow[] | null, Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
+) => {
+  const supabase = createClient();
+  return useQuery<UserRow[] | null, Error, TData>({
+    queryKey: ["users", userIds],
+    queryFn: () => userIds ? usersService.getByIds(supabase, userIds) : null,
+    enabled: !!userIds,
+    ...options,
+  });
+}
+
 // Get users by organisation
 export const useUsersByOrganisation = <TData = UserRow[]>(
   organisationId: string | undefined,
