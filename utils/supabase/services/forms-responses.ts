@@ -193,7 +193,6 @@ export const formResponsesService = {
     if (qrError) throw qrError;
 
     const { error: expError } = await supabase.rpc("add_user_experience", {
-      p_user_id: userId,
       p_experience_points: earnedExperience,
     });
 

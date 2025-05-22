@@ -30,6 +30,9 @@ import {
   Loader2,
   ChevronUp,
   ChevronDown,
+  Trophy,
+  Users,
+  UserRound,
 } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { z } from "zod";
@@ -43,6 +46,8 @@ import {
   useUpdateForm,
 } from "@/hooks/queries/useForms";
 import { useToast } from "@/hooks/use-toast";
+import { FormVisibilityToggle } from "./form-visibility-toggle";
+import { FormLabel } from "@/components/ui/form";
 
 interface FormBuilderProps {
   formId?: string;
@@ -112,12 +117,24 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
   const formSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().optional(),
+    visibility: z
+      .object({
+        coach: z.boolean().default(true),
+        parent: z.boolean().default(true),
+        team: z.boolean().default(false),
+      })
+      .default({ coach: true, parent: true, team: true }),
   });
 
   const defaultValues = {
     id: formData?.id || "",
     title: formData?.title || "",
     description: formData?.description || "",
+    visibility: {
+      coach: formData?.visibility?.coach ?? true,
+      parent: formData?.visibility?.parent ?? true,
+      team: formData?.visibility?.team ?? false,
+    },
   };
 
   const filteredQuestions = questions.filter((question) => {
@@ -171,6 +188,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
       display_mode: displayMode,
       total_experience: totalExperience,
       organisation_id: params.organisationId as string,
+      visibility: values.visibility,
     };
 
     if (formId) {
@@ -211,7 +229,28 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
             <Textarea placeholder="Add form description or instructions" />
           </FormItemWrapper>
 
-          <div className="space-y-3 mt-4">
+          <div className="mt-6">
+            <FormLabel>Who can see the form?</FormLabel>
+            <div className="space-y-4 py-4">
+              <FormVisibilityToggle
+                name="visibility.coach"
+                icon={UserRound}
+                label="Coach"
+              />
+              <FormVisibilityToggle
+                name="visibility.parent"
+                icon={Users}
+                label="Parent"
+              />
+              <FormVisibilityToggle
+                name="visibility.team"
+                icon={Trophy}
+                label="Team"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3 mt-6">
             <Label>Display Mode</Label>
             <RadioGroup
               value={displayMode}
@@ -358,7 +397,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
       </div>
 
       <div className="md:col-span-1">
-        <Card className="sticky top-4">
+        <Card className="sticky top-20">
           <CardHeader>
             <CardTitle>Question Bank</CardTitle>
             <CardDescription>Add questions to your form</CardDescription>

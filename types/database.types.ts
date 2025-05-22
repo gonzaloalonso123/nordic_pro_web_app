@@ -188,44 +188,6 @@ export type Database = {
           },
         ];
       };
-      emoji_options: {
-        Row: {
-          created_at: string;
-          emoji: string;
-          id: string;
-          label: string | null;
-          question_id: string;
-          sort_order: number;
-          value: number;
-        };
-        Insert: {
-          created_at?: string;
-          emoji: string;
-          id?: string;
-          label?: string | null;
-          question_id: string;
-          sort_order?: number;
-          value: number;
-        };
-        Update: {
-          created_at?: string;
-          emoji?: string;
-          id?: string;
-          label?: string | null;
-          question_id?: string;
-          sort_order?: number;
-          value?: number;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "emoji_options_question_id_fkey";
-            columns: ["question_id"];
-            isOneToOne: false;
-            referencedRelation: "questions";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       events: {
         Row: {
           calendar_id: string;
@@ -503,7 +465,7 @@ export type Database = {
           id?: string;
           invitation_id?: string | null;
           submitted_at?: string;
-          user_id: string;
+          user_id?: string;
         };
         Update: {
           completed?: boolean;
@@ -1049,7 +1011,7 @@ export type Database = {
     };
     Functions: {
       add_user_experience: {
-        Args: { p_user_id: string; p_experience_points: number };
+        Args: { total_experience: number };
         Returns: undefined;
       };
       create_default_emoji_scale: {

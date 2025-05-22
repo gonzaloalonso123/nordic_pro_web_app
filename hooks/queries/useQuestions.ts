@@ -17,7 +17,6 @@ type QuestionRow = Tables<"questions">;
 type QuestionInsert = TablesInsert<"questions">;
 type QuestionUpdate = TablesUpdate<"questions">;
 type QuestionOptionInsert = TablesInsert<"question_options">;
-type EmojiOptionInsert = TablesInsert<"emoji_options">;
 
 // Get all questions
 export const useQuestions = <TData = QuestionRow[]>(
@@ -110,7 +109,6 @@ export const useCreateQuestion = (
         question: QuestionInsert;
         options?: {
           questionOptions?: QuestionOptionInsert[];
-          emojiOptions?: EmojiOptionInsert[];
         };
       }
     >,
@@ -127,7 +125,6 @@ export const useCreateQuestion = (
       question: QuestionInsert;
       options?: {
         questionOptions?: QuestionOptionInsert[];
-        emojiOptions?: EmojiOptionInsert[];
       };
     }
   >({
@@ -152,7 +149,6 @@ export const useUpdateQuestion = (
         updates: QuestionUpdate;
         options?: {
           questionOptions?: QuestionOptionInsert[];
-          emojiOptions?: EmojiOptionInsert[];
         };
       }
     >,
@@ -170,7 +166,6 @@ export const useUpdateQuestion = (
       updates: QuestionUpdate;
       options?: {
         questionOptions?: QuestionOptionInsert[];
-        emojiOptions?: EmojiOptionInsert[];
       };
     }
   >({

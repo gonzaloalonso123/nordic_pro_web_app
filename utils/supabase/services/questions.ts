@@ -1,13 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
-import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/types/database.types";
 import { decode } from "base64-arraybuffer";
 
 type QuestionRow = Tables<"questions">;
 type QuestionInsert = TablesInsert<"questions">;
 type QuestionUpdate = TablesUpdate<"questions">;
 type QuestionOptionInsert = TablesInsert<"question_options">;
-type EmojiOptionInsert = TablesInsert<"emoji_options">;
 
 export const questionsService = {
   async getAll(
@@ -45,7 +48,6 @@ export const questionsService = {
         *,
         form_categories(name),
         question_options(*),
-        emoji_options(*)
       `
       )
       .eq("id", questionId)
@@ -101,7 +103,6 @@ export const questionsService = {
     question: QuestionInsert,
     options?: {
       questionOptions?: QuestionOptionInsert[];
-      emojiOptions?: EmojiOptionInsert[];
     }
   ): Promise<any> {
     // Start a transaction
@@ -128,22 +129,6 @@ export const questionsService = {
 
       if (optionsError) throw optionsError;
     }
-    if (
-      question.input_type === "emoji" &&
-      options?.emojiOptions &&
-      options.emojiOptions.length > 0
-    ) {
-      const emojiOptionsWithId = options.emojiOptions.map((option) => ({
-        ...option,
-        question_id: questionId,
-      }));
-
-      const { error: emojiError } = await supabase
-        .from("emoji_options")
-        .insert(emojiOptionsWithId);
-
-      if (emojiError) throw emojiError;
-    }
 
     if (question.image_url) {
       await this.uploadQuestionImage(supabase, questionId, question.image_url);
@@ -158,7 +143,6 @@ export const questionsService = {
     updates: QuestionUpdate,
     options?: {
       questionOptions?: QuestionOptionInsert[];
-      emojiOptions?: EmojiOptionInsert[];
     }
   ): Promise<any> {
     // Update the question
@@ -194,36 +178,9 @@ export const questionsService = {
       }
     }
 
-    // Update emoji options if provided
-    if (options?.emojiOptions) {
-      // Delete existing options
-      const { error: deleteError } = await supabase
-        .from("emoji_options")
-        .delete()
-        .eq("question_id", questionId);
-
-      if (deleteError) throw deleteError;
-
-      // Add new options
-      if (options.emojiOptions.length > 0) {
-        const emojiOptionsWithId = options.emojiOptions.map((option) => ({
-          ...option,
-          question_id: questionId,
-        }));
-
-        const { error: emojiError } = await supabase
-          .from("emoji_options")
-          .insert(emojiOptionsWithId);
-
-        if (emojiError) throw emojiError;
-      }
-    }
-
-    // Return the updated question with its options
     return this.getById(supabase, questionId);
   },
 
-  // Delete question
   async delete(
     supabase: SupabaseClient<Database>,
     questionId: string
