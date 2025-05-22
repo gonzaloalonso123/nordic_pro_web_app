@@ -17,12 +17,9 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tables } from "@/types/database.types";
 import { useRouter } from "next/navigation";
+import { getInitials } from "@/utils/get-initials";
 
 type QuestionOption = Tables<"question_options">;
-
-const getInitials = (firstName: string, lastName: string) => {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-};
 
 // Helper function to format date
 const formatDate = (dateString: string) => {
@@ -154,7 +151,7 @@ export default function TeamFormVisualization({ data }: { data: FormData }) {
               hasResponded &&
               invitation.response &&
               invitation.response.length > 0;
-            const { first_name, last_name } = invitation.users;
+            const { first_name: firstName, last_name: lastName } = invitation.users;
 
             return (
               <div
@@ -172,11 +169,11 @@ export default function TeamFormVisualization({ data }: { data: FormData }) {
                   <div className="flex items-center gap-2">
                     <Avatar className="h-6 w-6">
                       <AvatarFallback className="text-xs">
-                        {getInitials(first_name, last_name)}
+                        {getInitials({ firstName, lastName })}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-sm font-medium">
-                      {first_name} {last_name}
+                      {firstName} {lastName}
                     </span>
                     {hasResponded ? (
                       <CheckCircle className="h-4 w-4 text-green-500" />

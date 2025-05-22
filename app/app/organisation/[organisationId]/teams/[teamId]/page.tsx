@@ -8,6 +8,7 @@ import { CalendarPlus, Clock, Plus, Users } from "lucide-react";
 import { format } from "date-fns";
 import { Content } from "@/components/content";
 import Calendar from "@/components/calendar/event-calendar";
+import { getInitials } from "@/utils/get-initials";
 
 type PageProps = {
   params: Promise<{
@@ -119,7 +120,7 @@ const Page = async (props: PageProps) => {
 
 const MemberCard = ({ member }: { member: any }) => {
   const user = member.user;
-  const initials = `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`;
+  const initials = getInitials({ firstName: user.first_name, lastName: user.last_name });
 
   return (
     <Card>

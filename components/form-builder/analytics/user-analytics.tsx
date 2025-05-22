@@ -8,6 +8,7 @@ import { BarChart } from "./charts/bar-chart"
 import { PieChart } from "./charts/pie-chart"
 import { LineChart } from "./charts/line-chart"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { getInitials } from "@/utils/get-initials"
 
 interface UserAnalyticsViewProps {
   analytics: UserAnalytics
@@ -17,21 +18,10 @@ interface UserAnalyticsViewProps {
 export function UserAnalyticsView({ analytics, timeSeriesData }: UserAnalyticsViewProps) {
   const [activeTab, setActiveTab] = useState("overview")
 
-  // Format category data for charts
   const categoryData = Object.entries(analytics.responsesByCategory).map(([category, count]) => ({
     category,
     count,
   }))
-
-  // Get user initials for avatar
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2)
-  }
 
   return (
     <Card className="w-full">

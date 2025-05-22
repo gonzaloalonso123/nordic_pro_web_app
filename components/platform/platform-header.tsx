@@ -23,6 +23,7 @@ import { Tables } from "@/types/database.types";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import { getInitials } from "@/utils/get-initials";
 
 export default function PlatformHeader() {
   const isMobile = useIsMobile();
@@ -128,7 +129,7 @@ const ProfileMenu = ({ user }: { user: Tables<"users"> }) => (
           />
           <AvatarFallback>
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-              {`${user.first_name[0]}${user.last_name[0]}`.toUpperCase()}
+              {getInitials({ firstName: user.first_name, lastName: user.last_name })}
             </div>
           </AvatarFallback>
         </Avatar>
