@@ -5,7 +5,7 @@ import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { FormWrapper } from "@/components/form/form-wrapper";
 import { z } from "zod";
 import { CompletionScreen } from "./completion-screen";
-import type { Tables } from "@/database.types";
+import type { Tables } from "@/types/database.types";
 import SequentialForm from "./sequential-form";
 import { ProgressIndicator } from "./progress-indicator";
 import { QuestionRenderer } from "./question-renderer";
