@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Content } from '@/components/content';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { getInitials } from '@/utils/get-initials';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -54,8 +55,7 @@ export default function UserProfilePage() {
               alt="User Avatar"
             />
             <AvatarFallback>
-              {user.first_name?.charAt(0).toUpperCase()}
-              {user.last_name?.charAt(0).toUpperCase()}
+              {getInitials({ firstName: user.first_name, lastName: user.last_name })}
             </AvatarFallback>
           </Avatar>
 

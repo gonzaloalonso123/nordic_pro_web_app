@@ -44,6 +44,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { getInitials } from "@/utils/get-initials";
 
 export default function ManagementPage() {
   const { user } = useCurrentUser();
@@ -97,10 +98,6 @@ export default function ManagementPage() {
 
   const teamMembers = team?.users || [];
 
-  // Helper function to get initials from name
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
 
   // Helper function to get role badge variant
   const getRoleBadgeVariant = (role: string) => {
@@ -191,13 +188,12 @@ export default function ManagementPage() {
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {teamMembers.map((member: any) => (
+                {teamMembers.map((member) => (
                   <MemberCard
                     key={member.user.id}
                     member={member}
                     onViewDetails={() => setSelectedMember(member)}
                     onRemove={() => handleRemoveMember(member.user.id)}
-                    getInitials={getInitials}
                     getRoleBadgeVariant={getRoleBadgeVariant}
                   />
                 ))}
@@ -229,10 +225,10 @@ export default function ManagementPage() {
                       <Avatar className="h-16 w-16 mr-4">
                         <AvatarFallback>
                           {selectedMember &&
-                            getInitials(
-                              selectedMember.user.first_name,
-                              selectedMember.user.last_name
-                            )}
+                            getInitials({
+                              firstName: selectedMember.user.first_name,
+                              lastName: selectedMember.user.last_name
+                            })}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -308,7 +304,6 @@ interface MemberCardProps {
   member: any;
   onViewDetails: () => void;
   onRemove: () => void;
-  getInitials: (firstName: string, lastName: string) => string;
   getRoleBadgeVariant: (role: string) => string;
 }
 
@@ -316,7 +311,6 @@ function MemberCard({
   member,
   onViewDetails,
   onRemove,
-  getInitials,
   getRoleBadgeVariant,
 }: MemberCardProps) {
   return (
@@ -325,7 +319,7 @@ function MemberCard({
         <div className="p-4 flex items-center space-x-4">
           <Avatar className="h-12 w-12">
             <AvatarFallback>
-              {getInitials(member.user.first_name, member.user.last_name)}
+              {getInitials({ firstName: member.user.first_name, lastName: member.user.last_name })}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">

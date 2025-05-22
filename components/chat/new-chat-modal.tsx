@@ -20,6 +20,7 @@ import { useUsersByOrganisation } from '@/hooks/queries/useUsers'; // Your exist
 import { useStartDirectChat } from '@/hooks/queries/useChatRooms'; // From your consolidated file
 import type { Tables } from '@/types/database.types';
 import { createClient } from '@/utils/supabase/client'; // For fetching org ID if needed
+import { getInitials } from '@/utils/get-initials';
 
 interface NewChatModalProps {
   isOpen: boolean;
@@ -150,14 +151,14 @@ export function NewChatModal({ isOpen, onOpenChange }: NewChatModalProps) {
               ))
             )}
             {!isLoadingUsersList && usersByOrgError && (
-                 <p className="text-sm text-red-500 text-center py-4">Error loading users: {usersByOrgError.message}</p>
+              <p className="text-sm text-red-500 text-center py-4">Error loading users: {usersByOrgError.message}</p>
             )}
             {!isLoadingUsersList && !usersByOrgError && filteredUsers.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">
                 {!currentUserOrganisationId && !isFetchingOrgId && !isLoadingCurrentUser ? "Could not determine your organization." :
-                 searchQuery ? "No users match your search." :
-                 (usersInOrg.length === 0 || (usersInOrg.length === 1 && usersInOrg[0].id === currentUser?.id)) && currentUserOrganisationId ? "No other users found in your organization." :
-                 "No users available to chat with."}
+                  searchQuery ? "No users match your search." :
+                    (usersInOrg.length === 0 || (usersInOrg.length === 1 && usersInOrg[0].id === currentUser?.id)) && currentUserOrganisationId ? "No other users found in your organization." :
+                      "No users available to chat with."}
               </p>
             )}
             {!isLoadingUsersList && !usersByOrgError && filteredUsers.map((user) => (
@@ -173,8 +174,7 @@ export function NewChatModal({ isOpen, onOpenChange }: NewChatModalProps) {
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={user.avatar || undefined} alt={`${user.first_name} ${user.last_name}`} />
                   <AvatarFallback>
-                    {(user.first_name?.[0] || '').toUpperCase()}
-                    {(user.last_name?.[0] || '').toUpperCase()}
+                    {getInitials({ firstName: user.first_name, lastName: user.last_name })}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-grow">

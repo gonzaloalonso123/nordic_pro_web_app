@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getInitials } from '@/utils/get-initials';
 
 export default function EditUserProfilePage() {
   const dataClient = useClientData();
@@ -183,8 +184,7 @@ export default function EditUserProfilePage() {
                 alt="User Avatar Preview"
               />
               <AvatarFallback className="text-4xl">
-                {firstName.charAt(0).toUpperCase()}
-                {lastName.charAt(0).toUpperCase()}
+                {getInitials({ firstName, lastName })}
               </AvatarFallback>
             </Avatar>
 
