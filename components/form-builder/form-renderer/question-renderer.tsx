@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Award } from "lucide-react";
 import Image from "next/image";
 import EmojiPicker from "../input-types/emoji-picker";
+import KidSlider from "@/components/ui/kid-slider";
 
 interface QuestionRendererProps {
   question: Question;
@@ -50,12 +51,8 @@ export function QuestionRenderer({
         return (
           <EmojiPicker
             value={typeof value === "object" ? value.emoji : value}
-            customOptions={question.emojiOptions}
-            onChange={(emoji, numericValue) => {
-              const newValue = question.emojiOptions
-                ? { emoji, value: numericValue }
-                : emoji;
-              onChange(newValue);
+            onChange={(emoji) => {
+              onChange(emoji);
             }}
           />
         );
@@ -63,7 +60,7 @@ export function QuestionRenderer({
       case "slider":
         return (
           <div className="pt-4 pb-2">
-            <Slider
+            <KidSlider
               value={[value !== undefined ? value : question.min_value || 0]}
               min={question.min_value || 0}
               max={question.max_value || 100}

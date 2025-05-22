@@ -15,10 +15,8 @@ import { v4 as uuidv4 } from "uuid";
 import type { InputType } from "../types";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import EmojiOptionsEditor from "../input-types/emoji-options-editor";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation } from "react-i18next";
 import {
   useCategories,
   useCreateQuestion,
@@ -57,7 +55,6 @@ const questionSchema = z.object({
       })
     )
     .optional(),
-  emojiOptions: z.array(z.any()).optional(),
   min_value: z.string().optional(),
   max_value: z.string().optional(),
   step_value: z.string().optional(),
@@ -117,13 +114,6 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
       required: false,
       description: "",
       options: [],
-      emojiOptions: [
-        { id: uuidv4(), emoji: "😢", value: 1, label: "Very Dissatisfied" },
-        { id: uuidv4(), emoji: "🙁", value: 2, label: "Dissatisfied" },
-        { id: uuidv4(), emoji: "😐", value: 3, label: "Neutral" },
-        { id: uuidv4(), emoji: "🙂", value: 4, label: "Satisfied" },
-        { id: uuidv4(), emoji: "😄", value: 5, label: "Very Satisfied" },
-      ],
       experience: 10,
       min_value: "",
       max_value: "",
@@ -148,7 +138,6 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
         inputType: question.input_type as InputType,
         imageUrl: question.image_url || "",
         options: question.question_options || [],
-        emojiOptions: question.emoji_options || [],
         min_value:
           question.input_type === "slider" || question.input_type === "number"
             ? question.min_value?.toString()
@@ -225,7 +214,7 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
       input_type: formData.inputType,
       required: formData.required,
       description: formData.description || null,
-      experience: formData.experience,
+      experience: formData.experience ? Number(formData.experience) : null,
       min_value:
         formData.inputType === "slider" || formData.inputType === "number"
           ? Number(formData.min_value)
@@ -248,23 +237,12 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
           }))
         : [];
 
-    const emojiOptions =
-      formData.inputType === "emoji"
-        ? formData.emojiOptions.map((opt: any) => ({
-            question_id: formData.id,
-            emoji: opt.emoji,
-            value: opt.value,
-            label: opt.label,
-          }))
-        : [];
-
     if (questionId) {
       updateQuestion.mutate({
         questionId,
         updates: questionData,
         options: {
           questionOptions,
-          emojiOptions,
         },
       });
     } else {
@@ -275,7 +253,6 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
         },
         options: {
           questionOptions,
-          emojiOptions,
         },
       });
     }
@@ -458,15 +435,6 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
               No options added yet. Click "Add Option" to create options.
             </div>
           )}
-        </div>
-      )}
-
-      {inputType === "emoji" && (
-        <div className="space-y-4 mt-4">
-          <EmojiOptionsEditor
-            options={getValues("emojiOptions") || []}
-            onChange={(newOptions) => setValue("emojiOptions", newOptions)}
-          />
         </div>
       )}
 

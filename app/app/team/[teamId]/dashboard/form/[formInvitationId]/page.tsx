@@ -5,6 +5,7 @@ import FormRenderer from "@/components/form-builder/form-renderer/form-renderer"
 import { Button } from "@/components/ui/button";
 import { useFormWithQuestions } from "@/hooks/queries";
 import { useUrl } from "@/hooks/use-url";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useClientData } from "@/utils/data/client";
 import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -15,7 +16,7 @@ export default () => {
   const formInvitationId = params.formInvitationId as string;
   const router = useRouter();
   const path = useUrl();
-
+  const { user } = useCurrentUser();
   const { data: invitation } =
     useClientData().formInvitations.useById(formInvitationId);
   const updateInvitation = useClientData().formInvitations.useUpdate();
@@ -46,6 +47,7 @@ export default () => {
       answers: values,
       earnedExperience: 15,
       invitationId: invitation?.id,
+      userId: user?.id,
     });
   };
 

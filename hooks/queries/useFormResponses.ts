@@ -142,6 +142,7 @@ export const useSubmitFormResponse = (
     {
       formId: string;
       invitationId: string;
+      userId: string;
       answers: Record<string, any>;
       earnedExperience: number;
     }
@@ -160,6 +161,9 @@ export const useSubmitFormResponse = (
       });
       queryClient.invalidateQueries({
         queryKey: ["form-analytics", variables.formId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["users", variables.userId],
       });
 
       options?.onSuccess?.(data, variables, context);

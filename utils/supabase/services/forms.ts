@@ -138,7 +138,6 @@ export const formsService = {
   async getWithQuestions(
     supabase: SupabaseClient<Database>,
     formId: string
-    
   ): Promise<any> {
     const { data, error } = await supabase
       .from("forms")
@@ -150,8 +149,7 @@ export const formsService = {
           questions(
             *,
             form_categories(name),
-            question_options(*),
-            emoji_options(*)
+            question_options(*)
           )
         )
       `
@@ -245,7 +243,6 @@ export const formsService = {
     return true;
   },
 
-  // Remove question from form
   async removeQuestion(
     supabase: SupabaseClient<Database>,
     formId: string,
