@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Paperclip, Send } from "lucide-react";
 import { useMessages } from "@/hooks/use-chat-room";
 import { useRealtimeChat } from "@/hooks/use-realtime-chat";
+import { getInitials } from "@/utils/get-initials";
 
 export type UserProfileSnippet = Pick<
   Tables<"users">,
@@ -33,7 +34,6 @@ export function ChatInterface({
   const [newMessage, setNewMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Use the custom hook for messages management
   const {
     messages,
     isLoading,
@@ -42,19 +42,13 @@ export function ChatInterface({
     handleNewRealtimeMessage
   } = useMessages(roomId, currentUser, initialMessages);
 
-  // Use the real-time chat hook for listening to new messages
   const { error: realtimeError } = useRealtimeChat<Tables<"chat_messages">>(
     roomId,
-    (newMessagePayload) => {
-      console.log("Received new message via realtime:", newMessagePayload);
-      handleNewRealtimeMessage(newMessagePayload);
-    }
+    (newMessagePayload) => handleNewRealtimeMessage(newMessagePayload)
   );
 
-  // Combined error from both hooks
   const error = chatError || realtimeError;
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -116,7 +110,7 @@ export function ChatInterface({
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={msg.author?.avatar || undefined} />
                           <AvatarFallback>
-                            {authorName.substring(0, 2).toUpperCase()}
+                            {getInitials({ firstName: msg.author?.first_name, lastName: msg.author?.last_name })}
                           </AvatarFallback>
                         </Avatar>
                       </div>
@@ -148,8 +142,7 @@ export function ChatInterface({
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={currentUser.avatar || undefined} />
                           <AvatarFallback>
-                            {currentUser.first_name?.substring(0, 1).toUpperCase() || ''}
-                            {currentUser.last_name?.substring(0, 1).toUpperCase() || ''}
+                            {getInitials({ firstName: currentUser.first_name, lastName: currentUser.last_name })}
                           </AvatarFallback>
                         </Avatar>
                       </div>
