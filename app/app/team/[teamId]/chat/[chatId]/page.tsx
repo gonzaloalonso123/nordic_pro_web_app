@@ -5,13 +5,11 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 
-// Hooks
 import { useChatRoom, useChatMessagesByRoom, useChatRoomMembers } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUrl } from "@/hooks/use-url";
 
-// UI Components
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,19 +17,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChatInterface, DisplayMessage, UserProfileSnippet } from "@/components/chat/chat-interface";
 
 export default function ChatRoomPage() {
-  // Hooks
   const params = useParams();
   const { user: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const chatId = params.chatId as string;
   const path = useUrl();
   const isMobile = useIsMobile();
 
-  // Data fetching
   const { data: chatRoom, isLoading: isLoadingRoom } = useChatRoom(chatId);
   const { data: initialDbMessages = [], isLoading: isLoadingMessages } = useChatMessagesByRoom(chatId);
   const { data: roomMembers = [] } = useChatRoomMembers(chatId);
 
-  // Transform messages for the chat interface
   const initialMessagesForInterface: DisplayMessage[] = useMemo(() => {
     return initialDbMessages.map((msg: any) => {
       let author: UserProfileSnippet | null = null;
@@ -57,7 +52,6 @@ export default function ChatRoomPage() {
     });
   }, [initialDbMessages]);
 
-  // Loading state
   if (isLoadingUser || isLoadingRoom || isLoadingMessages) {
     return (
       <div className="flex flex-col h-full pb-16 md:pb-0">
@@ -69,7 +63,6 @@ export default function ChatRoomPage() {
     );
   }
 
-  // Error state - chat room not found
   if (!chatRoom) {
     return (
       <div className="flex flex-col h-full">
@@ -83,7 +76,6 @@ export default function ChatRoomPage() {
     );
   }
 
-  // Main chat view
   return (
     <div className="flex flex-col h-full pb-16 md:pb-0">
       <ChatRoomHeader

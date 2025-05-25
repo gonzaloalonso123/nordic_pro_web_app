@@ -13,7 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/utils";
 import { Check, X } from "lucide-react";
-import { Tables } from "@/database.types";
+import { Tables } from "@/types/database.types";
 
 interface InvitationListProps {
   invitations: Tables<"events_invitation">[];

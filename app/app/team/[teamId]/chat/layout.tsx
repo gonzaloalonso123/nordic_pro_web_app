@@ -10,7 +10,6 @@ export default function ChatLayout({
   const pathname = usePathname();
   const path = useUrl();
   const isChatRoom = pathname !== `${path}/chat`;
-  const isMobile = useIsMobile();
   return (
     <div className="h-full">
       <div className="md:hidden h-full">{children}</div>
@@ -34,7 +33,6 @@ export default function ChatLayout({
   );
 }
 
-import { Content } from "@/components/content";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,8 +47,6 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useUnreadMessageCount } from "@/hooks/queries/useChatRooms";
 import { useUrl } from "@/hooks/use-url";
 
 function ChatListSidebar() {
@@ -64,7 +60,6 @@ function ChatListSidebar() {
     [chatRooms]
   );
 
-  // Get unread counts for all rooms in a single query
   const { data: unreadCounts = {} } = useUnreadMessageCountBatch(
     roomIds,
     user?.id
