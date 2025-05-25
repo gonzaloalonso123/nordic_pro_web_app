@@ -5,6 +5,7 @@ import {
   MessageSquare,
   Settings,
   TrophyIcon,
+  Clipboard,
   UserRoundCog,
 } from "lucide-react";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
@@ -19,7 +20,7 @@ const generalTeamMenuItems = (root: string) => [
 const coachMenuItems = (root: string) => [
   { name: "Management", href: `${root}/management`, icon: Settings },
   { name: "Analytics", href: `${root}/analytics`, icon: BarChart3 },
-  { name: "Forms", href: `${root}/forms`, icon: MessageSquare },
+  { name: "Forms", href: `${root}/forms`, icon: Clipboard },
 ];
 
 const userMenuItems = (root: string) => [

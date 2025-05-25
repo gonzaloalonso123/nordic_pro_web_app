@@ -18,12 +18,15 @@ export default function MobilePlatformNavbar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex w-full flex-col items-center py-2 px-3 ${isActive ? "text-primary" : "text-gray-500"}`}
+              className={`flex w-full flex-col items-center py-4 ${
+                isActive ? "text-primary" : "text-gray-500"
+              }`}
             >
-              <div className={`p-1 rounded-full ${isActive ? "bg-primary/10" : ""}`}>
+              <div
+                className={`p-1 rounded-full ${isActive ? "bg-primary/10" : ""}`}
+              >
                 <Icon className="h-6 w-6" />
               </div>
-              <span className="text-xs mt-1">{item.name}</span>
             </Link>
           );
         })}

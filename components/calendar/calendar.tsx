@@ -8,8 +8,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// Import the CSS for styling
 import "./calendar.css";
 
 export type CalendarEvent = {
@@ -29,6 +27,8 @@ interface StyledCalendarProps {
   onDateClick?: (info: any) => void;
   className?: string;
   initialView?: "dayGridMonth" | "timeGridWeek";
+  viewChangable?: boolean;
+  height?: number;
 }
 
 export function StyledCalendar({
@@ -37,6 +37,8 @@ export function StyledCalendar({
   onDateClick,
   className,
   initialView = "dayGridMonth",
+  viewChangable,
+  height,
 }: StyledCalendarProps) {
   const [view, setView] = useState<"dayGridMonth" | "timeGridWeek">(
     initialView
@@ -44,7 +46,6 @@ export function StyledCalendar({
   const [currentTitle, setCurrentTitle] = useState<string>("");
   const calendarRef = React.useRef<any>(null);
 
-  // Update the title when the view changes
   useEffect(() => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
@@ -96,13 +97,14 @@ export function StyledCalendar({
 
   return (
     <div className={cn("styled-calendar-container", className)}>
-      <div className="calendar-header flex flex-wrap items-center justify-between gap-2 p-4">
-        <div className="flex items-center gap-2">
+      <div className="calendar-header flex flex-wrap items-center justify-between p-4">
+        <div className="flex items-center">
           <Button
             variant="outline"
             size="sm"
             onClick={handlePrev}
             aria-label="Previous"
+            className="rounded-r-none"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -111,6 +113,7 @@ export function StyledCalendar({
             size="sm"
             onClick={handleNext}
             aria-label="Next"
+            className="rounded-l-none"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -128,42 +131,45 @@ export function StyledCalendar({
           {currentTitle}
         </h2>
 
-        <div className="flex items-center">
-          <div className="view-switcher flex rounded-md overflow-hidden border">
-            <Button
-              variant={view === "dayGridMonth" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => handleViewChange("dayGridMonth")}
-              className="rounded-none"
-            >
-              Month
-            </Button>
-            <Button
-              variant={view === "timeGridWeek" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => handleViewChange("timeGridWeek")}
-              className="rounded-none"
-            >
-              Week
-            </Button>
+        {viewChangable && (
+          <div className="flex items-center">
+            <div className="view-switcher flex rounded-md overflow-hidden border">
+              <Button
+                variant={view === "dayGridMonth" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => handleViewChange("dayGridMonth")}
+                className="rounded-none"
+              >
+                Month
+              </Button>
+              <Button
+                variant={view === "timeGridWeek" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => handleViewChange("timeGridWeek")}
+                className="rounded-none"
+              >
+                Week
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Mobile title - shown only on small screens */}
-      <h2 className="text-lg font-semibold mb-4 px-4 md:hidden">{currentTitle}</h2>
+      <h2 className="text-lg font-semibold mb-4 px-4 md:hidden">
+        {currentTitle}
+      </h2>
 
       <div className="calendar-wrapper rounded-lg border overflow-hidden shadow-sm">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView={view}
-          headerToolbar={false} // We're using our custom header
+          headerToolbar={false}
           events={events}
           eventClick={onEventClick}
           dateClick={onDateClick}
           datesSet={handleDatesSet}
-          height="auto"
+          height={height || "auto"}
           dayMaxEvents={3}
           eventTimeFormat={{
             hour: "numeric",
