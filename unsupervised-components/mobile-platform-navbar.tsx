@@ -18,7 +18,7 @@ export default function MobilePlatformNavbar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex w-full flex-col items-center py-2 px-3 ${
+              className={`flex w-full flex-col items-center py-4 ${
                 isActive ? "text-primary" : "text-gray-500"
               }`}
             >
@@ -29,7 +29,6 @@ export default function MobilePlatformNavbar() {
               >
                 <Icon className="h-6 w-6" />
               </div>
-              <span className="text-xs mt-1">{item.name}</span>
             </Link>
           );
         })}

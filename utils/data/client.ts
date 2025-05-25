@@ -14,6 +14,7 @@ import * as eventsInvitationQueries from "@/hooks/queries/useEventsInvitation";
 import * as formInvitationQueries from "@/hooks/queries/useFormInvitations";
 import * as chatMessagesQueries from "@/hooks/queries/useChatMessages";
 import * as avatarsQueries from "@/hooks/queries/useAvatars";
+import * as locationQueries from "@/hooks/queries/useLocations";
 
 import { createClient } from "../supabase/client";
 import { useCallback } from "react";
@@ -231,6 +232,14 @@ export const useClientData = () => {
       useDelete: formInvitationQueries.useDeleteFormInvitation,
       useBulkCreate: formInvitationQueries.useBulkCreateFormInvitations,
       useSendToTeam: formInvitationQueries.useSendInvitationsToTeam,
+    },
+    locations: {
+      useAll: locationQueries.useLocations,
+      useById: locationQueries.useLocation,
+      useByOrganisation: locationQueries.useLocationsByOrganisation,
+      useCreate: locationQueries.useCreateLocation,
+      useUpdate: locationQueries.useUpdateLocation,
+      useDelete: locationQueries.useDeleteLocation,
     },
     avatars: {
       useUpload: avatarsQueries.useUploadAvatar,

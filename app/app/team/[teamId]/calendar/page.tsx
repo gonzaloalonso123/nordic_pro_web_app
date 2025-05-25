@@ -1,42 +1,60 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Calendar from "../../../../../components/calendar/event-calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Content } from "@/components/content";
 import { useClientData } from "@/utils/data/client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import InvitationList from "./components/invitation-list";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useRole } from "@/app/app/(role-provider)/role-provider";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useUrl } from "@/hooks/use-url";
+import { EnhancedEventPopup } from "@/components/calendar/event-popup";
 
 export default function CalendarDemo() {
   const [selectedView, setSelectedView] = useState<
     "dayGridMonth" | "timeGridWeek"
   >("dayGridMonth");
-  const [activeTab, setActiveTab] = useState<"calendar" | "invitations">(
-    "calendar"
-  );
-  const isMobile = useIsMobile();
-
-  const handleEventClick = (info: any) => {
-    alert(
-      `Event: ${info.event.title}\nTime: ${info.event.start.toLocaleString()}`
-    );
-  };
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [isEventPopupOpen, setIsEventPopupOpen] = useState(false);
 
   const { user } = useCurrentUser();
+  const { team } = useRole();
+  const path = useUrl();
   const clientData = useClientData();
   const userId = user?.id;
   const eventsQuery = clientData.events.useByUserId(userId);
   const invitationsQuery = clientData.eventsInvitation.useByUser(userId);
   const updateInvitation = clientData.eventsInvitation.useUpdate();
+  const router = useRouter();
 
   const events = eventsQuery.data || [];
   const invitations = invitationsQuery.data || [];
 
-  const pendingInvitations =
-    invitations?.filter((invitation) => invitation.will_attend === null) || [];
+  const handleEventClick = (info: any) => {
+    const eventData = events.find((event) => event.id === info.event.id);
+    if (eventData) {
+      const userInvitation = invitations.find(
+        (inv) => inv.event_id === eventData.id
+      );
+      const enrichedEvent = {
+        ...eventData,
+        userInvitation: userInvitation
+          ? {
+              id: userInvitation.id,
+              will_attend: userInvitation.will_attend,
+              reason: userInvitation.reason,
+            }
+          : undefined,
+      };
+
+      setSelectedEvent(enrichedEvent);
+      setIsEventPopupOpen(true);
+    }
+  };
 
   const handleAcceptInvitation = async (invitationId: string) => {
     try {
@@ -47,6 +65,16 @@ export default function CalendarDemo() {
           reason: null,
         },
       });
+      if (selectedEvent?.userInvitation?.id === invitationId) {
+        setSelectedEvent({
+          ...selectedEvent,
+          userInvitation: {
+            ...selectedEvent.userInvitation,
+            will_attend: true,
+            reason: null,
+          },
+        });
+      }
     } catch (error) {
       console.error("Failed to accept invitation:", error);
     }
@@ -64,88 +92,56 @@ export default function CalendarDemo() {
           reason,
         },
       });
+      if (selectedEvent?.userInvitation?.id === invitationId) {
+        setSelectedEvent({
+          ...selectedEvent,
+          userInvitation: {
+            ...selectedEvent.userInvitation,
+            will_attend: false,
+            reason,
+          },
+        });
+      }
     } catch (error) {
       console.error("Failed to reject invitation:", error);
     }
   };
 
-  useEffect(() => {
-    if (pendingInvitations.length > 0) {
-      setActiveTab("invitations");
-    } else {
-      setActiveTab("calendar");
-    }
-  }, [pendingInvitations.length]);
-
-  if (!isMobile) {
-    return (
-      <Content>
-        <h1 className="text-2xl font-bold mb-6">Team Calendar</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardContent className="p-0">
-                <Calendar
-                  events={events || []}
-                  onEventClick={handleEventClick}
-                  initialView={selectedView}
-                />
-              </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-1">
-            <InvitationList
-              invitations={invitations || []}
-              events={events || []}
-              onAccept={handleAcceptInvitation}
-              onReject={handleRejectInvitation}
-            />
-          </div>
-        </div>
-      </Content>
-    );
-  }
+  const isMobile = useIsMobile();
 
   return (
     <Content>
-      <h1 className="text-2xl font-bold mb-6">Team Calendar</h1>
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) =>
-          setActiveTab(value as "calendar" | "invitations")
-        }
-      >
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="calendar">Calendar</TabsTrigger>
-          <TabsTrigger value="invitations" className="relative">
-            Invitations
-            {pendingInvitations.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {pendingInvitations.length}
-              </span>
-            )}
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="calendar" className="mt-0">
-          <Card>
-            <CardContent className="p-0">
-              <Calendar
-                events={events || []}
-                onEventClick={handleEventClick}
-                initialView={selectedView}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="invitations" className="mt-0">
-          <InvitationList
-            invitations={invitations || []}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Team Calendar</h1>
+        {team.role === "COACH" && (
+          <Button
+            onClick={() => {
+              router.push(`${path}/calendar/add-event`);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Add Event
+          </Button>
+        )}
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <Calendar
             events={events || []}
-            onAccept={handleAcceptInvitation}
-            onReject={handleRejectInvitation}
+            onEventClick={handleEventClick}
+            initialView={selectedView}
           />
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
+
+      <EnhancedEventPopup
+        event={selectedEvent}
+        open={isEventPopupOpen}
+        onOpenChange={setIsEventPopupOpen}
+        onAcceptInvitation={handleAcceptInvitation}
+        onRejectInvitation={handleRejectInvitation}
+      />
     </Content>
   );
 }

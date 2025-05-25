@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { EventPopup } from "./event-popup";
 import type { Tables } from "@/types/database.types";
 import { CalendarEvent, StyledCalendar } from "@/components/calendar/calendar";
+import { EnhancedEventPopup } from "./event-popup";
 
 function convertEvents(dbEvents: Tables<"events">[]): CalendarEvent[] {
   return dbEvents.map((event) => ({
@@ -33,61 +33,35 @@ function getEventColor(type: string): string {
 }
 
 interface CalendarProps {
-  events: Tables<"events">[];
+  events: Tables<"events">[] | any[];
   onEventClick?: (info: any) => void;
   onDateClick?: (info: any) => void;
   className?: string;
   initialView?: "dayGridMonth" | "timeGridWeek";
+  viewChangable?: boolean;
+  height?: number;
 }
 
 export default function Calendar({
   events,
-  onEventClick,
   onDateClick,
+  onEventClick,
   className,
   initialView = "dayGridMonth",
+  viewChangable = true,
+  height,
 }: CalendarProps) {
   const calendarEvents = convertEvents(events);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
-    null
-  );
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-
-  const handleEventClick = (info: any) => {
-    const eventData: CalendarEvent = {
-      id: info.event.id,
-      title: info.event.title,
-      start: info.event.start,
-      end: info.event.end,
-      allDay: info.event.allDay,
-      extendedProps: info.event.extendedProps,
-    };
-
-    setSelectedEvent(eventData);
-    setIsPopupOpen(true);
-  };
-
-  const handleDateClick = (info: any) => {
-    if (onDateClick) {
-      onDateClick(info);
-    }
-  };
 
   return (
-    <>
-      <StyledCalendar
-        events={calendarEvents}
-        onEventClick={handleEventClick}
-        onDateClick={handleDateClick}
-        className={className}
-        initialView={initialView}
-      />
-
-      <EventPopup
-        event={selectedEvent}
-        open={isPopupOpen}
-        onOpenChange={setIsPopupOpen}
-      />
-    </>
+    <StyledCalendar
+      events={calendarEvents}
+      // onDateClick={handleDateClick}
+      onEventClick={onEventClick}
+      className={className}
+      initialView={initialView}
+      viewChangable={viewChangable}
+      height={height}
+    />
   );
 }

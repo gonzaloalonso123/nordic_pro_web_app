@@ -195,8 +195,10 @@ export type Database = {
           description: string | null;
           end_date: string;
           id: string;
+          location_id: string | null;
           name: string;
           start_date: string;
+          time_to_come: string | null;
           type: string;
           updated_at: string | null;
         };
@@ -206,8 +208,10 @@ export type Database = {
           description?: string | null;
           end_date: string;
           id?: string;
+          location_id?: string | null;
           name: string;
           start_date: string;
+          time_to_come?: string | null;
           type: string;
           updated_at?: string | null;
         };
@@ -217,12 +221,21 @@ export type Database = {
           description?: string | null;
           end_date?: string;
           id?: string;
+          location_id?: string | null;
           name?: string;
           start_date?: string;
+          time_to_come?: string | null;
           type?: string;
           updated_at?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "events_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "fk_events_calendar";
             columns: ["calendar_id"];
@@ -510,6 +523,7 @@ export type Database = {
           title: string;
           total_experience: number;
           updated_at: string;
+          visibility: Json | null;
         };
         Insert: {
           created_at?: string;
@@ -520,6 +534,7 @@ export type Database = {
           title: string;
           total_experience?: number;
           updated_at?: string;
+          visibility?: Json | null;
         };
         Update: {
           created_at?: string;
@@ -530,6 +545,7 @@ export type Database = {
           title?: string;
           total_experience?: number;
           updated_at?: string;
+          visibility?: Json | null;
         };
         Relationships: [
           {
@@ -570,6 +586,38 @@ export type Database = {
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      locations: {
+        Row: {
+          coordinates: string | null;
+          created_at: string;
+          id: string;
+          name: string | null;
+          organisation_id: string | null;
+        };
+        Insert: {
+          coordinates?: string | null;
+          created_at?: string;
+          id?: string;
+          name?: string | null;
+          organisation_id?: string | null;
+        };
+        Update: {
+          coordinates?: string | null;
+          created_at?: string;
+          id?: string;
+          name?: string | null;
+          organisation_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "locations_organisation_id_fkey";
+            columns: ["organisation_id"];
+            isOneToOne: false;
+            referencedRelation: "organisations";
             referencedColumns: ["id"];
           },
         ];
@@ -1011,7 +1059,7 @@ export type Database = {
     };
     Functions: {
       add_user_experience: {
-        Args: { total_experience: number };
+        Args: { p_experience_points: number };
         Returns: undefined;
       };
       create_default_emoji_scale: {

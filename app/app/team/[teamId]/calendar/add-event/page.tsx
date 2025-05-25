@@ -4,16 +4,20 @@ import { FormWrapper } from "@/components/form/form-wrapper";
 import { SubmitButton } from "@/components/form/submit-button";
 import { useClientData } from "@/utils/data/client";
 import { useParams, useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import flags from "@/flags.json";
 import { Disclaimer } from "@/components/disclaimer";
 import { useToast } from "@/hooks/use-toast";
 import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { FormSelect } from "@/components/form/form-select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { TeamUserSelectorPopup } from "@/components/create-event/team-user-selector";
+import { DateSelector } from "@/components/create-event/date-selector/date-selector";
+import { addHours } from "date-fns";
+import { useUrl } from "@/hooks/use-url";
+import { LocationSelectorPopup } from "@/components/create-event/location-selector/location-selector-popup";
+import { TeamUserSelectorPopup } from "@/components/create-event/team-user-selector/team-user-selector";
+import { useRole } from "@/app/app/(role-provider)/role-provider";
 
 const eventTypeOptions = [
   { value: "TRAINING", label: "Training" },
@@ -25,18 +29,34 @@ const AddTeamEventPage = () => {
   const router = useRouter();
   const params = useParams();
   const teamId = params.teamId as string;
-  const organisationId = params.organisationId as string;
+  const path = useUrl();
   const { toast } = useToast();
 
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: team } = useClientData().teams.useWithUsers(teamId);
-  const { data: calendar } = useClientData().calendars.useByTeam(teamId);
+  const [dates, setDates] = useState<{
+    timeToCome?: string;
+    startTime: string;
+    endTime: string;
+    dates: string[];
+  }>({
+    timeToCome: "17:00",
+    startTime: "18:00",
+    endTime: "20:00",
+    dates: [new Date().toISOString().split("T")[0]],
+  });
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+
+  const { data: team, isPending: isTeamPending } =
+    useClientData().teams.useWithUsers(teamId);
+  const { data: calendar, isPending: isCalendarPending } =
+    useClientData().calendars.useByTeam(teamId);
   const createEvent = useClientData().events.useCreate();
   const createInvitation = useClientData().eventsInvitation.useCreate();
   const sendEventsToCalendars =
     useClientData().calendars.useSendEventsToCalendars();
+  const { organisation } = useRole();
 
   const handleToggleUser = (userId: string) => {
     if (selectedUsers.includes(userId)) {
@@ -56,11 +76,17 @@ const AddTeamEventPage = () => {
     }
   };
 
+  useEffect(() => {
+    handleSelectAll();
+  }, [team?.users]);
+
+  const onLocationSelect = (location: any) => {
+    setSelectedLocation(location);
+  };
+
   const handleCreateEvent = async (values: {
     name: string;
     description: string;
-    start_date: string;
-    end_date: string;
     type: string;
   }) => {
     if (!calendar) {
@@ -72,60 +98,78 @@ const AddTeamEventPage = () => {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      const startDate = new Date(values.start_date);
-      const endDate = new Date(values.end_date);
-      const event = await createEvent.mutateAsync({
-        name: values.name,
-        description: values.description,
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        type: values.type,
-        calendar_id: calendar.id,
-      });
-      if (selectedUsers.length > 0 && event) {
-        const invitationPromises = Promise.all(
-          selectedUsers.map((userId) =>
-            createInvitation.mutateAsync({
-              event_id: event.id,
-              user_id: userId,
-              description: values.description,
-            })
-          )
-        );
-        await invitationPromises;
-
-        await sendEventsToCalendars.mutateAsync({
-          usersIds: selectedUsers,
-          eventId: event.id,
-          teamIds: [teamId],
-        });
-
-        toast({
-          title: "Success",
-          description: `Event created and ${selectedUsers.length} invitations sent`,
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Event created successfully",
-        });
-      }
-      router.push(
-        `${flags.current_app}/organisation/${organisationId}/teams/${teamId}`
-      );
-    } catch (error: any) {
-      console.error("Error creating event:", error);
+    if (!dates.dates || dates.dates.length === 0) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create event",
+        description: "Please set event date",
         variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const date = dates.dates[0];
+      const [startHours, startMinutes] = dates.startTime.split(":").map(Number);
+      const [endHours, endMinutes] = dates.endTime.split(":").map(Number);
+      const [timeToComeHours, timeToComeMinutes] = dates.timeToCome
+        ?.split(":")
+        .map(Number) || [0, 0];
+      const startDate = new Date(date);
+      startDate.setHours(startHours, startMinutes, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(endHours, endMinutes, 0, 0);
+      const timeToCome = new Date(date);
+      if (dates.timeToCome) {
+        timeToCome.setHours(timeToComeHours, timeToComeMinutes, 0, 0);
+      }
+      const createdEvents = [];
+      for (const date of dates.dates) {
+        const startDate = addHours(new Date(date), startHours);
+        const endDate = addHours(new Date(date), endHours);
+        const event = await createEvent.mutateAsync({
+          name: values.name,
+          description: values.description,
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          time_to_come: dates.timeToCome ? timeToCome.toISOString() : null,
+          location_id: selectedLocation?.id,
+          type: values.type,
+          calendar_id: calendar.id,
+        });
+
+        createdEvents.push(event);
+        if (selectedUsers.length > 0 && event) {
+          await Promise.all(
+            selectedUsers.map((userId) =>
+              createInvitation.mutateAsync({
+                event_id: event.id,
+                user_id: userId,
+                description: values.description,
+              })
+            )
+          );
+
+          await sendEventsToCalendars.mutateAsync({
+            usersIds: selectedUsers,
+            eventId: event.id,
+            teamIds: [teamId],
+          });
+        }
+      }
+      router.push(`${path}/calendar`);
+      toast({
+        title: "Success",
+        description: `${createdEvents.length} recurring events created with ${selectedUsers.length} invitations each`,
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (isTeamPending || isCalendarPending) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container py-4 pb-20 md:pb-4">
@@ -149,7 +193,6 @@ const AddTeamEventPage = () => {
             description={t("Event created successfully")}
           />
         )}
-
         <FormItemWrapper
           label={t("Event Name")}
           description={t("Enter a name for this event")}
@@ -157,7 +200,6 @@ const AddTeamEventPage = () => {
         >
           <Input placeholder={t("Event name")} />
         </FormItemWrapper>
-
         <FormItemWrapper
           label={t("Description")}
           description={t("Provide details about this event")}
@@ -165,24 +207,6 @@ const AddTeamEventPage = () => {
         >
           <Textarea placeholder={t("Event description")} />
         </FormItemWrapper>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormItemWrapper
-            label={t("Start Date & Time")}
-            description={t("When does the event start")}
-            name="start_date"
-          >
-            <Input type="datetime-local" />
-          </FormItemWrapper>
-
-          <FormItemWrapper
-            label={t("End Date & Time")}
-            description={t("When does the event end")}
-            name="end_date"
-          >
-            <Input type="datetime-local" />
-          </FormItemWrapper>
-        </div>
 
         <FormItemWrapper
           label={t("Event Type")}
@@ -197,7 +221,12 @@ const AddTeamEventPage = () => {
             }))}
           />
         </FormItemWrapper>
-
+        <DateSelector dates={dates} setDates={setDates} />
+        <LocationSelectorPopup
+          onLocationSelect={onLocationSelect}
+          selectedLocation={selectedLocation}
+          organisationId={organisation.id}
+        />
         {team?.users && team.users?.length > 0 && (
           <TeamUserSelectorPopup
             users={team.users}
@@ -207,10 +236,17 @@ const AddTeamEventPage = () => {
           />
         )}
 
-        <SubmitButton disabled={isSubmitting || createEvent.isPending}>
+        <SubmitButton
+          disabled={
+            isSubmitting ||
+            createEvent.isPending ||
+            !dates.dates ||
+            dates.dates.length === 0
+          }
+        >
           {isSubmitting || createEvent.isPending
             ? t("Creating...")
-            : t("Create Event")}
+            : t("Create")}
         </SubmitButton>
       </FormWrapper>
     </div>

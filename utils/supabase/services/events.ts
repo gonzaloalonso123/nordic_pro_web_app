@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
-import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/types/database.types";
 import { getByOrganisation } from "./organisations_invitation";
 import { calendarsService } from "./calendars";
 
@@ -93,7 +97,7 @@ export const eventsService = {
     if (eventIds.length === 0) return [];
     const { data: events, error: eventsError } = await supabase
       .from("events")
-      .select("*")
+      .select("*, locations(*)")
       .in("id", eventIds)
       .order("start_date", { ascending: true });
 
