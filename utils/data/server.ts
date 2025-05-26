@@ -1,7 +1,7 @@
-import * as services from "../supabase/services";
-import { createClient } from "../supabase/server";
-import { eventsInvitationService } from "../supabase/services/events-invitation";
-import { formInvitationsService } from "../supabase/services/form-invitations";
+import * as services from "@/utils/supabase/services";
+import { createClient } from "@/utils/supabase/server";
+import { eventsInvitationService } from "@/utils/supabase/services/events-invitation";
+import { formInvitationsService } from  "@/utils/supabase/services/form-invitations";
 
 export const serverData = {
   users: {
@@ -509,7 +509,8 @@ export const serverData = {
       const supabase = await createClient();
       return services.organisationsInvitationService.acceptInvitation(
         supabase,
-        invitationId
+        invitationId,
+        userId
       );
     },
     reject: async (invitationId: string) => {
@@ -531,14 +532,14 @@ export const serverData = {
       return eventsInvitationService.getByEvent(supabase, eventId);
     },
     create: async (
-      invitation: Parameters<typeof eventsInvitationService.create>[0]
+      invitation: Parameters<typeof eventsInvitationService.create>[1]
     ) => {
       const supabase = await createClient();
       return eventsInvitationService.create(supabase, invitation);
     },
     update: async (
       id: string,
-      updates: Parameters<typeof eventsInvitationService.update>[1]
+      updates: Parameters<typeof eventsInvitationService.update>[2]
     ) => {
       const supabase = await createClient();
       return eventsInvitationService.update(supabase, id, updates);
@@ -559,14 +560,14 @@ export const serverData = {
       return formInvitationsService.getByForm(supabase, formId);
     },
     create: async (
-      invitation: Parameters<typeof formInvitationsService.create>[0]
+      invitation: Parameters<typeof formInvitationsService.create>[1]
     ) => {
       const supabase = await createClient();
       return formInvitationsService.create(supabase, invitation);
     },
     update: async (
       id: string,
-      updates: Parameters<typeof formInvitationsService.update>[1]
+      updates: Parameters<typeof formInvitationsService.update>[2]
     ) => {
       const supabase = await createClient();
       return formInvitationsService.update(supabase, id, updates);
@@ -575,6 +576,52 @@ export const serverData = {
       const supabase = await createClient();
       return formInvitationsService.delete(supabase, id);
     },
+  },
+
+  pushSubscriptions: {
+    getAll: async () => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.getAll(supabase);
+    },
+    getById: async (id: string) => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.getById(supabase, id);
+    },
+    getByUserId: async (userId: string) => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.getByUserId(supabase, userId);
+    },
+    getByEndpoint: async (endpoint: string) => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.getByEndpoint(supabase, endpoint);
+    },
+    create: async (
+      subscription: Parameters<typeof services.pushSubscriptionsService.create>[1]
+    ) => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.create(supabase, subscription);
+    },
+    update: async (
+      id: string,
+      updates: Parameters<typeof services.pushSubscriptionsService.update>[2]
+    ) => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.update(supabase, id, updates);
+    },
+    delete: async (id: string) => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.delete(supabase, id);
+    },
+    deleteByEndpoint: async (endpoint: string) => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.deleteByEndpoint(supabase, endpoint);
+    },
+    upsert: async (
+      subscription: Parameters<typeof services.pushSubscriptionsService.upsert>[1]
+    ) => {
+      const supabase = await createClient();
+      return services.pushSubscriptionsService.upsert(supabase, subscription);
+    }
   },
 
   auth: {

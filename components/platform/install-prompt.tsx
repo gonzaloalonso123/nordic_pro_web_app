@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { X } from "lucide-react" //
 import { Button } from "@/components/ui/button"
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 
 export default function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false)
@@ -10,6 +11,8 @@ export default function InstallPrompt() {
   const [isStandalone, setIsStandalone] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [isVisible, setIsVisible] = useState(true)
+
+  usePushNotifications();
 
   useEffect(() => {
     setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream)

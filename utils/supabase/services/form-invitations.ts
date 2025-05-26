@@ -8,6 +8,7 @@ import type {
 import { teamsService } from "./teams";
 import { formsService } from "./forms";
 import { formResponsesService } from "./forms-responses";
+import { triggerNewFormAvailableNotification } from "@/utils/notificationService";
 
 type FormInvitationRow = Tables<"form_invitations">;
 type FormInvitationInsert = TablesInsert<"form_invitations">;
@@ -135,8 +136,8 @@ export const formInvitationsService = {
           updated_at
         ),
         users(
-            first_name,
-            last_name    
+          first_name,
+          last_name
         )
       `
       )
@@ -146,7 +147,7 @@ export const formInvitationsService = {
     const groups: Record<string, any> = {};
     for (const invitation of data || []) {
       const commonId = invitation.common_invitation_id;
-      if (!groups[commonId]) {
+      if (commonId && !groups[commonId]) {
         groups[commonId] = {
           id: commonId,
           form: invitation.forms,
@@ -180,6 +181,13 @@ export const formInvitationsService = {
       .single();
 
     if (error) throw error;
+
+    triggerNewFormAvailableNotification({
+      recipientUserIds: [invitation.user_id!],
+      formId: invitation.form_id!,
+    }).catch((err) => {
+      console.error("Error triggering form available notification:", err)
+    });
     return data;
   },
 
@@ -239,7 +247,7 @@ export const formInvitationsService = {
 
     const created_at = new Date().toISOString();
     const invitations: FormInvitationInsert[] = teamUsers.users
-      .filter((u) => u.role === "PLAYER")
+      .filter((user) => user.role === "PLAYER")
       .map((userObj: any) => ({
         form_id: formId,
         user_id: userObj.user.id,
