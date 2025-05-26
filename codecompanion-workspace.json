@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "name": "Football Club Management Platform",
+  "version": "1.1.0",
+  "system_prompt": "You are working on a Next.js football club management platform with mental health focus. The platform uses Supabase as backend, TypeScript, Tailwind CSS, and shadcn/ui components. The architecture includes server-side and client-side data layers, real-time chat, calendar management, forms for mental health surveys, and comprehensive user/organization management.",
+  "vars": {
+    "project_type": "Next.js with Supabase",
+    "ui_framework": "Tailwind CSS + shadcn/ui",
+    "focus": "Football club administration with mental health features"
+  },
+  "groups": [
+    {
+      "name": "Database Schema & Types",
+      "system_prompt": "This group contains the complete database schema and TypeScript type definitions generated from Supabase. These types define the structure of all tables, relationships, and data models used throughout the application. Essential for understanding the data architecture and ensuring type safety across the platform.",
+      "data": [
+        "database_types"
+      ]
+    },
+    {
+      "name": "Data Layer & Services",
+      "system_prompt": "This group contains the core data abstraction layer that centralizes all Supabase operations. The server.ts provides server-side data operations while client.ts provides client-side React Query hooks. All database operations flow through these centralized services.",
+      "data": [
+        "data_server",
+        "data_client",
+        "package_config",
+        "database_types"
+      ]
+    },
+    {
+      "name": "Authentication & User Management",
+      "system_prompt": "Focus on user authentication, user profiles, and user-related operations. This includes login/logout, user creation, profile management, and user relationships with organizations and teams.",
+      "data": [
+        "data_server",
+        "data_client",
+        "database_types"
+      ]
+    },
+    {
+      "name": "Organizations & Teams",
+      "system_prompt": "Handle organization and team management functionality. This includes creating/managing organizations, team structures, member management, invitations, and hierarchical relationships between organizations and teams.",
+      "data": [
+        "data_server",
+        "data_client",
+        "database_types"
+      ]
+    },
+    {
+      "name": "Events & Calendar System",
+      "system_prompt": "Manage calendar functionality and event scheduling. This includes creating events, calendar management, event attendance tracking, roster management, and event invitations for football clubs.",
+      "data": [
+        "data_server",
+        "data_client",
+        "database_types"
+      ]
+    },
+    {
+      "name": "Forms & Mental Health Surveys",
+      "system_prompt": "Handle form creation and mental health survey functionality. This includes dynamic form building, question management, form responses, analytics, and mental health data collection for football players and staff.",
+      "data": [
+        "data_server",
+        "data_client",
+        "database_types"
+      ]
+    },
+    {
+      "name": "Chat & Messaging System",
+      "system_prompt": "Manage real-time chat functionality including chat rooms, message sending/receiving, message read status, member management, and real-time communication features for football clubs.",
+      "data": [
+        "data_server",
+        "data_client",
+        "database_types"
+      ]
+    },
+    {
+      "name": "Project Configuration & Dependencies",
+      "system_prompt": "Review project setup, dependencies, build configuration, and overall project structure. Focus on Next.js configuration, package management, and development workflow.",
+      "data": [
+        "package_config"
+      ]
+    }
+  ],
+  "data": {
+    "database_types": {
+      "type": "file",
+      "path": "types/database.types.ts",
+      "description": "TypeScript type definitions for all Supabase database tables, relationships, and schema structure"
+    },
+    "data_server": {
+      "type": "file",
+      "path": "utils/data/server.ts",
+      "description": "Server-side data layer providing centralized access to all Supabase services and operations"
+    },
+    "data_client": {
+      "type": "file",
+      "path": "utils/data/client.ts",
+      "description": "Client-side data layer providing React Query hooks and client-side operations for all features"
+    },
+    "package_config": {
+      "type": "file",
+      "path": "package.json",
+      "description": "Project configuration, dependencies, and build scripts for the Next.js football club management platform"
+    }
+  }
+}
