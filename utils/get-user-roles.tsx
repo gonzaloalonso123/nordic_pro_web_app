@@ -1,3 +1,5 @@
+"use server";
+
 import { serverData } from "./data/server";
 
 export const getUserRoles = async () => {
