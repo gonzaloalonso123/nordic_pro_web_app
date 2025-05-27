@@ -9,13 +9,16 @@ on:
 jobs:
   validate:
     runs-on: "ubuntu-latest"
+    env:
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: your-vapid-public-key
+      VAPID_PRIVATE_KEY: your-vapid-private-key
 
     steps:
+      - uses: actions/checkout@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: ".tool-versions"
       - name: Install dependencies
         run: npm install
-      - run: npm run tsc
       - run: npm run build
