@@ -1,10 +1,8 @@
 "use server";
+
 import { Resend } from "resend";
-import { JOIN_TEAM_SWEDISH } from "../email-templates/join-team-swedish";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/types/database.types";
-import * as organisationsInvitation from "../supabase/services/organisations_invitation";
-import { createClient } from "../supabase/server";
+import { JOIN_TEAM_SWEDISH } from "@/utils/email-templates/join-team-swedish";
+import { createClient } from "@/utils/supabase/server";
 
 const resend = new Resend("re_7GG7eMSx_8AaSGrUWtumrtMd2sWXH75Ro");
 
