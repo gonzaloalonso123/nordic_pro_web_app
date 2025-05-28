@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import { triggerNewChatMessageNotification } from "@/utils/notificationService";
 
 type ChatMessageRow = Tables<"chat_messages">;
 type ChatMessageInsert = TablesInsert<"chat_messages">;
@@ -69,6 +70,17 @@ export const chatMessagesService = {
       .single();
 
     if (error) throw error;
+
+    if (data && data.room_id && data.user_id && data.content) {
+      triggerNewChatMessageNotification({
+        actorUserId: data.user_id,
+        roomId: data.room_id,
+        messageContent: data.content,
+      }).catch(err => {
+        console.error("Error triggering new chat message notification:", err);
+      });
+    }
+
     return data;
   },
 
@@ -94,6 +106,7 @@ export const chatMessagesService = {
       .single();
 
     if (error) throw error;
+
     return data;
   },
 
@@ -126,6 +139,7 @@ export const chatMessagesService = {
       .single();
 
     if (error) throw error;
+    // Notifications are typically not sent on message update, so the logic is removed from here.
     return data;
   },
 

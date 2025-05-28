@@ -13,7 +13,7 @@ import { FormItemWrapper } from "@/components/form/form-item-wrapper";
 import { FormSelect } from "@/components/form/form-select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { TeamUserSelectorPopup } from "@/components/create-event/team-user-selector";
+import { TeamUserSelectorPopup } from "@/components/create-event/team-user-selector/team-user-selector";
 
 const eventTypeOptions = [
   { value: "TRAINING", label: "Training" },

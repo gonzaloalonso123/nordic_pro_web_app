@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navbar";
 import { useMenuItems } from "@/hooks/use-menu-items";
-import ProFeatures from "./pro-features";
 
 export default function PlatformSidebar() {
   const pathname = usePathname();
@@ -65,6 +64,7 @@ export default function PlatformSidebar() {
             </ul>
           </nav>
         </div>
+
 
         {/* <ProFeatures collapsed={collapsed} /> */}
       </div>

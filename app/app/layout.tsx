@@ -11,6 +11,7 @@ async function PlatformLayoutClient({
   children: React.ReactNode;
 }) {
   const roles = await getUserRoles();
+
   return (
     <RoleProvider {...roles}>
       <div className="min-h-screen flex flex-col bg-gray-50">

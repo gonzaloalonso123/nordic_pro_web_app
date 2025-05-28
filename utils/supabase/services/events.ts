@@ -5,7 +5,6 @@ import type {
   TablesInsert,
   TablesUpdate,
 } from "@/types/database.types";
-import { getByOrganisation } from "./organisations_invitation";
 import { calendarsService } from "./calendars";
 
 type EventRow = Tables<"events">;

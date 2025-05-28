@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import { triggerNewEventCreatedNotification } from "@/utils/notificationService";
 
 type EventInvitationRow = Tables<"events_invitation">;
 type EventInvitationInsert = TablesInsert<"events_invitation">;
@@ -90,6 +91,14 @@ export const eventsInvitationService = {
       .single();
 
     if (error) throw error;
+
+    triggerNewEventCreatedNotification({
+      recipientUserIds: [invitation.user_id],
+      eventId: invitation.event_id,
+    }).catch((err) => {
+      console.error("Error triggering new event invitation notification:", err)
+    });
+
     return data;
   },
 
