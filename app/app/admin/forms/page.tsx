@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { FileText, ListChecks, Award, Smartphone } from "lucide-react";
+import { FileText, ListChecks } from "lucide-react";
 
 export default function HomePage() {
   const baseUrl = `/app/admin/forms`;
@@ -56,6 +56,28 @@ export default function HomePage() {
         <CardFooter>
           <Link href={`${baseUrl}/forms`} className="w-full">
             <Button className="w-full">Manage Forms</Button>
+          </Link>
+        </CardFooter>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <FileText className="h-5 w-5 mr-2" />
+            Program Builder
+          </CardTitle>
+          <CardDescription>
+            Create groups of forms with a common purpose
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Create sequences of forms that can be used to gather information
+            about a specific topic.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Link href={`${baseUrl}/programs`} className="w-full">
+            <Button className="w-full">Manage Programs</Button>
           </Link>
         </CardFooter>
       </Card>

@@ -64,6 +64,9 @@ export default function PlatformSidebar() {
             </ul>
           </nav>
         </div>
+
+
+        {/* <ProFeatures collapsed={collapsed} /> */}
       </div>
 
       <div className="fixed bottom-4 right-4 md:hidden z-50">

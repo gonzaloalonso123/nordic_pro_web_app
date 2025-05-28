@@ -422,6 +422,38 @@ export type Database = {
           },
         ];
       };
+      form_program: {
+        Row: {
+          category_id: string | null;
+          created_at: string;
+          description: string | null;
+          id: string;
+          name: string | null;
+        };
+        Insert: {
+          category_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name?: string | null;
+        };
+        Update: {
+          category_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "form_program_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "form_categories";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       form_questions: {
         Row: {
           created_at: string;
@@ -553,6 +585,42 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      forms_form_programs: {
+        Row: {
+          created_at: string;
+          form_id: string | null;
+          form_program_id: string | null;
+          id: string;
+        };
+        Insert: {
+          created_at?: string;
+          form_id?: string | null;
+          form_program_id?: string | null;
+          id?: string;
+        };
+        Update: {
+          created_at?: string;
+          form_id?: string | null;
+          form_program_id?: string | null;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "forms_form_programs_form_id_fkey";
+            columns: ["form_id"];
+            isOneToOne: false;
+            referencedRelation: "forms";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "forms_form_programs_form_program_id_fkey";
+            columns: ["form_program_id"];
+            isOneToOne: false;
+            referencedRelation: "form_program";
             referencedColumns: ["id"];
           },
         ];

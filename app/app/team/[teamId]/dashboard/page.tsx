@@ -2,11 +2,11 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 import { Content } from "@/components/content";
 import { FormInvitations } from "./components/form-invitations";
 import { RewardOverview } from "./components/reward-overview";
+import AccountSetupCard from "@/components/onboarding/account-setup-card";
 
 export default function DashboardPage() {
   useEffect(() => {
@@ -51,6 +51,7 @@ export default function DashboardPage() {
         Track your progress, earn trophies, and continue your journey!
       </p>
 
+      <AccountSetupCard />
       <div className="lg:col-span-2 pb-4">
         <FormInvitations />
       </div>
