@@ -1,0 +1,115 @@
+export const COACH_INVITE_SWEDISH = (
+    coachName: string,
+    teamName: string,
+    organisationName: string,
+    qrCodeUrl: string
+  ) => {
+    return `
+    <!DOCTYPE html>
+    <html lang="sv">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Coachinbjudan till NordicPro</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+        <style>
+          body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            color: #333;
+          }
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+          }
+          .header {
+            background-color: #f8fafc;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          .logo img {
+            max-width: 180px;
+            height: auto;
+          }
+          .content {
+            padding: 40px 30px;
+          }
+          h1 {
+            font-size: 24px;
+            color: #007bff;
+            margin-bottom: 16px;
+          }
+          p {
+            font-size: 16px;
+            margin-bottom: 16px;
+          }
+          .highlight {
+            background-color: #e6f0ff;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          }
+          .qr-image {
+            text-align: center;
+            margin: 30px 0;
+          }
+          .qr-image img {
+            max-width: 200px;
+          }
+          .footer {
+            background-color: #f1f5f9;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+          }
+          .social-links {
+            margin-top: 15px;
+          }
+          .social-link {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 600;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <a class="logo" href="https://nordicpro.se">
+              <img src="https://nordicpro.se/images/nordic-pro-logo.png" alt="NordicPro Logo" />
+            </a>
+          </div>
+          <div class="content">
+            <h1>Hej ${coachName},</h1>
+            <p>Du har blivit registrerad som coach för teamet <strong>${teamName}</strong> i organisationen <strong>${organisationName}</strong> på NordicPro.</p>
+            <div class="highlight">
+              <p>Teammedlemmar kan använda QR-koden nedan för att registrera sig till ditt team på NordicPro.</p>
+            </div>
+            <div class="qr-image">
+              <img src="${qrCodeUrl}" alt="QR-kod för teamregistrering" />
+            </div>
+            <p>Behöver du hjälp eller har frågor? Kontakta oss på <a href="mailto:info@nordicpro.se">info@nordicpro.se</a>.</p>
+            <p>Med vänliga hälsningar,<br />Teamet bakom NordicPro</p>
+          </div>
+          <div class="footer">
+            <p>© 2025 NordicPro. Alla rättigheter förbehållna.</p>
+            <div class="social-links">
+              <a href="https://www.linkedin.com/company/nordicpro" class="social-link">LinkedIn</a>
+              <a href="https://instagram.com/_nordicpro" class="social-link">Instagram</a>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+    `;
+  };
+  

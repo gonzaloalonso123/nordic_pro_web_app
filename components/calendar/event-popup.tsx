@@ -38,7 +38,6 @@ interface EventData {
     name: string;
     coordinates: string;
   };
-  // Add invitation-related props
   userInvitation?: {
     id: string;
     will_attend: boolean | null;
@@ -94,7 +93,6 @@ export function EnhancedEventPopup({
     return format(timeTocome, "h:mm a");
   };
 
-  // Get event type styling
   const getTypeStyle = () => {
     const type = event.type?.toLowerCase() || "default";
     const styleMap: Record<string, string> = {
@@ -134,32 +132,32 @@ export function EnhancedEventPopup({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
-        <DialogHeader className="space-y-3">
+      <DialogContent className="sm:max-w-[500px] md:max-h-[80vh] max-h-[100svh] overflow-y-auto">
+        <DialogHeader className="space-y-4">
           <div className="flex items-start justify-between gap-3">
-            <DialogTitle className="text-xl leading-tight pr-2">
+            <DialogTitle className="text-lg font-semibold leading-tight pr-2">
               {event.name}
             </DialogTitle>
-            <Badge className={cn("shrink-0", getTypeStyle())}>
+            <Badge className={cn("shrink-0 text-sm", getTypeStyle())}>
               {event.type}
             </Badge>
           </div>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Date and Time Section */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">{date}</p>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium">{date}</p>
                 <p className="text-sm text-muted-foreground">{time}</p>
               </div>
             </div>
 
             {timeTocome && (
-              <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-muted-foreground" />
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm">
                     <span className="font-medium">Arrive by:</span> {timeTocome}
@@ -174,37 +172,33 @@ export function EnhancedEventPopup({
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div className="flex-1">
-                  <p className="font-medium">{event.locations.name}</p>
-                  <div className="flex gap-2 mt-1">
-                    {event.locations.coordinates && (
-                      <>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
-                          onClick={() => setShowMap(!showMap)}
-                        >
-                          <Map className="h-3 w-3 mr-1" />
-                          {showMap ? "Hide Map" : "Show Map"}
-                        </Button>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
-                          onClick={openInMaps}
-                        >
-                          <Navigation className="h-3 w-3 mr-1" />
-                          Open in Maps
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                <div className="flex-1 space-y-2">
+                  <p className="text-sm font-medium">{event.locations.name}</p>
+                  {event.locations.coordinates && (
+                    <div className="flex gap-3">
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-sm text-muted-foreground hover:text-primary"
+                        onClick={() => setShowMap(!showMap)}
+                      >
+                        <Map className="h-4 w-4 mr-1.5" />
+                        {showMap ? "Hide Map" : "Show Map"}
+                      </Button>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-sm text-muted-foreground hover:text-primary"
+                        onClick={openInMaps}
+                      >
+                        <Navigation className="h-4 w-4 mr-1.5" />
+                        Directions
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Map */}
               {showMap && event.locations.coordinates && (
                 <div className="ml-8">
                   <LocationMap
@@ -221,109 +215,111 @@ export function EnhancedEventPopup({
           {event.description && (
             <>
               <Separator />
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
                   <span className="text-sm font-medium">Description</span>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed ml-7">
                   {event.description}
                 </p>
               </div>
             </>
           )}
 
-          {/* Attendance Section - Only show if user has an invitation */}
+          {/* Attendance Section */}
           {event.userInvitation && (
             <>
               <Separator />
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-5 w-5 text-muted-foreground" />
                   <span className="text-sm font-medium">Your Response</span>
                 </div>
 
-                {event.userInvitation.will_attend === null &&
-                  !showRejectReason && (
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowRejectReason(true)}
-                        className="flex-1"
-                      >
-                        <X className="h-3 w-3 mr-1" />
-                        Can't Attend
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleAccept}
-                        className="flex-1"
-                      >
-                        <Check className="h-3 w-3 mr-1" />
-                        Will Attend
-                      </Button>
+                <div className="ml-7">
+                  {event.userInvitation.will_attend === null &&
+                    !showRejectReason && (
+                      <div className="flex gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowRejectReason(true)}
+                          className="flex-1 text-sm"
+                        >
+                          <X className="h-4 w-4 mr-1.5" />
+                          Can't Attend
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleAccept}
+                          className="flex-1 text-sm"
+                        >
+                          <Check className="h-4 w-4 mr-1.5" />
+                          Will Attend
+                        </Button>
+                      </div>
+                    )}
+
+                  {showRejectReason && (
+                    <div className="space-y-3">
+                      <Textarea
+                        placeholder="Let them know why you can't make it (optional)"
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        className="text-sm"
+                        rows={2}
+                      />
+                      <div className="flex gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setShowRejectReason(false);
+                            setRejectReason("");
+                          }}
+                          className="flex-1 text-sm"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleReject}
+                          className="flex-1 text-sm"
+                        >
+                          Submit
+                        </Button>
+                      </div>
                     </div>
                   )}
 
-                {showRejectReason && (
-                  <div className="space-y-2">
-                    <Textarea
-                      placeholder="Let them know why you can't make it (optional)"
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                      className="text-sm"
-                      rows={2}
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setShowRejectReason(false);
-                          setRejectReason("");
-                        }}
-                        className="flex-1"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleReject}
-                        className="flex-1"
-                      >
-                        Submit
-                      </Button>
+                  {event.userInvitation.will_attend === true && (
+                    <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          You're attending this event
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {event.userInvitation.will_attend === true && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-md text-sm">
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4" />
-                      <span className="font-medium">
-                        You're attending this event
-                      </span>
+                  {event.userInvitation.will_attend === false && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <X className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          You can't attend this event
+                        </span>
+                      </div>
+                      {event.userInvitation.reason && (
+                        <p className="mt-2 text-sm opacity-80">
+                          Reason: {event.userInvitation.reason}
+                        </p>
+                      )}
                     </div>
-                  </div>
-                )}
-
-                {event.userInvitation.will_attend === false && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md text-sm">
-                    <div className="flex items-center gap-2">
-                      <X className="h-4 w-4" />
-                      <span className="font-medium">
-                        You can't attend this event
-                      </span>
-                    </div>
-                    {event.userInvitation.reason && (
-                      <p className="mt-1 text-xs opacity-80">
-                        Reason: {event.userInvitation.reason}
-                      </p>
-                    )}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </>
           )}

@@ -69,23 +69,11 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
   const { data: questionData, isLoading: questionLoading } =
     useQuestion(questionId);
 
-  const createQuestion = useCreateQuestion();
-  //   {
-  //   onSuccess: () => {
-  //     toast({
-  //       title: "Success",
-  //       description: "Question created successfully",
-  //     });
-  //     router.back();
-  //   },
-  //   onError: (error) => {
-  //     toast({
-  //       title: "Error",
-  //       description: `Failed to create question: ${error.message}`,
-  //       variant: "destructive",
-  //     });
-  //   },
-  // }
+  const createQuestion = useCreateQuestion({
+    onSuccess: () => {
+      router.back();
+    },
+  });
 
   const updateQuestion = useUpdateQuestion();
   //   {

@@ -18,6 +18,7 @@ import { useUrl } from "@/hooks/use-url";
 import { LocationSelectorPopup } from "@/components/create-event/location-selector/location-selector-popup";
 import { TeamUserSelectorPopup } from "@/components/create-event/team-user-selector/team-user-selector";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const eventTypeOptions = [
   { value: "TRAINING", label: "Training" },
@@ -56,7 +57,9 @@ const AddTeamEventPage = () => {
   const createInvitation = useClientData().eventsInvitation.useCreate();
   const sendEventsToCalendars =
     useClientData().calendars.useSendEventsToCalendars();
+  const { user } = useCurrentUser();
   const { organisation } = useRole();
+  const teamUsersWithoutMe = team?.users.filter((u) => u.user.id !== user?.id);
 
   const handleToggleUser = (userId: string) => {
     if (selectedUsers.includes(userId)) {
@@ -71,7 +74,7 @@ const AddTeamEventPage = () => {
       if (selectedUsers.length === team.users.length) {
         setSelectedUsers([]);
       } else {
-        setSelectedUsers(team.users.map((user: any) => user.user.id));
+        setSelectedUsers(teamUsersWithoutMe.map((user: any) => user.user.id));
       }
     }
   };
@@ -229,7 +232,7 @@ const AddTeamEventPage = () => {
         />
         {team?.users && team.users?.length > 0 && (
           <TeamUserSelectorPopup
-            users={team.users}
+            users={teamUsersWithoutMe}
             selectedUsers={selectedUsers}
             onToggleUser={handleToggleUser}
             onSelectAll={handleSelectAll}
