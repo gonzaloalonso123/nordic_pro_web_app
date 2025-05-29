@@ -7,70 +7,30 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  PlusCircle,
-  Trash2,
-  BarChart,
-  User,
-  Briefcase,
-  Shield,
-} from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { useClientData } from "@/utils/data/client";
 import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Content } from "@/components/content";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { getInitials } from "@/utils/get-initials";
+import { MembersTable } from "./components/members-table";
+import { AddMemberDialog } from "./components/add-member-dialog";
+import { MemberDetailsSheet } from "./components/member-details-sheet";
+import { DeleteConfirmationDialog } from "./components/delete-confirmation-dialog";
 
 export default function ManagementPage() {
-  const { user } = useCurrentUser();
   const params = useParams();
   const teamId = params.teamId as string;
   const { toast } = useToast();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
-  const [newMember, setNewMember] = useState({
-    name: "",
-    position: "",
-    role: "PLAYER",
-  });
+  const [memberToDelete, setMemberToDelete] = useState<any>(null);
 
-  // Use client data hooks
   const clientData = useClientData();
   const { data: team, isLoading } = clientData.teams.useWithUsers(teamId);
-  const addUserToTeam = clientData.teams.useAddMember();
   const removeUserFromTeam = clientData.teams.useRemoveMember();
-
-  const handleAddMember = async () => {
-    if (newMember.name && newMember.position) {
-      // Implementation would go here
-    }
-  };
 
   const handleRemoveMember = async (userId: string) => {
     try {
@@ -86,6 +46,7 @@ export default function ManagementPage() {
       if (selectedMember?.id === userId) {
         setSelectedMember(null);
       }
+      setMemberToDelete(null);
     } catch (error) {
       console.error("Error removing member from team:", error);
       toast({
@@ -96,20 +57,16 @@ export default function ManagementPage() {
     }
   };
 
-  const teamMembers = team?.users || [];
-
-
-  // Helper function to get role badge variant
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case "COACH":
-        return "default";
-      case "LEADER":
-        return "secondary";
-      default:
-        return "outline";
-    }
+  const handleAddWithEmail = (email: string) => {
+    console.log("Adding member with email:", email);
+    // Your existing email functionality here
+    toast({
+      title: "Email Sent",
+      description: `Invitation sent to ${email}`,
+    });
   };
+
+  const teamMembers = team?.users || [];
 
   return (
     <Content>
@@ -120,239 +77,43 @@ export default function ManagementPage() {
               <CardTitle>Team Members</CardTitle>
               <CardDescription>Manage your team roster</CardDescription>
             </div>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Add Member</span>
-                  <span className="sm:hidden">Add</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Team Member</DialogTitle>
-                  <DialogDescription>
-                    Enter the details of the new team member.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={newMember.name}
-                      onChange={(e) =>
-                        setNewMember({ ...newMember, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="position">Position</Label>
-                    <Input
-                      id="position"
-                      value={newMember.position}
-                      onChange={(e) =>
-                        setNewMember({ ...newMember, position: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsAddDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={handleAddMember}>Add Member</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Add Member</span>
+              <span className="sm:hidden">Add</span>
+            </Button>
           </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center space-x-4">
-                        <Skeleton className="h-12 w-12 rounded-full" />
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-[150px]" />
-                          <Skeleton className="h-4 w-[100px]" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {teamMembers.map((member) => (
-                  <MemberCard
-                    key={member.user.id}
-                    member={member}
-                    onViewDetails={() => setSelectedMember(member)}
-                    onRemove={() => handleRemoveMember(member.user.id)}
-                    getRoleBadgeVariant={getRoleBadgeVariant}
-                  />
-                ))}
-              </div>
-            )}
+          <CardContent className="px-0 sm:px-6">
+            <MembersTable
+              members={teamMembers}
+              isLoading={isLoading}
+              onViewDetails={setSelectedMember}
+              onRemove={setMemberToDelete}
+            />
           </CardContent>
         </Card>
 
-        <Sheet
-          open={!!selectedMember}
-          onOpenChange={(open) => !open && setSelectedMember(null)}
-        >
-          <SheetContent className="sm:max-w-md">
-            <SheetHeader>
-              <SheetTitle>
-                {selectedMember?.user.first_name}{" "}
-                {selectedMember?.user.last_name}
-              </SheetTitle>
-              <SheetDescription>{selectedMember?.position}</SheetDescription>
-            </SheetHeader>
-            <div className="py-6 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Member Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <Avatar className="h-16 w-16 mr-4">
-                        <AvatarFallback>
-                          {selectedMember &&
-                            getInitials({
-                              firstName: selectedMember.user.first_name,
-                              lastName: selectedMember.user.last_name
-                            })}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-medium">
-                          {selectedMember?.user.first_name}{" "}
-                          {selectedMember?.user.last_name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {selectedMember?.position}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-3 pt-2">
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground mr-2">
-                          Email:
-                        </span>
-                        <span className="text-sm">
-                          {selectedMember?.user.email}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground mr-2">
-                          Role:
-                        </span>
-                        <Badge
-                          variant={
-                            selectedMember &&
-                            getRoleBadgeVariant(selectedMember.role)
-                          }
-                        >
-                          {selectedMember?.role}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center">
-                        <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground mr-2">
-                          Position:
-                        </span>
-                        <span className="text-sm">
-                          {selectedMember?.position}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4 flex justify-end">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      if (selectedMember) {
-                        handleRemoveMember(selectedMember.user.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Remove from Team
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          </SheetContent>
-        </Sheet>
+        <AddMemberDialog
+          isOpen={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          teamId={teamId}
+          onAddWithEmail={handleAddWithEmail}
+        />
+
+        <MemberDetailsSheet
+          member={selectedMember}
+          onClose={() => setSelectedMember(null)}
+          onRemove={setMemberToDelete}
+        />
+
+        <DeleteConfirmationDialog
+          member={memberToDelete}
+          onClose={() => setMemberToDelete(null)}
+          onConfirm={() =>
+            memberToDelete && handleRemoveMember(memberToDelete.user.id)
+          }
+        />
       </div>
     </Content>
-  );
-}
-
-interface MemberCardProps {
-  member: any;
-  onViewDetails: () => void;
-  onRemove: () => void;
-  getRoleBadgeVariant: (role: string) => string;
-}
-
-function MemberCard({
-  member,
-  onViewDetails,
-  onRemove,
-  getRoleBadgeVariant,
-}: MemberCardProps) {
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
-        <div className="p-4 flex items-center space-x-4">
-          <Avatar className="h-12 w-12">
-            <AvatarFallback>
-              {getInitials({ firstName: member.user.first_name, lastName: member.user.last_name })}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium truncate">
-              {member.user.first_name} {member.user.last_name}
-            </h3>
-            <p className="text-sm text-muted-foreground truncate">
-              {member.position}
-            </p>
-          </div>
-          <Badge variant={getRoleBadgeVariant(member.role)} className="ml-auto">
-            {member.role}
-          </Badge>
-        </div>
-        <div className="border-t flex divide-x">
-          <Button
-            variant="ghost"
-            className="flex-1 rounded-none h-10"
-            onClick={onViewDetails}
-          >
-            <BarChart className="h-4 w-4 mr-2" />
-            Details
-          </Button>
-          <Button
-            variant="ghost"
-            className="flex-1 rounded-none h-10 text-destructive hover:text-destructive"
-            onClick={onRemove}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Remove
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

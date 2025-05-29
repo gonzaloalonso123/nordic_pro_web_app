@@ -12,6 +12,7 @@ export const getUserRoles = async () => {
   let team = {
     role: "USER",
     id: "",
+    isManager: false,
   };
   if (user) {
     if (user.is_admin) {
@@ -33,6 +34,7 @@ export const getUserRoles = async () => {
       team = {
         role: selectedTeam.role,
         id: selectedTeam.teams.id,
+        isManager: selectedTeam.team_manager === user.id,
       };
     }
   }
