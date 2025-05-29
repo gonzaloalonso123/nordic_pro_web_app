@@ -1,14 +1,19 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { Content } from "@/components/content";
 import { FormInvitations } from "./components/form-invitations";
 import { RewardOverview } from "./components/reward-overview";
 import AccountSetupCard from "@/components/onboarding/account-setup-card";
+import { useHeader } from "@/hooks/useHeader";
 
 export default function DashboardPage() {
+  const { useHeaderConfig } = useHeader();
+
+  useHeaderConfig({ centerContent: "Dashboard" });
+
   useEffect(() => {
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
@@ -46,11 +51,6 @@ export default function DashboardPage() {
 
   return (
     <Content>
-      <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-      <p className="text-muted-foreground mb-8">
-        Track your progress, earn trophies, and continue your journey!
-      </p>
-
       <AccountSetupCard />
       <div className="lg:col-span-2 pb-4">
         <FormInvitations />
