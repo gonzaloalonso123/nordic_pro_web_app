@@ -4,6 +4,7 @@ import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ReactQueryProvider } from "@/providers/reactQueryProvider";
 
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -22,11 +23,11 @@ export const metadata: Metadata = {
   description: "Mental health, motivation, and team management in one place.",
 };
 
-export default function PlatformLayout({
+export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: ReactNode;
-}>) {
+}) {
   return (
     <ReactQueryProvider>
       <html lang="en">
@@ -39,7 +40,7 @@ export default function PlatformLayout({
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
         >
-          <div className="min-h-screen flex flex-col">{children}</div>
+          <main className="flex-grow">{children}</main>
         </body>
       </html>
     </ReactQueryProvider>

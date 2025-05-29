@@ -23,7 +23,7 @@ export default function PlatformSidebar() {
         )}
       >
         <div>
-          <div className="p-4 flex justify-end">
+          <div className={cn('p-4 flex justify-end', collapsed && 'justify-center')}>
             <Button
               variant="ghost"
               size="icon"
@@ -31,15 +31,15 @@ export default function PlatformSidebar() {
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {collapsed ? (
-                <Menu className="h-5 w-5" />
+                <Menu className="h-6 w-6" />
               ) : (
-                <X className="h-5 w-5" />
+                <X className="h-6 w-6" />
               )}
             </Button>
           </div>
 
           <nav className="px-3 py-2">
-            <ul className="space-y-1">
+            <ul className={cn("space-y-1 flex flex-col transition-all", collapsed && "items-center")}>
               {items.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -52,10 +52,11 @@ export default function PlatformSidebar() {
                         "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                         isActive
                           ? "bg-primary text-white"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                        collapsed && "w-fit"
                       )}
                     >
-                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      <Icon className="h-6 w-6 flex-shrink-0" />
                       {!collapsed && <span>{item.name}</span>}
                     </Link>
                   </li>
