@@ -13,13 +13,15 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUrl } from "@/hooks/use-url";
 import { EnhancedEventPopup } from "@/components/calendar/event-popup";
+import { useHeader } from "@/hooks/useHeader";
 
 export default function CalendarDemo() {
-  const [selectedView, setSelectedView] = useState<
-    "dayGridMonth" | "timeGridWeek"
-  >("dayGridMonth");
+  const [selectedView, setSelectedView] = useState< "dayGridMonth" | "timeGridWeek">("dayGridMonth");
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isEventPopupOpen, setIsEventPopupOpen] = useState(false);
+  const { useHeaderConfig } = useHeader();
+
+  useHeaderConfig({ centerContent: "Team Calendar" });
 
   const { user } = useCurrentUser();
   const { team } = useRole();
@@ -44,10 +46,10 @@ export default function CalendarDemo() {
         ...eventData,
         userInvitation: userInvitation
           ? {
-              id: userInvitation.id,
-              will_attend: userInvitation.will_attend,
-              reason: userInvitation.reason,
-            }
+            id: userInvitation.id,
+            will_attend: userInvitation.will_attend,
+            reason: userInvitation.reason,
+          }
           : undefined,
       };
 
@@ -112,7 +114,6 @@ export default function CalendarDemo() {
   return (
     <Content>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Team Calendar</h1>
         {team.role === "COACH" && (
           <Button
             onClick={() => {
