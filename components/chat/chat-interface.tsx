@@ -74,13 +74,13 @@ export function ChatInterface({
   }
 
   return (
-    <div className="max-h-screen-without-header flex flex-col h-full bg-background">
+    <div className="max-h-screen-without-header-mobile md:max-h-screen-without-header flex flex-col h-full bg-background">
       {error && (
         <div className="p-2 text-center text-red-600 bg-red-100 border-b border-red-200">
           {error}
         </div>
       )}
-      <ScrollArea className="p-4">
+      <ScrollArea className="p-4 h-full">
         <div className="space-y-4">
           {isLoading ? (
             <div className="flex items-center justify-center h-20 text-muted-foreground">
@@ -116,7 +116,7 @@ export function ChatInterface({
                       </div>
                     )}
                     <div
-                      className={`py-2 px-3 rounded-lg shadow-sm ${isCurrentUserMessage
+                      className={`py-2 px-3 rounded-lg shadow-sm max-w-80 ${isCurrentUserMessage
                         ? "bg-primary text-primary-foreground rounded-br-none"
                         : "bg-slate-200 rounded-bl-none"}`}
                     >
