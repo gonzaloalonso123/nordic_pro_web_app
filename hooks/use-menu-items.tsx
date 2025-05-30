@@ -19,7 +19,7 @@ const generalTeamMenuItems = (root: string) => [
 
 const coachMenuItems = (root: string) => [
   { name: "Management", href: `${root}/management`, icon: Settings },
-  { name: "Analytics", href: `${root}/analytics`, icon: BarChart3 },
+  // { name: "Analytics", href: `${root}/analytics`, icon: BarChart3 },
   { name: "Forms", href: `${root}/forms`, icon: Clipboard },
 ];
 

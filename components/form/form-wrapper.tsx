@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodSchema } from "zod";
 
 interface FormWrapperProps {
-  title: string;
+  title?: string;
   children: ReactNode;
   onClose?: () => void;
   onBack?: () => void;
@@ -55,12 +55,13 @@ export function FormWrapper({
         className
       )}
     >
-      <FormHeader
-        title={title}
-        onClose={showCloseButton ? onClose : undefined}
-        onBack={showBackButton ? onBack : undefined}
-      />
-
+      {title && (
+        <FormHeader
+          title={title}
+          onClose={showCloseButton ? onClose : undefined}
+          onBack={showBackButton ? onBack : undefined}
+        />
+      )}
       <div
         className={cn(
           "flex-1 overflow-y-auto p-4 md:p-6",

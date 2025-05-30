@@ -35,7 +35,6 @@ export default function InvitationList({
     Record<string, boolean>
   >({});
 
-  // Find the event details for an invitation
   const getEventDetails = (eventId: string) => {
     return events?.find((event) => event.id === eventId) || null;
   };

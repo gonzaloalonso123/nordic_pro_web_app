@@ -44,7 +44,6 @@ interface CalendarProps {
 
 export default function Calendar({
   events,
-  onDateClick,
   onEventClick,
   className,
   initialView = "dayGridMonth",
@@ -56,7 +55,6 @@ export default function Calendar({
   return (
     <StyledCalendar
       events={calendarEvents}
-      // onDateClick={handleDateClick}
       onEventClick={onEventClick}
       className={className}
       initialView={initialView}

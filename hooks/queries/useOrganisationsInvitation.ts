@@ -231,6 +231,24 @@ export const useAcceptOrganisationInvitation = (
   });
 };
 
+export const useQrCodeInvitationAccept = (
+  options?: Omit<
+    UseMutationOptions<boolean, Error, { userId: string; teamId: string }>,
+    "mutationFn"
+  >
+) => {
+  const supabase = createClient();
+  return useMutation<boolean, Error, { userId: string; teamId: string }>({
+    mutationFn: ({ userId, teamId }) =>
+      organisationsInvitationService.qrTypeInvitationAccept(
+        supabase,
+        userId,
+        teamId
+      ),
+    ...options,
+  });
+};
+
 export const useRejectOrganisationInvitation = (
   options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">
 ) => {

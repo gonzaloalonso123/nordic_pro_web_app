@@ -1,7 +1,5 @@
 "use server";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { Database } from "@/types/database.types";
 import { toPostgresTimestamp } from "../utils";
 import { createClient } from "./server";
 
@@ -10,6 +8,21 @@ export async function signIn(email: string, password: string) {
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
+    password,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { user: data.user, session: data.session };
+}
+
+export async function signInWithPhone(phone: string, password: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    phone,
     password,
   });
 
@@ -55,6 +68,43 @@ export async function signUp(
   return { user: data.user, session: data.session };
 }
 
+export async function signUpWithPhone(
+  phone: string,
+  password: string,
+  metadata: {
+    firstName: string;
+    lastName: string;
+    gender: "MAN" | "WOMAN";
+    address: string;
+    birthDate: Date;
+    email: string;
+  }
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signUp({
+    phone: phone,
+    password: password,
+    options: {
+      data: {
+        first_name: metadata.firstName,
+        last_name: metadata.lastName,
+        email: metadata.email,
+        gender: metadata.gender,
+        address: metadata.address,
+        birth_date: toPostgresTimestamp(metadata.birthDate),
+        phone: phone,
+      },
+    },
+  });
+
+  if (error) {
+    console.log(error.message);
+    return { error: error.message };
+  }
+  return { user: data.user, session: data.session };
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
@@ -66,6 +116,19 @@ export async function resetPassword(email: string) {
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function resetPasswordWithPhone(phone: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithOtp({
+    phone,
   });
 
   if (error) {

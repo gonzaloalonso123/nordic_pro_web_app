@@ -188,7 +188,46 @@ export const useUpdateTeam = (
   });
 };
 
-// Delete team mutation
+export const useUpdateUserInTeam = (
+  options?: Omit<
+    UseMutationOptions<
+      TeamRow,
+      Error,
+      {
+        teamId: string;
+        updates: {
+          role?: string;
+          position?: string;
+        };
+      }
+    >,
+    "mutationFn"
+  >
+) => {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  return useMutation<
+    TeamRow,
+    Error,
+    {
+      teamId: string;
+      userId: string;
+      updates: {
+        role?: string;
+        position?: string;
+      };
+    }
+  >({
+    mutationFn: ({ teamId, userId, updates }) =>
+      teamsService.updateUserInTeam(supabase, teamId, userId, updates),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId] });
+    },
+    ...options,
+  });
+};
+
 export const useDeleteTeam = (
   options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">
 ) => {

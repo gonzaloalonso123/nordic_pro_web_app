@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
-import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/types/database.types";
 
 type TeamRow = Tables<"teams">;
 type TeamInsert = TablesInsert<"teams">;
@@ -213,5 +217,22 @@ export const teamsService = {
       .eq("user_id", userId);
     if (error) throw error;
     return true;
+  },
+
+  async updateUserInTeam(
+    supabase: SupabaseClient<Database>,
+    teamId: string,
+    userId: string,
+    updates: any
+  ): Promise<any> {
+    const { data, error } = await supabase
+      .from("users_teams")
+      .update(updates)
+      .eq("team_id", teamId)
+      .eq("user_id", userId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
   },
 };

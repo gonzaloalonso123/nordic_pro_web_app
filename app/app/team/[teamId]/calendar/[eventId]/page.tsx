@@ -1,18 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/custom/tabs";
 import { format, parseISO } from "date-fns";
 import {
   MapPin,
@@ -25,71 +22,85 @@ import {
   Navigation,
   Map,
   UserPlus,
+  ChevronLeft,
 } from "lucide-react";
-import { LocationMap } from "./location-map";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
+import { AddInvitationsModal } from "@/components/calendar/add-invitations-modal";
+import { EventInvitations } from "@/components/calendar/event-invitations";
 import { useClientData } from "@/utils/data/client";
-import { AddInvitationsModal } from "./add-invitations-modal";
-import { EventInvitations } from "./event-invitations";
+import { LocationMap } from "@/components/calendar/location-map";
+import { useParams } from "next/navigation";
+import { useHeader } from "@/hooks/useHeader";
+import { Content } from "@/components/content";
+import { Card } from "@/components/ui/card";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
-interface EventData {
-  id: string;
-  name: string;
-  description?: string;
-  start_date: string;
-  end_date: string;
-  time_to_come?: string;
-  type: string;
-  locations?: {
-    name: string;
-    coordinates: string;
-  };
-  userInvitation?: {
-    id: string;
-    will_attend: boolean | null;
-    reason?: string;
-  };
-}
-
-interface TeamUser {
-  user: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    avatar: string | null;
-  };
-}
-
-interface EnhancedEventPopupProps {
-  event: EventData | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onAcceptInvitation?: (invitationId: string) => void;
-  onRejectInvitation?: (invitationId: string, reason: string) => void;
-  isCoach?: boolean;
-  teamId?: string;
-  teamUsers?: TeamUser[];
-  onInvitationAdded?: () => void;
-}
-
-export function EnhancedEventPopup({
-  event,
-  open,
-  onOpenChange,
-  onAcceptInvitation,
-  onRejectInvitation,
-  onInvitationAdded,
-}: EnhancedEventPopupProps) {
+export default function Page() {
+  const params = useParams();
+  const eventId = params?.eventId as string;
+  const {
+    data: event,
+    isPending,
+    isError,
+  } = useClientData().events.useById(eventId);
   const [showRejectReason, setShowRejectReason] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [showMap, setShowMap] = useState(false);
   const [showAddInvitations, setShowAddInvitations] = useState(false);
-
+  const { user } = useCurrentUser();
+  const { data: invitation } =
+    useClientData().eventsInvitation.useByEventAndUser(eventId, user?.id);
+  const updateInvitation = useClientData().eventsInvitation.useUpdate();
   const { team } = useRole();
   const isCoach = team?.role === "COACH";
+  const { useHeaderConfig } = useHeader();
 
-  if (!event) return null;
+  useHeaderConfig({
+    centerContent: event?.name || "Event Details",
+    leftContent: (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => history.back()}
+        className="flex items-center gap-2"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+    ),
+  });
+
+  const handleAcceptInvitation = async (invitationId: string) => {
+    try {
+      await updateInvitation.mutateAsync({
+        invitationId,
+        updates: {
+          will_attend: true,
+          reason: null,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to accept invitation:", error);
+    }
+  };
+
+  const handleRejectInvitation = async (
+    invitationId: string,
+    reason: string
+  ) => {
+    try {
+      await updateInvitation.mutateAsync({
+        invitationId,
+        updates: {
+          will_attend: false,
+          reason,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to reject invitation:", error);
+    }
+  };
+
+  if (isPending || isError) return null;
 
   const formatEventDateTime = () => {
     const startDate = parseISO(event.start_date);
@@ -118,18 +129,6 @@ export function EnhancedEventPopup({
     return format(timeTocome, "h:mm a");
   };
 
-  const getTypeStyle = () => {
-    const type = event.type?.toLowerCase() || "default";
-    const styleMap: Record<string, string> = {
-      training: "bg-green-100 text-green-800 border-green-200",
-      match: "bg-blue-100 text-blue-800 border-blue-200",
-      meeting: "bg-orange-100 text-orange-800 border-orange-200",
-      social: "bg-purple-100 text-purple-800 border-purple-200",
-      default: "bg-gray-100 text-gray-800 border-gray-200",
-    };
-    return styleMap[type] || styleMap.default;
-  };
-
   const openInMaps = () => {
     if (event.locations?.coordinates) {
       const [lat, lng] = event.locations.coordinates.split(" ");
@@ -139,14 +138,14 @@ export function EnhancedEventPopup({
   };
 
   const handleAccept = () => {
-    if (event.userInvitation?.id && onAcceptInvitation) {
-      onAcceptInvitation(event.userInvitation.id);
+    if (invitation?.id) {
+      handleAcceptInvitation(invitation.id);
     }
   };
 
   const handleReject = () => {
-    if (event.userInvitation?.id && onRejectInvitation) {
-      onRejectInvitation(event.userInvitation.id, rejectReason);
+    if (invitation?.id) {
+      handleRejectInvitation(invitation.id, rejectReason);
       setShowRejectReason(false);
       setRejectReason("");
     }
@@ -154,7 +153,6 @@ export function EnhancedEventPopup({
 
   const handleInvitationsAdded = () => {
     setShowAddInvitations(false);
-    onInvitationAdded?.();
   };
 
   const { date, time } = formatEventDateTime();
@@ -241,7 +239,7 @@ export function EnhancedEventPopup({
         </>
       )}
 
-      {!isCoach && event.userInvitation && (
+      {!isCoach && invitation && (
         <>
           <Separator />
           <div className="space-y-4">
@@ -251,28 +249,27 @@ export function EnhancedEventPopup({
             </div>
 
             <div className="ml-7">
-              {event.userInvitation.will_attend === null &&
-                !showRejectReason && (
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowRejectReason(true)}
-                      className="flex-1 text-sm"
-                    >
-                      <X className="h-4 w-4 mr-1.5" />
-                      Can't Attend
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleAccept}
-                      className="flex-1 text-sm"
-                    >
-                      <Check className="h-4 w-4 mr-1.5" />
-                      Will Attend
-                    </Button>
-                  </div>
-                )}
+              {invitation.will_attend === null && !showRejectReason && (
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowRejectReason(true)}
+                    className="flex-1 text-sm"
+                  >
+                    <X className="h-4 w-4 mr-1.5" />
+                    Can't Attend
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleAccept}
+                    className="flex-1 text-sm"
+                  >
+                    <Check className="h-4 w-4 mr-1.5" />
+                    Will Attend
+                  </Button>
+                </div>
+              )}
 
               {showRejectReason && (
                 <div className="space-y-3">
@@ -306,7 +303,7 @@ export function EnhancedEventPopup({
                 </div>
               )}
 
-              {event.userInvitation.will_attend === true && (
+              {invitation.will_attend === true && (
                 <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-md">
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4" />
@@ -317,7 +314,7 @@ export function EnhancedEventPopup({
                 </div>
               )}
 
-              {event.userInvitation.will_attend === false && (
+              {invitation.will_attend === false && (
                 <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md">
                   <div className="flex items-center gap-2">
                     <X className="h-4 w-4" />
@@ -325,9 +322,9 @@ export function EnhancedEventPopup({
                       You can't attend this event
                     </span>
                   </div>
-                  {event.userInvitation.reason && (
+                  {invitation.reason && (
                     <p className="mt-2 text-sm opacity-80">
-                      Reason: {event.userInvitation.reason}
+                      Reason: {invitation.reason}
                     </p>
                   )}
                 </div>
@@ -340,56 +337,45 @@ export function EnhancedEventPopup({
   );
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogHeader className="space-y-4 h-fit">
-            <div className="flex items-start justify-between gap-3">
-              <DialogTitle className="text-lg font-semibold leading-tight pr-2">
-                {event.name}
-              </DialogTitle>
-              <Badge className={cn("shrink-0 text-sm", getTypeStyle())}>
-                {event.type}
-              </Badge>
-            </div>
-          </DialogHeader>
-
-          {isCoach ? (
-            <Tabs defaultValue="details">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="invitations">Invitations</TabsTrigger>
-              </TabsList>
-              <TabsContent value="details" className="mt-6">
-                <EventDetailsContent />
-              </TabsContent>
-              <TabsContent value="invitations" className="mt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-sm font-medium">
-                        Event Invitations
-                      </span>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => setShowAddInvitations(true)}
-                      className="flex items-center gap-2"
-                    >
-                      <UserPlus className="h-4 w-4" />
-                      Add Invitations
-                    </Button>
+    <Content>
+      {isCoach ? (
+        <Tabs defaultValue="details">
+          <TabsList className="grid w-full grid-cols-2 lg:w-[400px] mx-auto mb-6">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="invitations">Invitations</TabsTrigger>
+          </TabsList>
+          <Card className="p-4">
+            <TabsContent value="details" className="mt-6">
+              <EventDetailsContent />
+            </TabsContent>
+            <TabsContent value="invitations" className="mt-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-sm font-medium">
+                      Event Invitations
+                    </span>
                   </div>
-                  <EventInvitations eventId={event.id} />
+                  <Button
+                    size="sm"
+                    onClick={() => setShowAddInvitations(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    Add Invitations
+                  </Button>
                 </div>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <EventDetailsContent />
-          )}
-        </DialogContent>
-      </Dialog>
+                <EventInvitations eventId={event.id} />
+              </div>
+            </TabsContent>
+          </Card>
+        </Tabs>
+      ) : (
+        <Card className="p-4">
+          <EventDetailsContent />
+        </Card>
+      )}
 
       <AddInvitationsModal
         open={showAddInvitations}
@@ -399,6 +385,6 @@ export function EnhancedEventPopup({
         teamId={team.id}
         onInvitationsAdded={handleInvitationsAdded}
       />
-    </>
+    </Content>
   );
 }

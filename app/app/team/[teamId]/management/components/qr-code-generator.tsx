@@ -13,7 +13,7 @@ export function QRCodeGenerator({ teamId }: QRCodeGeneratorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
 
-  const registrationUrl = `https://app.nordicpro.se/register/${teamId}`;
+  const registrationUrl = `https://app.nordicpro.se/register?teamCode=${teamId}`;
 
   useEffect(() => {
     generateQRCode();
@@ -23,7 +23,6 @@ export function QRCodeGenerator({ teamId }: QRCodeGeneratorProps) {
     if (!canvasRef.current) return;
 
     try {
-      // Using QR Server API for QR code generation
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(registrationUrl)}`;
 
       const img = new Image();

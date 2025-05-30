@@ -3,6 +3,7 @@ import { Database } from "@/types/database.types";
 import { serverData } from "@/utils/data/server";
 import { usersService } from "./users";
 import { teamsService } from "./teams";
+import { organisationsInvitationService, organisationsService } from ".";
 
 type OrganisationInvitationRow =
   Database["public"]["Tables"]["organisations_invitation"]["Row"];
@@ -146,4 +147,26 @@ export const rejectInvitation = async (
   invitationId: string
 ): Promise<boolean> => {
   return await deleteInvitation(supabase, invitationId);
+};
+
+export const qrTypeInvitationAccept = async (
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  teamId: string
+) => {
+  const team = await teamsService.getWithOrganisations(supabase, teamId);
+  await organisationsService.addMember(
+    supabase,
+    team.teams_organisations[0].organisations.id,
+    userId,
+    "USER"
+  );
+  await teamsService.addUserToTeam(
+    supabase,
+    teamId,
+    userId,
+    "PLAYER",
+    "STRIKER"
+  );
+  return true;
 };

@@ -23,14 +23,13 @@ export const eventsService = {
     return data || [];
   },
 
-  // Get event by ID
   async getById(
     supabase: SupabaseClient<Database>,
     eventId: string
   ): Promise<EventRow | null> {
     const { data, error } = await supabase
       .from("events")
-      .select("*")
+      .select("*, locations(*)")
       .eq("id", eventId)
       .single();
 

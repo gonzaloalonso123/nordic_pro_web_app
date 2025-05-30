@@ -27,18 +27,17 @@
   background-color: hsl(var(--muted) / 0.1);
 }
 
-/* Day cells */
 .styled-calendar-container .fc td {
   border-color: hsl(var(--border));
 }
 
-/* Event styling */
 .styled-calendar-container .fc-event {
   border-radius: 4px;
   padding: 2px 4px;
   font-size: 0.75rem;
   font-weight: 500;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
 }
 
 .styled-calendar-container .fc .fc-day-today {

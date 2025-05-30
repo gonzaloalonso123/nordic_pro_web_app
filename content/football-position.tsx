@@ -72,3 +72,7 @@ export const footballPositions = [
     fieldPosition: { x: 50, y: 15 },
   },
 ];
+
+export const getFootballPosition = (position: string) => {
+  return footballPositions.find((p) => p.value === position);
+};

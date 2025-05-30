@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
-import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/types/database.types";
 
 type CalendarRow = Tables<"calendars">;
 type CalendarInsert = TablesInsert<"calendars">;
@@ -85,6 +89,8 @@ export const calendarsService = {
     }
   ): Promise<boolean> {
     const { usersIds, teamIds, organisationIds, eventId } = calendars;
+
+    console.log(usersIds, teamIds, organisationIds);
     const allUserCalendars = await Promise.all(
       (usersIds ?? []).map(async (userId) => {
         return await calendarsService.getByUser(supabase, userId);

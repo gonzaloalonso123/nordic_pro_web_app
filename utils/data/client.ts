@@ -82,6 +82,7 @@ export const useClientData = () => {
       useUpdate: teamQueries.useUpdateTeam,
       useDelete: teamQueries.useDeleteTeam,
       useAddMember: teamQueries.useAddUserToTeam,
+      useUpdateUserInTeam: teamQueries.useUpdateUserInTeam,
       useRemoveMember: teamQueries.useRemoveUserFromTeam,
     },
 
@@ -200,11 +201,11 @@ export const useClientData = () => {
       useUpdate: organisationsInvitationQueries.useUpdateOrganisationInvitation,
       useDelete: organisationsInvitationQueries.useDeleteOrganisationInvitation,
       useAccept: organisationsInvitationQueries.useAcceptOrganisationInvitation,
+      useAcceptQrType: organisationsInvitationQueries.useQrCodeInvitationAccept,
       useReject: organisationsInvitationQueries.useRejectOrganisationInvitation,
     },
 
     eventsInvitation: {
-      // Queries
       useAll: eventsInvitationQueries.useEventsInvitations,
       useById: eventsInvitationQueries.useEventInvitation,
       useByEvent: eventsInvitationQueries.useEventInvitationsByEvent,

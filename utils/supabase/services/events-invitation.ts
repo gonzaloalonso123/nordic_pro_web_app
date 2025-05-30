@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
-import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/types/database.types";
 import { triggerNewEventCreatedNotification } from "@/utils/notificationService";
 
 type EventInvitationRow = Tables<"events_invitation">;
@@ -35,16 +39,16 @@ export const eventsInvitationService = {
     return data;
   },
 
-  // Get invitations by event
   async getByEvent(
     supabase: SupabaseClient<Database>,
     eventId: string
   ): Promise<EventInvitationRow[]> {
     const { data, error } = await supabase
       .from("events_invitation")
-      .select("*")
+      .select("*, users(*)")
       .eq("event_id", eventId);
 
+    console.log(data, error);
     if (error) throw error;
     return data || [];
   },
@@ -62,7 +66,6 @@ export const eventsInvitationService = {
     return data || [];
   },
 
-  // Get invitation by event and user
   async getByEventAndUser(
     supabase: SupabaseClient<Database>,
     eventId: string,
@@ -79,7 +82,6 @@ export const eventsInvitationService = {
     return data;
   },
 
-  // Create invitation
   async create(
     supabase: SupabaseClient<Database>,
     invitation: EventInvitationInsert
@@ -96,7 +98,7 @@ export const eventsInvitationService = {
       recipientUserIds: [invitation.user_id],
       eventId: invitation.event_id,
     }).catch((err) => {
-      console.error("Error triggering new event invitation notification:", err)
+      console.error("Error triggering new event invitation notification:", err);
     });
 
     return data;

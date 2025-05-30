@@ -1,6 +1,11 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/custom/tabs";
 import { Content } from "@/components/content";
 import { useParams } from "next/navigation";
 import { AvailableForms } from "./components/available-forms";
@@ -12,7 +17,7 @@ export default function FormsTab() {
   return (
     <Content>
       <Tabs defaultValue="available" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 lg:w-[400px] mx-auto mb-6">
           <TabsTrigger value="available">Available Forms</TabsTrigger>
           <TabsTrigger value="history">Form History</TabsTrigger>
         </TabsList>

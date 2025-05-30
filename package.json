@@ -4,7 +4,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "update-types" : "npx supabase gen types typescript --project-id 'rcuficvjsjdizfigkdfx' --schema public > types/database.types.ts"
   },
   "engines": {
     "node": "<=23"

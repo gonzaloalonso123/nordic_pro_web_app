@@ -19,6 +19,7 @@ import { LocationSelectorPopup } from "@/components/create-event/location-select
 import { TeamUserSelectorPopup } from "@/components/create-event/team-user-selector/team-user-selector";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Switch } from "@/components/ui/switch";
 
 const eventTypeOptions = [
   { value: "TRAINING", label: "Training" },
@@ -91,6 +92,7 @@ const AddTeamEventPage = () => {
     name: string;
     description: string;
     type: string;
+    invite_future_members: boolean;
   }) => {
     if (!calendar) {
       toast({
@@ -139,6 +141,7 @@ const AddTeamEventPage = () => {
           location_id: selectedLocation?.id,
           type: values.type,
           calendar_id: calendar.id,
+          invite_future_members: values.invite_future_members,
         });
 
         createdEvents.push(event);
@@ -210,7 +213,6 @@ const AddTeamEventPage = () => {
         >
           <Textarea placeholder={t("Event description")} />
         </FormItemWrapper>
-
         <FormItemWrapper
           label={t("Event Type")}
           description={t("Select the type of event")}
@@ -238,6 +240,16 @@ const AddTeamEventPage = () => {
             onSelectAll={handleSelectAll}
           />
         )}
+        <FormItemWrapper
+          label={t("Invite future team members")}
+          description={t("Invite future team members to this event")}
+          name="invite_future_members"
+        >
+          <Switch
+            checked={selectedUsers.length > 0}
+            onChange={handleSelectAll}
+          />
+        </FormItemWrapper>
 
         <SubmitButton
           disabled={

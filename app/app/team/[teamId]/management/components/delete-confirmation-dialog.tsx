@@ -15,15 +15,17 @@ interface DeleteConfirmationDialogProps {
   member: any;
   onClose: () => void;
   onConfirm: () => void;
+  open: boolean;
 }
 
 export function DeleteConfirmationDialog({
+  open,
   member,
   onClose,
   onConfirm,
 }: DeleteConfirmationDialogProps) {
   return (
-    <AlertDialog open={!!member} onOpenChange={(open) => !open && onClose()}>
+    <AlertDialog open={open} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Remove Team Member</AlertDialogTitle>

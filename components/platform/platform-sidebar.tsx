@@ -23,7 +23,7 @@ export default function PlatformSidebar() {
         )}
       >
         <div>
-          <div className={cn('p-4 flex justify-end', collapsed && 'justify-center')}>
+          <div className={cn("p-4 flex transition-all", !collapsed && "justify-end")}>
             <Button
               variant="ghost"
               size="icon"
@@ -39,7 +39,7 @@ export default function PlatformSidebar() {
           </div>
 
           <nav className="px-3 py-2">
-            <ul className={cn("space-y-1 flex flex-col transition-all", collapsed && "items-center")}>
+            <ul className={cn("space-y-1 flex flex-col transition-all")}>
               {items.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -49,7 +49,7 @@ export default function PlatformSidebar() {
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                        "flex items-center gap-3 px-3 py-2 rounded-lg transition-all",
                         isActive
                           ? "bg-primary text-white"
                           : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
@@ -65,7 +65,6 @@ export default function PlatformSidebar() {
             </ul>
           </nav>
         </div>
-
 
         {/* <ProFeatures collapsed={collapsed} /> */}
       </div>
