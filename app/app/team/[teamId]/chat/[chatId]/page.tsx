@@ -83,7 +83,7 @@ export default function ChatRoomPage() {
 
   if (isLoadingUser || isLoadingRoom || isLoadingMessages) {
     return (
-      <div className="flex flex-col flex-grow gap-4 h-full items-center justify-center pb-16 md:pb-0">
+      <div className="flex flex-col grow gap-4 h-full items-center justify-center pb-16 md:pb-0">
         <p className="text-muted-foreground">Loading chat...</p>
         <Skeleton className="h-6 w-2/3" />
       </div>
@@ -100,7 +100,7 @@ export default function ChatRoomPage() {
 
   return (
     <div className="flex flex-col h-full pb-16 md:pb-0">
-      <div className="flex-grow overflow-hidden h-full">
+      <div className="grow overflow-hidden h-full">
         {currentUser && chatRoom && (
           <ChatInterface
             roomId={chatId}

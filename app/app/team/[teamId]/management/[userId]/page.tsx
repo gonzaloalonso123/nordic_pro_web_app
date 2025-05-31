@@ -126,7 +126,7 @@ export default function Page() {
       case "LEADER":
         return "secondary";
       default:
-        return "outline";
+        return "outline-solid";
     }
   };
 

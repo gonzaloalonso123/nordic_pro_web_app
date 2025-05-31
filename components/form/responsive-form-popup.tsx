@@ -29,7 +29,7 @@ export const ResponsiveFormPopup: React.FC<ResponsiveFormPopupProps> = ({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   className = "",
-  mobileClassName = "h-[100svh] flex flex-col rounded-none drawer-no-close-btn",
+  mobileClassName = "h-svh flex flex-col rounded-none drawer-no-close-btn",
   desktopClassName = "max-w-4xl h-[80vh] p-0 flex flex-col",
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);

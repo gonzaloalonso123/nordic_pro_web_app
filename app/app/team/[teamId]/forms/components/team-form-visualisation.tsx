@@ -57,7 +57,7 @@ const renderResponse = (response: QuestionResponse) => {
                   isSelected ? "bg-primary/10 border-l-2 border-primary" : ""
                 }`}
               >
-                <div className="mr-2 flex-shrink-0">
+                <div className="mr-2 shrink-0">
                   {isSelected ? (
                     <div className="h-4 w-4 rounded-full bg-primary flex items-center justify-center">
                       <Check className="h-3 w-3 text-primary-foreground" />

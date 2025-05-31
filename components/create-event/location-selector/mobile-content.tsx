@@ -150,7 +150,7 @@ export const MobileContent: React.FC<MobileContentProps> = ({
                       className="flex items-center p-3 rounded-md bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
                       onClick={() => handleLocationSelect(location)}
                     >
-                      <MapPin className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0" />
+                      <MapPin className="h-5 w-5 text-blue-600 mr-3 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm truncate">
                           {location.name}

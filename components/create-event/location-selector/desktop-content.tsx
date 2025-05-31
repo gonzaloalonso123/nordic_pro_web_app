@@ -117,7 +117,7 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
                     className="flex items-center p-2 rounded-md bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
                     onClick={() => handleLocationSelect(location)}
                   >
-                    <MapPin className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
+                    <MapPin className="h-4 w-4 text-blue-600 mr-2 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-xs truncate">
                         {location.name}

@@ -89,7 +89,7 @@ export const DateRecurrenceForm: React.FC<DateRecurrenceFormProps> = ({
                   variant={
                     recurrencePattern.weekdays?.includes(day.value)
                       ? "default"
-                      : "outline"
+                      : "outline-solid"
                   }
                   size="sm"
                   className="w-12 h-10"

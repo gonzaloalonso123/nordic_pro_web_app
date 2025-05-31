@@ -22,7 +22,7 @@ export const RewardOverview = () => {
   const progress = (experienceInLevel / levelTotalExperience) * 100;
 
   return (
-    <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 overflow-hidden mb-6">
+    <Card className="bg-linear-to-br from-indigo-50 to-purple-50 border-indigo-200 overflow-hidden mb-6">
       <CardHeader className="pb-2 relative">
         <motion.div
           className="absolute -top-6 -right-6 w-24 h-24 bg-indigo-500 rounded-full opacity-10"
@@ -42,7 +42,7 @@ export const RewardOverview = () => {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white h-12 w-12 rounded-full flex items-center justify-center mr-3 font-bold text-lg shadow-md">
+            <div className="bg-linear-to-br from-indigo-600 to-purple-600 text-white h-12 w-12 rounded-full flex items-center justify-center mr-3 font-bold text-lg shadow-md">
               {level}
             </div>
             <div>
@@ -105,7 +105,7 @@ export const RewardOverview = () => {
           </div> */}
         </div>
       </CardContent>
-      <CardFooter className="bg-gradient-to-r from-indigo-100/50 py-2 to-purple-100/50 border-t border-indigo-200">
+      <CardFooter className="bg-linear-to-r from-indigo-100/50 py-2 to-purple-100/50 border-t border-indigo-200">
         <div className="text-xs text-muted-foreground">
           <span className="font-medium text-indigo-700">Next level in: </span>
           {levelTotalExperience - experienceInLevel} XP

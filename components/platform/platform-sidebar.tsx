@@ -56,7 +56,7 @@ export default function PlatformSidebar() {
                         collapsed && "w-fit"
                       )}
                     >
-                      <Icon className="h-6 w-6 flex-shrink-0" />
+                      <Icon className="h-6 w-6 shrink-0" />
                       {!collapsed && <span>{item.name}</span>}
                     </Link>
                   </li>

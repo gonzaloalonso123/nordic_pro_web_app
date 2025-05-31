@@ -9,7 +9,7 @@
 //       className="p-3 hover:bg-muted/50 flex items-start gap-3"
 //     >
 //       {question.image_url && (
-//         <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
+//         <div className="relative w-10 h-10 rounded overflow-hidden shrink-0">
 //           <Image
 //             src={question.image_url || "/placeholder.svg"}
 //             alt={question.question}
@@ -39,7 +39,7 @@
 //         variant="ghost"
 //         size="icon"
 //         onClick={() => handleAddQuestion(question.id)}
-//         className="h-6 w-6 flex-shrink-0"
+//         className="h-6 w-6 shrink-0"
 //       >
 //         <Plus className="h-4 w-4" />
 //       </Button>

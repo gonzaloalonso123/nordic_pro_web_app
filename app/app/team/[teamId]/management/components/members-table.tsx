@@ -24,7 +24,7 @@ export function MembersTable({ members, onViewDetails }: MembersTableProps) {
       case "LEADER":
         return "secondary";
       default:
-        return "outline";
+        return "outline-solid";
     }
   };
 

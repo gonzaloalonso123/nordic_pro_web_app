@@ -94,7 +94,7 @@ export default function KidSlider({
     <div className={`w-full py-8 px-2 ${className}`}>
       <div
         ref={trackRef}
-        className="relative h-8 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full cursor-pointer"
+        className="relative h-8 bg-linear-to-r from-red-400 via-yellow-400 to-green-400 rounded-full cursor-pointer"
         onClick={handleTrackClick}
       >
         <div className="absolute inset-0 flex justify-between px-4">

@@ -40,7 +40,7 @@ export default function RootLayout({
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
         >
-          <main className="flex-grow">{children}</main>
+          <main className="grow">{children}</main>
         </body>
       </html>
     </ReactQueryProvider>
