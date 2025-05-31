@@ -22,7 +22,7 @@ function isNotificationSupported(): boolean {
 }
 
 function getNotificationPermission(): NotificationPermission {
-  if (!isNotificationSupported()) return 'default';
+  if (!isNotificationSupported()) return 'denied';
   return Notification.permission;
 }
 
