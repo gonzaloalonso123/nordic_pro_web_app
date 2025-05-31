@@ -26,14 +26,21 @@ export const useHeader = () => {
         rightContent: undefined,
       });
     };
-  }, [context]);
+  }, [context.setHeaderConfig]);
 
   const useHeaderConfig = useCallback((config: HeaderConfig, deps: DependencyList = []) => {
     useEffect(() => {
-      const cleanup = setHeaderConfigWithCleanup(config);
-      return cleanup;
+      context.setHeaderConfig(config);
+
+      return () => {
+        context.setHeaderConfig({
+          leftContent: undefined,
+          centerContent: undefined,
+          rightContent: undefined,
+        });
+      };
     }, deps);
-  }, [setHeaderConfigWithCleanup]);
+  }, [context.setHeaderConfig]);
 
   return {
     ...context,
