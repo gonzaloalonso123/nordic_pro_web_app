@@ -203,4 +203,33 @@
   h6 {
     @apply font-montserrat font-bold;
   }
+
+  /* PWA-specific styles to prevent zoom on iOS */
+  @supports (-webkit-touch-callout: none) {
+    /* iOS Safari */
+    @media (display-mode: standalone) {
+      html, body {
+        -webkit-user-select: none;
+        user-select: none;
+        touch-callout: none;
+        tap-highlight-color: transparent;
+        overscroll-behavior: none;
+        touch-action: pan-x pan-y;
+      }
+
+      input, textarea, select {
+        user-select: text;
+        touch-action: manipulation;
+      }
+
+      /* Prevent zoom on input focus */
+      input,
+      textarea,
+      select {
+        font-size: 16px !important;
+        transform: translateZ(0);
+        appearance: none;
+      }
+    }
+  }
 }
