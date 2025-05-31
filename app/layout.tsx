@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ReactQueryProvider } from "@/providers/reactQueryProvider";
+import PWAViewportManager from "@/components/pwa/PWAViewportManager";
 
 
 const inter = Inter({
@@ -34,12 +35,13 @@ export default function RootLayout({
         <head>
           <meta
             name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+            content="width=device-width, initial-scale=1.0"
           />
         </head>
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
         >
+          <PWAViewportManager />
           <main className="grow">{children}</main>
         </body>
       </html>
