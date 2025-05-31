@@ -30,7 +30,7 @@ async function requestNotificationPermission(): Promise<NotificationPermission> 
   if (!isNotificationSupported()) return 'denied';
 
   // For iOS Safari, we need to request permission in response to user interaction
-  if ('requestPermission' in Notification) {
+  if (typeof Notification.requestPermission === 'function') {
     return await Notification.requestPermission();
   }
 
