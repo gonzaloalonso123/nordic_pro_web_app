@@ -17,6 +17,26 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray
 }
 
+function isNotificationSupported(): boolean {
+  return typeof window !== 'undefined' && 'Notification' in window;
+}
+
+function getNotificationPermission(): NotificationPermission {
+  if (!isNotificationSupported()) return 'default';
+  return Notification.permission;
+}
+
+async function requestNotificationPermission(): Promise<NotificationPermission> {
+  if (!isNotificationSupported()) return 'denied';
+
+  // For iOS Safari, we need to request permission in response to user interaction
+  if ('requestPermission' in Notification) {
+    return await Notification.requestPermission();
+  }
+
+  return 'denied';
+}
+
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
 export function usePushNotifications() {
@@ -80,7 +100,7 @@ export function usePushNotifications() {
         return;
       }
 
-      if (!('serviceWorker' in navigator && 'PushManager' in window)) {
+      if (!('serviceWorker' in navigator && 'PushManager' in window && isNotificationSupported())) {
         setIsSupported(false);
         setPermissionChecked(true);
         return;
@@ -98,11 +118,11 @@ export function usePushNotifications() {
 
       if (subscriptionSetup) return;
 
-      const permission = Notification.permission;
+      const permission = getNotificationPermission();
 
       if (permission === 'default' && !permissionChecked) {
         try {
-          const result = await Notification.requestPermission();
+          const result = await requestNotificationPermission();
           setPermissionChecked(true);
           if (result === 'granted') {
             await subscribeToPush();
@@ -142,7 +162,7 @@ export function usePushNotifications() {
     isSupported,
     subscription,
     isSubscribed: !!subscription,
-    permissionStatus: typeof window !== 'undefined' ? Notification.permission : 'default',
+    permissionStatus: getNotificationPermission(),
     unsubscribe,
   };
 }
