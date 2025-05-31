@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden select-none",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all duration-300 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden select-none",
   {
     variants: {
       variant: {
@@ -12,34 +12,34 @@ const buttonVariants = cva(
           "bg-primary text-white",
           "hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(var(--primary-rgb)/0.5)]",
           "active:scale-[0.97] active:shadow-inner",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
-          "before:absolute before:inset-0 before:opacity-0 before:bg-[radial-gradient(circle,_rgba(255,255,255,0.25)_0%,_transparent_60%)] hover:before:opacity-100 before:transition-opacity before:duration-500 before:h-[150%] before:w-[150%] before:top-[-25%] before:left-[-25%]",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "before:absolute before:inset-0 before:opacity-0 before:bg-[radial-gradient(circle,rgba(255,255,255,0.25)_0%,transparent_60%)] hover:before:opacity-100 before:transition-opacity before:duration-500 before:h-[150%] before:w-[150%] before:top-[-25%] before:left-[-25%]",
         ],
         destructive: [
           "bg-destructive text-destructive-foreground",
           "hover:bg-destructive/90 hover:shadow-[0_0_20px_rgba(var(--destructive-rgb)/0.5)]",
           "active:scale-[0.97] active:shadow-inner",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
-          "before:absolute before:inset-0 before:opacity-0 before:bg-[radial-gradient(circle,_rgba(255,255,255,0.25)_0%,_transparent_60%)] hover:before:opacity-100 before:transition-opacity before:duration-500 before:h-[150%] before:w-[150%] before:top-[-25%] before:left-[-25%]",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "before:absolute before:inset-0 before:opacity-0 before:bg-[radial-gradient(circle,rgba(255,255,255,0.25)_0%,transparent_60%)] hover:before:opacity-100 before:transition-opacity before:duration-500 before:h-[150%] before:w-[150%] before:top-[-25%] before:left-[-25%]",
         ],
         outline: [
           "border border-input bg-background text-foreground",
           "hover:bg-accent hover:text-white hover:border-accent/50 hover:shadow-[0_0_15px_rgba(var(--accent-rgb)/0.25)]",
           "active:scale-[0.97] active:shadow-inner",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-accent/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-accent/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
         ],
         secondary: [
           "bg-secondary text-secondary-foreground",
           "hover:bg-secondary/80 hover:shadow-[0_0_20px_rgba(var(--secondary-rgb)/0.5)]",
           "active:scale-[0.97] active:shadow-inner",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
-          "before:absolute before:inset-0 before:opacity-0 before:bg-[radial-gradient(circle,_rgba(255,255,255,0.25)_0%,_transparent_60%)] hover:before:opacity-100 before:transition-opacity before:duration-500 before:h-[150%] before:w-[150%] before:top-[-25%] before:left-[-25%]",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "before:absolute before:inset-0 before:opacity-0 before:bg-[radial-gradient(circle,rgba(255,255,255,0.25)_0%,transparent_60%)] hover:before:opacity-100 before:transition-opacity before:duration-500 before:h-[150%] before:w-[150%] before:top-[-25%] before:left-[-25%]",
         ],
         ghost: [
           "text-foreground",
           "hover:bg-accent/50 hover:text-accent-foreground hover:shadow-[0_0_15px_rgba(var(--accent-rgb)/0.15)]",
           "active:scale-[0.97] active:shadow-inner",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-accent/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-accent/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
         ],
         link: [
           "text-primary underline-offset-4",
@@ -48,26 +48,26 @@ const buttonVariants = cva(
           "relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-primary after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform after:duration-300",
         ],
         premium: [
-          "bg-gradient-to-r from-violet-600 to-indigo-600 text-white",
+          "bg-linear-to-r from-violet-600 to-indigo-600 text-white",
           "hover:from-violet-700 hover:to-indigo-700 hover:shadow-[0_8px_25px_-5px_rgba(99,102,241,0.5)]",
           "hover:translate-y-[-2px]",
           "active:translate-y-[0px] active:shadow-[0_5px_15px_-3px_rgba(99,102,241,0.4)]",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
-          "before:absolute before:inset-0 before:opacity-0 before:bg-[radial-gradient(circle,_rgba(255,255,255,0.25)_0%,_transparent_60%)] hover:before:opacity-100 before:transition-opacity before:duration-500 before:h-[150%] before:w-[150%] before:top-[-25%] before:left-[-25%]",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "before:absolute before:inset-0 before:opacity-0 before:bg-[radial-gradient(circle,rgba(255,255,255,0.25)_0%,transparent_60%)] hover:before:opacity-100 before:transition-opacity before:duration-500 before:h-[150%] before:w-[150%] before:top-[-25%] before:left-[-25%]",
           "transition-all duration-500",
         ],
         neon: [
           "bg-black text-[#00ff99] border-2 border-[#00ff99]",
           "hover:bg-[#00ff99]/10 hover:shadow-[0_0_20px_rgba(0,255,153,0.5),inset_0_0_20px_rgba(0,255,153,0.3)]",
           "active:scale-[0.97] active:shadow-[0_0_10px_rgba(0,255,153,0.5),inset_0_0_10px_rgba(0,255,153,0.3)]",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-[#00ff99]/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-[#00ff99]/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
           "transition-all duration-300",
         ],
         glass: [
           "bg-white/10 backdrop-blur-md text-white border border-white/20",
           "hover:bg-white/20 hover:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.3)]",
           "active:scale-[0.97] active:shadow-inner",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
           "transition-all duration-300",
         ],
         neomorphic: [
@@ -78,12 +78,12 @@ const buttonVariants = cva(
           "transition-all duration-300",
         ],
         sport: [
-          "bg-gradient-to-r from-emerald-500 to-teal-500 text-white",
+          "bg-linear-to-r from-emerald-500 to-teal-500 text-white",
           "hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_10px_25px_-5px_rgba(16,185,129,0.4)]",
           "hover:translate-y-[-2px]",
           "active:translate-y-[0px] active:shadow-[0_5px_15px_-3px_rgba(16,185,129,0.3)]",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/30 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-500 after:ease-in-out",
-          "before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:opacity-0 before:translate-x-[-100%] hover:before:translate-x-[200%] hover:before:opacity-100 before:transition-all before:duration-700 before:delay-100 before:ease-in-out",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-white/30 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-500 after:ease-in-out",
+          "before:absolute before:inset-0 before:bg-linear-to-r before:from-transparent before:via-white/10 before:to-transparent before:opacity-0 before:-translate-x-full hover:before:translate-x-[200%] hover:before:opacity-100 before:transition-all before:duration-700 before:delay-100 before:ease-in-out",
           "transition-all duration-500",
         ],
         threed: [
@@ -92,7 +92,7 @@ const buttonVariants = cva(
           "hover:shadow-[0_10px_25px_-5px_rgba(59,130,246,0.5)]",
           "hover:translate-y-[-4px] hover:rotate-x-[-10deg]",
           "active:translate-y-[-2px] active:rotate-x-[-5deg] active:shadow-[0_5px_15px_-3px_rgba(59,130,246,0.4)]",
-          "after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:translate-x-[-100%] hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
+          "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-white/20 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-700 after:ease-in-out",
           "transition-all duration-300",
         ],
       },

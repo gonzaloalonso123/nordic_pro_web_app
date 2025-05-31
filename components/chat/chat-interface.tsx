@@ -116,7 +116,7 @@ export function ChatInterface({
                       </div>
                     )}
                     <div
-                      className={`py-2 px-3 rounded-lg shadow-sm max-w-80 ${isCurrentUserMessage
+                      className={`py-2 px-3 rounded-lg shadow-xs max-w-80 ${isCurrentUserMessage
                         ? "bg-primary text-primary-foreground rounded-br-none"
                         : "bg-slate-200 rounded-bl-none"}`}
                     >
@@ -168,7 +168,7 @@ export function ChatInterface({
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Message"
-          className="flex-grow"
+          className="grow"
           disabled={!currentUser}
           autoComplete="off"
         />

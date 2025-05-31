@@ -72,7 +72,7 @@ const FormInvitation = ({
               <CardTitle className="text-lg">{form.form.title}</CardTitle>
               <CardDescription>{form.form.description}</CardDescription>
             </div>
-            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0">
+            <Badge className="bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0">
               +{form.form.experience || 500} XP
             </Badge>
           </div>
@@ -92,7 +92,7 @@ const FormInvitation = ({
             size="xl"
             className={
               index === 0
-                ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                ? "bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
                 : ""
             }
             onClick={() => router.push(`${path}/dashboard/form/${form.id}`)}

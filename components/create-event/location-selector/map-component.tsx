@@ -92,7 +92,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         />
         {selectedCoordinates && <Marker position={selectedCoordinates} />}
       </MapContainer>
-      <div className="absolute top-4 left-4 right-4 z-[1000]">
+      <div className="absolute top-4 left-4 right-4 z-1000">
         <MapSearchBar onLocationSelect={handleSearchSelect} />
       </div>
     </div>

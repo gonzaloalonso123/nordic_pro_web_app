@@ -159,7 +159,7 @@ export function StyledCalendar({
         {currentTitle}
       </h2>
 
-      <div className="calendar-wrapper rounded-lg border overflow-hidden shadow-sm">
+      <div className="calendar-wrapper rounded-lg border overflow-hidden shadow-xs">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}

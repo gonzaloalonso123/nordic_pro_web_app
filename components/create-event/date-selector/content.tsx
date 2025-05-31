@@ -27,14 +27,14 @@ export const Content: React.FC<DesktopContentProps> = ({
 }) => {
   return (
     <>
-      <div className="p-4 border-b flex-shrink-0">
+      <div className="p-4 border-b shrink-0">
         <h2 className="text-xl font-semibold">Event Settings</h2>
       </div>
 
-      <div className="p-4 border-b flex-shrink-0">
+      <div className="p-4 border-b shrink-0">
         <div className="grid grid-cols-2 gap-4">
           <Button
-            variant={activeTab === "datetime" ? "default" : "outline"}
+            variant={activeTab === "datetime" ? "default" : "outline-solid"}
             className={cn(
               "justify-start",
               activeTab === "datetime"
@@ -47,7 +47,7 @@ export const Content: React.FC<DesktopContentProps> = ({
             Date/Time
           </Button>
           <Button
-            variant={activeTab === "preview" ? "default" : "outline"}
+            variant={activeTab === "preview" ? "default" : "outline-solid"}
             className={cn(
               "justify-start",
               activeTab === "preview"
@@ -70,7 +70,7 @@ export const Content: React.FC<DesktopContentProps> = ({
         />
       </div>
 
-      <div className="p-3 border-t flex-shrink-0">
+      <div className="p-3 border-t shrink-0">
         <div className="flex justify-between items-center">
           <p className="text-sm font-medium">
             {previewEvents.length > 1

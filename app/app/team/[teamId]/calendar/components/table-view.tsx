@@ -104,7 +104,7 @@ export function TrainingSessionsTable({
         variant: "default" as const,
         value: "upcoming",
       };
-    return { label: "Unknown", variant: "outline" as const, value: "unknown" };
+    return { label: "Unknown", variant: "outline-solid" as const, value: "unknown" };
   };
 
   const getTypeColor = (type: string) => {

@@ -45,7 +45,7 @@ export const LocationSelectorPopup: React.FC<LocationSelectorProps> = ({
     <div className="space-y-2">
       <div className="flex items-center justify-between border rounded-md p-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          <MapPin className="h-5 w-5 text-muted-foreground shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium">Location</p>
             <p className="text-xs text-muted-foreground truncate">
@@ -63,7 +63,7 @@ export const LocationSelectorPopup: React.FC<LocationSelectorProps> = ({
             title="Location Selection"
             open={open}
             onOpenChange={setOpen}
-            mobileClassName="h-[100svh] flex flex-col rounded-none drawer-no-close-btn"
+            mobileClassName="h-svh flex flex-col rounded-none drawer-no-close-btn"
             desktopClassName="p-0 w-full max-w-4xl mx-auto flex flex-col [&>button]:hidden rounded-lg overflow-hidden"
           >
             {isMobile ? (

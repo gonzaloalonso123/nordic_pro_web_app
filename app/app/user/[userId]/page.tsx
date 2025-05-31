@@ -59,7 +59,7 @@ export default function UserProfilePage() {
             </AvatarFallback>
           </Avatar>
 
-          <div className="text-center md:text-left flex-grow">
+          <div className="text-center md:text-left grow">
             <h2 className="text-2xl font-semibold">
               {user.first_name}
               {' '}

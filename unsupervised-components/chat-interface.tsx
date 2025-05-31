@@ -103,7 +103,7 @@ export default function ChatInterface() {
   }, {});
 
   return (
-    <div className="flex-grow overflow-y-auto p-4">
+    <div className="grow overflow-y-auto p-4">
       {Object.entries(groupedMessages).map(([date, msgs]) => (
         <div key={date}>
           <div className="flex justify-center my-4">

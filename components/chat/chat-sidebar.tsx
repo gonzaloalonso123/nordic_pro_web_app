@@ -38,7 +38,7 @@ export default function ChatListSidebar() {
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="px-4 py-3 border-b flex-shrink-0">
+      <CardHeader className="px-4 py-3 border-b shrink-0">
         <div className="relative">
           <Input
             placeholder="Search chats..."
@@ -48,7 +48,7 @@ export default function ChatListSidebar() {
           />
         </div>
       </CardHeader>
-      <CardContent className="p-0 overflow-y-auto flex-grow">
+      <CardContent className="p-0 overflow-y-auto grow">
         <div className="divide-y">
           {isLoading ? (
             Array(5)
@@ -56,7 +56,7 @@ export default function ChatListSidebar() {
               .map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-4">
                   <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="flex-grow">
+                  <div className="grow">
                     <Skeleton className="h-4 w-24 mb-2" />
                     <Skeleton className="h-3 w-40" />
                   </div>
@@ -87,7 +87,7 @@ export default function ChatListSidebar() {
                         <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
                       )}
                     </div>
-                    <div className="flex-grow min-w-0">
+                    <div className="grow min-w-0">
                       <div className="flex justify-between items-center">
                         <h4 className="font-medium text-sm truncate">
                           {room.name || "Unnamed Chat"}

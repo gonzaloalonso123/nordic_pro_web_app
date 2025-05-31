@@ -206,7 +206,7 @@ export const MapSearchBar: React.FC<MapSearchBarProps> = ({
                 )}
                 onClick={() => handleResultSelect(result)}
               >
-                <MapPin className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                <MapPin className="h-4 w-4 text-blue-600 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{main}</p>
                   {secondary && (

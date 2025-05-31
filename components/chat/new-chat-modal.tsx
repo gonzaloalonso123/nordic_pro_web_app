@@ -137,13 +137,13 @@ export function NewChatModal({ isOpen, onOpenChange }: NewChatModalProps) {
           />
         </div>
 
-        <ScrollArea className="flex-grow mb-4 pr-3 -mr-1"> {/* Added -mr-1 to visually hide scrollbar if not needed but keep space */}
+        <ScrollArea className="grow mb-4 pr-3 -mr-1"> {/* Added -mr-1 to visually hide scrollbar if not needed but keep space */}
           <div className="space-y-1">
             {isLoadingUsersList && (
               Array(3).fill(0).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-2">
                   <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="flex-grow">
+                  <div className="grow">
                     <Skeleton className="h-4 w-3/4 mb-1" />
                     <Skeleton className="h-3 w-1/2" />
                   </div>
@@ -177,7 +177,7 @@ export function NewChatModal({ isOpen, onOpenChange }: NewChatModalProps) {
                     {getInitials({ firstName: user.first_name, lastName: user.last_name })}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-grow">
+                <div className="grow">
                   <p className="font-medium text-sm">{user.first_name} {user.last_name}</p>
                   <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>

@@ -38,7 +38,7 @@ export const Streak = ({
             <div
               className={`w-6 h-6 rounded-md flex items-center justify-center text-xs ${
                 day.completed
-                  ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white"
+                  ? "bg-linear-to-br from-green-500 to-emerald-600 text-white"
                   : "bg-gray-100 text-gray-400"
               }`}
             >
@@ -62,7 +62,7 @@ export const Streak = ({
       transition={{ duration: 0.4, delay: 0.2 }}
     >
       <Card className="overflow-hidden border-orange-200">
-        <CardHeader className="pb-2 bg-gradient-to-r from-orange-50 to-amber-50">
+        <CardHeader className="pb-2 bg-linear-to-r from-orange-50 to-amber-50">
           <CardTitle className="text-lg flex items-center">
             <Flame className="mr-2 h-5 w-5 text-orange-500" />
             {title}
@@ -72,7 +72,7 @@ export const Streak = ({
         <CardContent className="pt-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-orange-500 to-amber-600 text-white h-12 w-12 rounded-full flex items-center justify-center font-bold text-lg shadow-md">
+              <div className="bg-linear-to-br from-orange-500 to-amber-600 text-white h-12 w-12 rounded-full flex items-center justify-center font-bold text-lg shadow-md">
                 {streak.current}
               </div>
               <div>

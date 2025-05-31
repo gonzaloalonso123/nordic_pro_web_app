@@ -100,7 +100,7 @@ export const Trophies = () => (
             transition={{ duration: 0.3, delay: index * 0.1 }}
           >
             <Card
-              className={`border ${trophy.earned ? "bg-gradient-to-r from-gray-50 to-gray-100" : "bg-gray-100 opacity-70"}`}
+              className={`border ${trophy.earned ? "bg-linear-to-r from-gray-50 to-gray-100" : "bg-gray-100 opacity-70"}`}
             >
               <CardContent className="p-4 flex items-center gap-4">
                 <div

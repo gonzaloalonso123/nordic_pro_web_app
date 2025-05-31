@@ -298,7 +298,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
                   </div>
                   <CardHeader className="pl-10 pb-2 pr-10 flex flex-row gap-4">
                     {question.image_url && (
-                      <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden">
+                      <div className="relative w-16 h-16 shrink-0 rounded-md overflow-hidden">
                         <Image
                           src={question.image_url || "/placeholder.svg"}
                           alt={question.question}
@@ -445,7 +445,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
                       className="p-3 hover:bg-muted/50 flex items-start gap-3"
                     >
                       {question.image_url && (
-                        <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
+                        <div className="relative w-10 h-10 rounded overflow-hidden shrink-0">
                           <Image
                             src={question.image_url || "/placeholder.svg"}
                             alt={question.question}
@@ -484,7 +484,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleAddQuestion(question.id)}
-                        className="h-6 w-6 flex-shrink-0"
+                        className="h-6 w-6 shrink-0"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>

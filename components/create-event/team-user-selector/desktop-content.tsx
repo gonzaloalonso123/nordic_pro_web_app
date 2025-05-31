@@ -69,7 +69,7 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
                 onClick={() => onToggleUser(teamUser.user.id)}
               >
                 <div className="flex items-center w-full">
-                  <div className="flex-shrink-0 mr-2">
+                  <div className="shrink-0 mr-2">
                     <div
                       className={`w-4 h-4 rounded border flex items-center justify-center ${
                         selectedUsers.includes(teamUser.user.id)
