@@ -18,7 +18,7 @@ export default function PlatformSidebar() {
     <>
       <div
         className={cn(
-          "bg-white border-r border-gray-200 h-[calc(100vh-4rem)] sticky top-16 transition-all duration-300 hidden md:flex flex-col justify-between",
+          "bg-white border-r border-gray-200 h-screen-without-header sticky top-16 transition-all duration-300 hidden md:flex flex-col justify-between",
           collapsed ? "w-20" : "w-64"
         )}
       >
