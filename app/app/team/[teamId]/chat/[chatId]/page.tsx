@@ -33,7 +33,7 @@ export default function ChatRoomPage() {
     leftContent: isMobile ? <BackButton path={path} /> : undefined,
     centerContent: (
       !isLoadingRoom ? (
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center justify-center">
           <Avatar>
             <AvatarImage
               src={chatRoom?.avatar || undefined}
