@@ -4,6 +4,7 @@ import type React from "react";
 import { Button } from "@/components/ui/button";
 import { footballPositions } from "@/content/football-position";
 import { FootballFieldVisualization } from "./football-field-visualisation";
+import { Switch } from "@/components/ui/switch";
 
 interface DesktopContentProps {
   users: Array<{
@@ -20,6 +21,8 @@ interface DesktopContentProps {
   onToggleUser: (userId: string) => void;
   onSelectAll: () => void;
   onClose: () => void;
+  inviteFutureMembers: boolean;
+  setInviteFutureMembers: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const DesktopContent: React.FC<DesktopContentProps> = ({
@@ -28,6 +31,8 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
   onToggleUser,
   onSelectAll,
   onClose,
+  inviteFutureMembers,
+  setInviteFutureMembers,
 }) => {
   const handleSelectAll = () => {
     onSelectAll();
@@ -48,6 +53,13 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
 
       <div className="flex h-[400px]">
         <div className="w-1/2 border-r p-3 overflow-y-auto">
+          <span className="w-full flex justify-between items-center mb-6 px-2">
+            <h2 className="font-light text-sm">Invite Future Members</h2>
+            <Switch
+              checked={inviteFutureMembers}
+              onCheckedChange={setInviteFutureMembers}
+            />
+          </span>
           <h3 className="font-medium mb-2 text-sm">Players</h3>
           <div className="space-y-2">
             {users.map((teamUser) => (

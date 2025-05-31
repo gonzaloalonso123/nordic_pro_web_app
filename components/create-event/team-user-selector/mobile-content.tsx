@@ -4,6 +4,7 @@ import type React from "react";
 import { Button } from "@/components/ui/button";
 import { footballPositions } from "@/content/football-position";
 import { FootballFieldVisualization } from "./football-field-visualisation";
+import { Switch } from "@/components/ui/switch";
 
 interface MobileContentProps {
   users: Array<{
@@ -22,6 +23,8 @@ interface MobileContentProps {
   onClose: () => void;
   activeTab: "list" | "field";
   setActiveTab: (tab: "list" | "field") => void;
+  inviteFutureMembers: boolean;
+  setInviteFutureMembers: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const MobileContent: React.FC<MobileContentProps> = ({
@@ -32,6 +35,8 @@ export const MobileContent: React.FC<MobileContentProps> = ({
   onClose,
   activeTab,
   setActiveTab,
+  inviteFutureMembers,
+  setInviteFutureMembers,
 }) => {
   const handleSelectAll = () => {
     onSelectAll();
@@ -82,6 +87,13 @@ export const MobileContent: React.FC<MobileContentProps> = ({
       <div className="flex-1 overflow-auto px-6 py-4">
         {activeTab === "list" && (
           <div className="space-y-2">
+            <span className="w-full flex justify-between items-center mb-6 px-2">
+              <h2 className="font-light">Invite Future Members</h2>
+              <Switch
+                checked={inviteFutureMembers}
+                onCheckedChange={setInviteFutureMembers}
+              />
+            </span>
             {users.map((teamUser) => (
               <div
                 key={teamUser.user.id}

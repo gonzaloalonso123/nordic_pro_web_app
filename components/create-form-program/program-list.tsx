@@ -20,8 +20,10 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useDeleteForm } from "@/hooks/queries";
-import { useFormPrograms } from "@/hooks/queries/useFormPrograms";
+import {
+  useDeleteFormProgram,
+  useFormPrograms,
+} from "@/hooks/queries/useFormPrograms";
 
 export default function ProgramList() {
   const router = useRouter();
@@ -29,7 +31,7 @@ export default function ProgramList() {
   const baseUrl = `/app/admin/forms`;
 
   const { data: programs, isPending, isError } = useFormPrograms();
-  const onDelete = useDeleteForm();
+  const deleteForm = useDeleteFormProgram();
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -86,7 +88,13 @@ export default function ProgramList() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredPrograms.map((program) => (
-            <Card key={program.id}>
+            <Card
+              key={program.id}
+              className="border-4"
+              style={{
+                borderColor: program.color,
+              }}
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
@@ -101,7 +109,7 @@ export default function ProgramList() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         onClick={() =>
-                          router.push(`${baseUrl}/forms/edit/${program.id}`)
+                          router.push(`${baseUrl}/programs/edit/${program.id}`)
                         }
                       >
                         <Pencil className="h-4 w-4 mr-2" />
@@ -109,7 +117,7 @@ export default function ProgramList() {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-600"
-                        onClick={() => onDelete.mutate(program.id)}
+                        onClick={() => deleteForm.mutate(program.id)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete

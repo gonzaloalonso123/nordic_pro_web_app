@@ -23,6 +23,8 @@ interface TeamUserSelectorProps {
   selectedUsers: string[];
   onToggleUser: (userId: string) => void;
   onSelectAll: () => void;
+  inviteFutureMembers: boolean;
+  setInviteFutureMembers: (inviteFutureMembers: boolean) => void;
 }
 
 export const TeamUserSelectorPopup: React.FC<TeamUserSelectorProps> = ({
@@ -30,6 +32,8 @@ export const TeamUserSelectorPopup: React.FC<TeamUserSelectorProps> = ({
   selectedUsers,
   onToggleUser,
   onSelectAll,
+  inviteFutureMembers,
+  setInviteFutureMembers,
 }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"list" | "field">("list");
@@ -45,6 +49,8 @@ export const TeamUserSelectorPopup: React.FC<TeamUserSelectorProps> = ({
     onToggleUser,
     onSelectAll,
     onClose: handleClose,
+    inviteFutureMembers,
+    setInviteFutureMembers,
   };
 
   return (
