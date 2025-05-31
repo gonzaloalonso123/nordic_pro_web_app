@@ -42,8 +42,7 @@ export function useRealtimeChat<T>(
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, onNewMessage, supabase]);
+  }, [roomId, supabase]);
 
   return { error };
 }
-

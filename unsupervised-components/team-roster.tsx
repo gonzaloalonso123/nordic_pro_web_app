@@ -150,8 +150,16 @@ export default function TeamRoster() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem>View Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Edit Player</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <LoadingLink href={`/app/user/${player.id}`} className="w-full cursor-pointer">
+                        View Profile
+                      </LoadingLink>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <LoadingLink href={`/app/user/${player.id}/edit`} className="w-full cursor-pointer">
+                        Edit Player
+                      </LoadingLink>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Message</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {player.status === "active" ? (

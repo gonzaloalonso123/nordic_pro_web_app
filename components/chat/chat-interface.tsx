@@ -160,9 +160,6 @@ export function ChatInterface({
         onSubmit={handleSendMessageSubmit}
         className="p-4 border-t bg-background flex items-center gap-2"
       >
-        <Button variant="ghost" size="icon" type="button" className="text-muted-foreground hover:text-primary">
-          <Paperclip className="h-5 w-5" />
-        </Button>
         <Input
           type="text"
           value={newMessage}

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
+import { createContext, useState, ReactNode, Dispatch, SetStateAction, useMemo } from 'react';
 
 interface HeaderConfig {
   leftContent?: ReactNode;
@@ -14,7 +14,7 @@ interface HeaderContextType {
 }
 
 const defaultState: HeaderContextType = {
-  headerConfig: { isNativeHeader: false },
+  headerConfig: {},
   setHeaderConfig: () => {},
 };
 
@@ -27,8 +27,13 @@ interface HeaderContextProviderProps {
 export const HeaderContextProvider: React.FC<HeaderContextProviderProps> = ({ children }) => {
   const [headerConfig, setHeaderConfig] = useState<HeaderConfig>(defaultState.headerConfig);
 
+  const contextValue = useMemo(() => ({
+    headerConfig,
+    setHeaderConfig
+  }), [headerConfig]);
+
   return (
-    <HeaderContext.Provider value={{ headerConfig, setHeaderConfig }}>
+    <HeaderContext.Provider value={contextValue}>
       {children}
     </HeaderContext.Provider>
   );

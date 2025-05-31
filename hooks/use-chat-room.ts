@@ -75,9 +75,6 @@ export function useMessages(
 
     // Add author information to messages
     const processedMessages = combinedMessages.map(msg => {
-      const existingMsg = messages.find(m => m.id === msg.id && m.author);
-      if (existingMsg) return existingMsg;
-
       return {
         ...msg,
         author: msg.user_id ? userDataMap[msg.user_id] : undefined
@@ -93,7 +90,7 @@ export function useMessages(
     pendingRealtimeMessagesRef.current.clear();
 
     setMessages(processedMessages);
-  }, [roomMessages, userDataList, usersLoading, messages]);
+  }, [roomMessages, userDataList, usersLoading, userDataMap]);
 
   const messageAlreadyExists = useCallback((messageId: Tables<"chat_messages">['id']) => {
     return messages.some(msg => msg.id === messageId);

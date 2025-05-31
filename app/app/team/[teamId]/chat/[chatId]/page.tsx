@@ -54,7 +54,7 @@ export default function ChatRoomPage() {
         </div>
       ) : (<Skeleton className="h-6 w-32" />)
     ),
-  }, [isMobile, path, chatRoom, isLoadingRoom, roomMembers]);
+  }, [isMobile, path, chatRoom?.name, isLoadingRoom, roomMembers.length]);
 
   const initialMessagesForInterface: DisplayMessage[] = useMemo(() => {
     return initialDbMessages.map((msg: any) => {
