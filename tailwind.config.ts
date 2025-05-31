@@ -20,6 +20,10 @@ const config: Config = {
       },
     },
     extend: {
+      height: {
+        "screen-without-header": "calc(100vh - 4rem)", // 4rem = h-16
+        "screen-without-header-mobile": "calc(100vh - 4rem - 4rem)", // 4rem = h-16
+      },
       maxHeight: {
         'screen-without-header': 'calc(100vh - 4rem)', // 4rem = h-16
         'screen-without-header-mobile': 'calc(100vh - 4rem - 4rem)', // 4rem = h-16
