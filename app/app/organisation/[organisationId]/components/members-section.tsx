@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Tables } from "@/types/database.types";
 import flags from "@/flags.json";
 import { Clock, Plus, Settings, Users, X } from "lucide-react";
-import Link from "next/link";
 import { useClientData } from "@/utils/data/client";
+import { LoadingLink, } from "@/components/ui/loading-link";
 
 interface MembersSectionProps {
   organisationId: string;
@@ -27,15 +27,6 @@ export function MembersSection({
 
   const handleCancelInvitation = (id: string) => {
     removeInvitation.mutate(id);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
   };
 
   if (isPending || isError) {
@@ -60,15 +51,15 @@ export function MembersSection({
               </TabsTrigger>
             </TabsList>
           </div>
-          <Button variant="sport" asChild size="sm">
-            <Link
-              className="flex gap-2 items-center"
-              href={`${flags.current_app}/organisation/${organisationId}/add-member`}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add new
-            </Link>
-          </Button>
+          <LoadingLink
+            variant="sport"
+            size="sm"
+            className="flex gap-2 items-center"
+            href={`${flags.current_app}/organisation/${organisationId}/add-member`}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add new
+          </LoadingLink>
         </div>
 
         <TabsContent value="members" className="space-y-3">
@@ -113,15 +104,13 @@ const MemberCard = ({ member, organisationId }: { member: Tables<"users">, organ
           </CardTitle>
           <p className="text-sm text-muted-foreground">{member.email}</p>
         </div>
-        <Button variant="link" asChild>
-          <Link
-            href={`${flags.current_app}/organisation/${organisationId}/members/${member.id}`}
-            className="flex gap-2 items-center"
-          >
-            <Settings className="h-4 w-4" />
-            Manage
-          </Link>
-        </Button>
+        <LoadingLink
+          href={`${flags.current_app}/organisation/${organisationId}/members/${member.id}`}
+          className="flex gap-2 items-center"
+        >
+          <Settings className="h-4 w-4" />
+          Manage
+        </LoadingLink>
       </CardHeader>
     </Card>
   );

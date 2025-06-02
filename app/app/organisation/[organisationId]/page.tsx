@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button";
 import { serverData } from "@/utils/data/server";
-import Link from "next/link";
 import flags from "@/flags.json";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Tables } from "@/types/database.types";
@@ -8,7 +6,7 @@ import { Settings, Layers, Plus } from "lucide-react";
 import { OrganisationPageAnalytics } from "./components/organisation-page-analytics";
 import { MembersSection } from "./components/members-section";
 import { Content } from "@/components/content";
-import { useUrl } from "@/hooks/use-url";
+import { LoadingLink } from "@/components/ui/loading-link";
 
 type PageProps = {
   params: Promise<{
@@ -32,15 +30,15 @@ const Page = async (props: PageProps) => {
               <Layers className="mr-2 h-5 w-5" />
               Teams
             </h2>
-            <Link
+            <LoadingLink
+              variant="sport"
+              size="sm"
               className="flex gap-2 items-center"
               href={`${flags.current_app}/organisation/${organisationId}/add-team`}
             >
-              <Button variant="sport" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add new
-              </Button>
-            </Link>
+              <Plus className="mr-2 h-4 w-4" />
+              Add new
+            </LoadingLink>
           </div>
 
           <div className="space-y-3">
@@ -77,15 +75,13 @@ const TeamCard = ({
     <Card>
       <CardHeader className="p-4 flex flex-row items-center justify-between">
         <CardTitle className="text-base">{team.name}</CardTitle>
-        <Button variant="link">
-          <Link
-            href={`${flags.current_app}/organisation/${organisationId}/teams/${team.id}`}
-            className="flex gap-2 items-center"
-          >
-            <Settings className="h-4 w-4" />
-            Manage
-          </Link>
-        </Button>
+        <LoadingLink
+          href={`${flags.current_app}/organisation/${organisationId}/teams/${team.id}`}
+          className="flex gap-2 items-center"
+        >
+          <Settings className="h-4 w-4" />
+          Manage
+        </LoadingLink>
       </CardHeader>
     </Card>
   );

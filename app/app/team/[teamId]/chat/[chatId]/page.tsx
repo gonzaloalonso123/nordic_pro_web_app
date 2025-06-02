@@ -2,8 +2,6 @@
 
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import { useChatRoom, useChatMessagesByRoom, useChatRoomMembers } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -11,11 +9,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useUrl } from "@/hooks/use-url";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatInterface, DisplayMessage, UserProfileSnippet } from "@/components/chat/chat-interface";
 import { useHeader } from "@/hooks/useHeader";
 import { getInitials } from "@/utils/get-initials";
+import BackButton from "@/components/ui/back-button";
 
 export default function ChatRoomPage() {
   const params = useParams();
@@ -30,7 +28,7 @@ export default function ChatRoomPage() {
   const { data: roomMembers = [] } = useChatRoomMembers(chatId);
 
   useHeaderConfig({
-    leftContent: isMobile ? <BackButton path={path} /> : undefined,
+    leftContent: isMobile ? <BackButton path={`${path}/chat`} /> : undefined,
     centerContent: (
       !isLoadingRoom ? (
         <div className="flex gap-3 items-center justify-center">
@@ -115,15 +113,5 @@ export default function ChatRoomPage() {
         )}
       </div>
     </div>
-  );
-}
-
-function BackButton({ path }: { path: string }) {
-  return (
-    <Link href={`${path}/chat`} className="md:hidden">
-      <Button variant="ghost" size="icon" className="mr-2">
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
-    </Link>
   );
 }

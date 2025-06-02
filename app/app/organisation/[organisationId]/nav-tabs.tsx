@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { LoadingLink } from "@/components/ui/loading-link";
 import { usePathname } from "next/navigation";
 
 interface NavTabsProps {
@@ -19,8 +19,9 @@ export default function NavTabs({ basePath }: NavTabsProps) {
 
   return (
     <nav className="flex space-x-4 border-b">
-      <Link
+      <LoadingLink
         href={basePath}
+        unstyled
         className={`px-4 py-2 text-sm font-medium rounded-t-md border-b-2 ${
           isActive(basePath)
             ? "border-primary text-primary font-semibold"
@@ -28,18 +29,6 @@ export default function NavTabs({ basePath }: NavTabsProps) {
         }`}
       >
         Dashboard
-      </Link>
-      <div
-        //change to Link to activate
-        href={`${basePath}/analytics`}
-        className={`px-4 py-2 text-sm font-medium rounded-t-md border-b-2 ${
-          isActive(`${basePath}/analytics`)
-            ? "border-primary text-primary font-semibold"
-            : "border-transparent hover:bg-muted"
-        }`}
-      >
-        Analytics
-      </div>
-    </nav>
-  );
+      </LoadingLink>
+    </nav>);
 }

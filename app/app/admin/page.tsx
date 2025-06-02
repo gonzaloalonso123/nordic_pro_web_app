@@ -2,9 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 import { useUrl } from "@/hooks/use-url";
+import { LoadingLink } from "@/components/ui/loading-link";
 
 const Page = () => {
   const path = useUrl();
@@ -21,15 +21,8 @@ const Page = () => {
           className="w-full"
           alt="Hero image"
         />
-        <Button asChild>
-          <Link href={`${path}/organisations`}>Organisations</Link>
-        </Button>
-        <Button asChild>
-          <Link href={`${path}/forms`}>Forms</Link>
-        </Button>
-        <Button asChild>
-          <Link href="">Option 3</Link>
-        </Button>
+        <LoadingLink variant="default" href={`${path}/organisations`}>Organisations</LoadingLink>
+        <LoadingLink variant="default" href={`${path}/forms`}>Forms</LoadingLink>
       </Card>
     </div>
   );

@@ -2,6 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all duration-300 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden select-none",
@@ -79,7 +80,7 @@ const buttonVariants = cva(
         ],
         sport: [
           "bg-linear-to-r from-emerald-500 to-teal-500 text-white",
-          "hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_10px_25px_-5px_rgba(16,185,129,0.4)]",
+          "hover:shadow-[0_10px_25px_-5px_rgba(16,185,129,0.4)]",
           "hover:translate-y-[-2px]",
           "active:translate-y-[0px] active:shadow-[0_5px_15px_-3px_rgba(16,185,129,0.3)]",
           "after:absolute after:inset-0 after:bg-linear-to-r after:from-transparent after:via-white/30 after:to-transparent after:opacity-0 after:-translate-x-full hover:after:translate-x-[200%] hover:after:opacity-100 after:transition-all after:duration-500 after:ease-in-out",
@@ -124,17 +125,24 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  isLoading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, rounded, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, rounded, asChild = false, isLoading = false, disabled, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, rounded, className }))}
         ref={ref}
+        disabled={disabled || isLoading}
         {...props}
-      />
+      >
+        {isLoading && (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        )}
+        {children}
+      </Comp>
     );
   }
 );

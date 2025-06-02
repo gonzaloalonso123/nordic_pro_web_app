@@ -32,49 +32,49 @@ import {
   Trash2,
   Search,
   Award,
-  ArrowLeft,
   Loader2,
 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import {
   useQuestions,
   useCategories,
   useDeleteQuestion,
 } from "@/hooks/queries/useQuestions";
+import { LoadingLink } from "@/components/ui/loading-link";
+import BackButton from "@/components/ui/back-button";
+import { useHeader } from "@/hooks/useHeader";
 
 export default function QuestionList() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const params = useParams();
+  const { useHeaderConfig } = useHeader();
   const baseUrl = `/app/admin/forms/questions`;
+
+  useHeaderConfig({
+    leftContent: <BackButton path={`/app/admin/forms`} />,
+    centerContent: (
+      <h3 className="text-xl font-semibold">
+        Question Bank
+      </h3>
+    ),
+    rightContent: (
+      <LoadingLink href={`${baseUrl}/create`} variant="default">
+        <PlusCircle className="h-4 w-4 mr-2" />
+        Create Question
+      </LoadingLink>
+    )
+  }, [baseUrl]);
 
   const {
     data: questionsData,
     isLoading: questionsLoading,
     isError: questionsError,
   } = useQuestions();
-  const { data: categoriesData, isLoading: categoriesLoading } =
-    useCategories();
+  const { data: categoriesData } = useCategories();
   const categories = categoriesData?.map((cat) => cat.name) || [];
   const deleteQuestion = useDeleteQuestion();
-  // {
-  //   onSuccess: () => {
-  //     toast({
-  //       title: "Success",
-  //       description: "Question deleted successfully",
-  //     });
-  //   },
-  //   onError: (error) => {
-  //     toast({
-  //       title: "Error",
-  //       description: `Failed to delete question: ${error.message}`,
-  //       variant: "destructive",
-  //     });
-  //   },
-  // }
 
   const onDelete = (questionId: string) => {
     if (confirm("Are you sure you want to delete this question?")) {
@@ -117,27 +117,12 @@ export default function QuestionList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-2 items-center">
-          <Button variant="ghost" size="icon" aria-label="Back">
-            <Link href={`/app/admin/forms`} className="p-3">
-              <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold">Question Bank</h1>
-        </div>
-        <Button onClick={() => router.push(`${baseUrl}/create`)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Create Question
-        </Button>
-      </div>
-
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search questions..."
             value={searchTerm}
+            icon={<Search className="h-4 w-4 text-muted-foreground" />}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
           />
@@ -190,7 +175,7 @@ export default function QuestionList() {
               )}
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <Badge variant="outline">{question.category}</Badge>
+                  {question.category ? <Badge variant="outline">{question.category}</Badge> : <div />}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon">
@@ -239,16 +224,16 @@ export default function QuestionList() {
                   <span>{question.experience} XP</span>
                 </div>
               </CardContent>
-              <CardFooter className="pt-0">
-                <Button
+              <CardFooter>
+                <LoadingLink
+                  href={`${baseUrl}/edit/${question.id}`}
                   variant="ghost"
                   size="sm"
                   className="w-full"
-                  onClick={() => router.push(`${baseUrl}/edit/${question.id}`)}
                 >
-                  <Pencil className="h-3.5 w-3.5 mr-2" />
+                  <Pencil className="h-4 w-4 mr-2" />
                   Edit Question
-                </Button>
+                </LoadingLink>
               </CardFooter>
             </Card>
           ))}

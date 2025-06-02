@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreVertical } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState, useMemo } from "react";
 import {
   useChatRoomsByUser,
@@ -11,9 +10,9 @@ import {
 } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
 import { useUrl } from "@/hooks/use-url";
 import { getInitials } from "@/utils/get-initials";
+import { LoadingLink } from "../ui/loading-link";
 
 export default function ChatListSidebar() {
   const { user } = useCurrentUser();
@@ -67,7 +66,8 @@ export default function ChatListSidebar() {
               const unreadCount = unreadCounts[room.id] || 0;
 
               return (
-                <Link
+                <LoadingLink
+                  unstyled
                   href={`${path}/chat/${room.id}`}
                   key={room.id}
                   className="block"
@@ -111,7 +111,7 @@ export default function ChatListSidebar() {
                       </Badge>
                     )}
                   </div>
-                </Link>
+                </LoadingLink>
               );
             })
           ) : (

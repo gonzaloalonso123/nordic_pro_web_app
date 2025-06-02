@@ -1,14 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { LoadingLink } from "@/components/ui/loading-link";
 import { useUrl } from "@/hooks/use-url";
-import Link from "next/link";
 import React from "react";
 
 export const CreateOrganisationButton = () => {
   const path = useUrl();
   return (
     <Button asChild>
-      <Link href={`${path}/organisations/create`}>Create Organisation</Link>
+      <LoadingLink href={`${path}/organisations/create`}>Create Organisation</LoadingLink>
     </Button>
   );
 };
