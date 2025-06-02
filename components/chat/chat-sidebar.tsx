@@ -3,26 +3,58 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   useChatRoomsByUser,
   useUnreadMessageCountBatch,
+  useMarkRoomAsRead,
 } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUrl } from "@/hooks/use-url";
 import { getInitials } from "@/utils/get-initials";
 import { LoadingLink } from "../ui/loading-link";
+import { formatChatTime, formatMessagePreviewWithSender } from "@/utils/format-time";
+import { cn } from "@/lib/utils";
+
+type EnhancedChatRoom = {
+  id: string;
+  name: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  last_message: Array<{
+    id: string;
+    content: string;
+    created_at: string;
+    user_id: string;
+    users: {
+      id: string;
+      first_name: string | null;
+      last_name: string | null;
+    } | null;
+  }> | null;
+  chat_room_members: Array<{
+    user_id: string;
+    last_read_at: string | null;
+  }>;
+};
 
 export default function ChatListSidebar() {
   const { user } = useCurrentUser();
   const { data: chatRooms, isLoading } = useChatRoomsByUser(user?.id);
   const [searchQuery, setSearchQuery] = useState("");
+  const markRoomAsReadMutation = useMarkRoomAsRead();
 
   const path = useUrl();
+
+  // Transform the data structure for type safety
+  const typedRooms = useMemo(() => {
+    return (chatRooms as EnhancedChatRoom[]) || [];
+  }, [chatRooms]);
+
   const roomIds = useMemo(
-    () => chatRooms?.map((room) => room.id) || [],
-    [chatRooms]
+    () => typedRooms.map((room) => room.id),
+    [typedRooms]
   );
 
   const { data: unreadCounts = {} } = useUnreadMessageCountBatch(
@@ -30,10 +62,44 @@ export default function ChatListSidebar() {
     user?.id
   );
 
-  const filteredRooms =
-    chatRooms?.filter((room) =>
+  // Sort rooms by latest message timestamp, with empty rooms at the bottom
+  const sortedRooms = useMemo(() => {
+    return [...typedRooms].sort((a, b) => {
+      const aLastMessage = a.last_message?.[0];
+      const bLastMessage = b.last_message?.[0];
+      
+      // If both have messages, sort by message timestamp (newest first)
+      if (aLastMessage && bLastMessage) {
+        return new Date(bLastMessage.created_at).getTime() - new Date(aLastMessage.created_at).getTime();
+      }
+      
+      // If only one has messages, prioritize the one with messages
+      if (aLastMessage && !bLastMessage) return -1;
+      if (!aLastMessage && bLastMessage) return 1;
+      
+      // If neither has messages, sort by room creation date (newest first)
+      const aTimestamp = a.updated_at || a.created_at;
+      const bTimestamp = b.updated_at || b.created_at;
+
+      if (!aTimestamp && !bTimestamp) return 0;
+      if (!aTimestamp) return 1;
+      if (!bTimestamp) return -1;
+
+      return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
+    });
+  }, [typedRooms]);
+
+  const filteredRooms = useMemo(() => {
+    return sortedRooms.filter((room) =>
       room.name?.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+    );
+  }, [sortedRooms, searchQuery]);
+
+  const handleRoomClick = useCallback((roomId: string) => {
+    if (user?.id) {
+      markRoomAsReadMutation.mutate({ roomId, userId: user.id });
+    }
+  }, [user?.id, markRoomAsReadMutation]);
 
   return (
     <Card className="h-full flex flex-col">
@@ -64,6 +130,20 @@ export default function ChatListSidebar() {
           ) : filteredRooms.length > 0 ? (
             filteredRooms.map((room) => {
               const unreadCount = unreadCounts[room.id] || 0;
+              const hasUnread = unreadCount > 0;
+              const lastMessage = room.last_message?.[0];
+              const lastMessageTime = lastMessage?.created_at || room.updated_at;
+
+              // Format message preview with sender name
+              const messagePreview = lastMessage
+                ? formatMessagePreviewWithSender(
+                    lastMessage.content,
+                    lastMessage.users?.first_name || null,
+                    lastMessage.users?.last_name || null,
+                    user?.id || '',
+                    lastMessage.user_id
+                  )
+                : "No recent messages";
 
               return (
                 <LoadingLink
@@ -71,43 +151,53 @@ export default function ChatListSidebar() {
                   href={`${path}/chat/${room.id}`}
                   key={room.id}
                   className="flex min-h-18 justify-center items-center"
+                  onClick={() => handleRoomClick(room.id)}
                 >
-                  <div className="flex w-full items-center gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+                  <div className={cn(
+                    "flex w-full items-center gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors",
+                    hasUnread && "bg-blue-50/30 hover:bg-blue-50/50"
+                  )}>
                     <div className="relative">
                       <Avatar>
                         <AvatarImage
-                          src={room.avatar_url}
+                          src={undefined} // Remove avatar_url as it's not in schema
                           alt={room.name || ""}
                         />
                         <AvatarFallback>
                           {getInitials(room.name)}
                         </AvatarFallback>
                       </Avatar>
-                      {room.is_active && (
-                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
+                      {hasUnread && (
+                        <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-blue-500 border-2 border-white"></span>
                       )}
                     </div>
                     <div className="grow min-w-0">
-                      <div className="flex justify-between items-center">
-                        <h4 className="font-medium text-sm truncate">
+                      <div className="flex justify-between items-center mb-1">
+                        <h4 className={cn(
+                          "text-sm truncate",
+                          hasUnread ? "font-semibold text-gray-900" : "font-medium text-gray-700"
+                        )}>
                           {room.name || "Unnamed Chat"}
                         </h4>
-                        <span className="text-xs text-gray-500">
-                          {room.updated_at
-                            ? new Date(room.updated_at).toLocaleDateString()
-                            : ""}
-                        </span>
+                        {lastMessageTime && (
+                          <span className="text-xs text-gray-500 ml-2 shrink-0">
+                            {formatChatTime(lastMessageTime)}
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-gray-500 truncate">
-                        {room.last_message || "No recent messages"}
+                      <p className={cn(
+                        "text-xs truncate",
+                        hasUnread ? "text-gray-600 font-medium" : "text-gray-500"
+                      )}>
+                        {messagePreview}
                       </p>
                     </div>
                     {unreadCount > 0 && (
                       <Badge
                         variant="default"
-                        className="rounded-full h-5 w-5 p-0 flex items-center justify-center"
+                        className="rounded-full h-5 min-w-5 px-1.5 text-xs flex items-center justify-center bg-blue-500 hover:bg-blue-600"
                       >
-                        {unreadCount}
+                        {unreadCount > 99 ? '99+' : unreadCount}
                       </Badge>
                     )}
                   </div>
