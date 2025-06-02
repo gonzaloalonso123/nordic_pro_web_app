@@ -387,45 +387,49 @@ export const useUnreadMessageCountBatch = (
     queryFn: async () => {
       if (!roomIds || !roomIds.length || !userId) return {};
 
-      const counts: Record<string, number> = {};
-
-      await Promise.all(
-        roomIds.map(async (roomId) => {
-          const count = await chatRoomsService.getUnreadMessageCount(
-            supabase,
-            roomId,
-            userId
-          );
-          counts[roomId] = count;
-        })
+      return await chatRoomsService.getUnreadCountsBatch(
+        supabase,
+        roomIds,
+        userId
       );
-
-      return counts;
     },
     enabled: !!roomIds?.length && !!userId,
+    staleTime: 30000, // 30 seconds
     ...options,
   });
 };
 
-export const useChatRoomUnreadCount = (
-  roomId: string | undefined,
-  userId: string | undefined,
+// Mark room as read mutation
+export const useMarkRoomAsRead = (
   options?: Omit<
-    UseQueryOptions<number, Error, number>,
-    "queryKey" | "queryFn" | "enabled"
+    UseMutationOptions<void, Error, { roomId: string; userId: string }>,
+    "mutationFn"
   >
 ) => {
   const supabase = createClient();
-  return useQuery<number, Error, number>({
-    queryKey: ["chatRoomUnreadCount", roomId, userId],
-    queryFn: () =>
-      roomId && userId
-        ? chatRoomsService.getChatRoomUnreadCount(supabase, roomId, userId)
-        : 0,
-    enabled: !!roomId && !!userId,
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { roomId: string; userId: string }>({
+    mutationFn: ({ roomId, userId }) =>
+      chatRoomsService.markRoomAsRead(supabase, roomId, userId),
+    onSuccess: (_, { roomId, userId }) => {
+      // Invalidate unread count queries
+      queryClient.invalidateQueries({
+        queryKey: ["unreadMessages", roomId, userId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["unreadMessages", "batch"],
+      });
+      // Also invalidate the chat rooms list to update UI
+      queryClient.invalidateQueries({
+        queryKey: ["chatRooms", "user", userId],
+      });
+    },
     ...options,
   });
-}
+};
+
+// Remove this duplicate hook as it's redundant with useUnreadMessageCount
 
 // --- NEW: Logic and Hook for Starting a Direct Chat ---
 

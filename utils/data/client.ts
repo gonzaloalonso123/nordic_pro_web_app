@@ -164,6 +164,7 @@ export const useClientData = () => {
       useByUser: chatRoomQueries.useChatRoomsByUser,
       useWithMessages: chatRoomQueries.useChatRoomWithMessages,
 
+      useWithUsers: chatRoomQueries.useChatRoomWithUsers,
       // Message methods
       useMessagesByRoom: chatRoomQueries.useChatMessagesByRoom,
       useSendMessage: chatRoomQueries.useSendChatMessage,
@@ -177,6 +178,10 @@ export const useClientData = () => {
       useMarkAsRead: chatRoomQueries.useMarkMessageAsRead,
       useUnreadCount: chatRoomQueries.useUnreadMessageCount,
 
+      useUnraedCountBatch: chatRoomQueries.useUnreadMessageCountBatch,
+      useMarkRoomAsRead: chatRoomQueries.useMarkRoomAsRead,
+
+      useStartDirectChat: chatRoomQueries.useStartDirectChat,
       // Mutations
       useCreate: chatRoomQueries.useCreateChatRoom,
       useUpdate: chatRoomQueries.useUpdateChatRoom,
