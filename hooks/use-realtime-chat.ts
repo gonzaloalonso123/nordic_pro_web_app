@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/database.types";
 
@@ -8,14 +8,17 @@ export function useRealtimeChat<T>(
 ) {
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const onNewMessageRef = useRef(onNewMessage);
 
   useEffect(() => {
-    if (!roomId || !onNewMessage) return;
+    onNewMessageRef.current = onNewMessage;
+  }, [onNewMessage]);
 
-    // Create a unique channel name for this room
+  useEffect(() => {
+    if (!roomId) return;
 
     const channel = supabase
-      .channel(roomId)
+      .channel(`chat_room_${roomId}`)
       .on<Tables<"chat_messages">>(
         "postgres_changes",
         {
@@ -25,7 +28,7 @@ export function useRealtimeChat<T>(
           filter: `room_id=eq.${roomId}`,
         },
         (payload) => {
-          onNewMessage(payload.new as unknown as T);
+          onNewMessageRef.current(payload.new as unknown as T);
         }
       )
       .subscribe((status, err) => {
@@ -34,11 +37,10 @@ export function useRealtimeChat<T>(
             `Real-time connection issue: ${err?.message || status.toLowerCase()}`
           );
         } else if (status === "SUBSCRIBED") {
-          console.log(`Successfully subscribed to chat room ${roomId}`);
+          setError(null);
         }
       });
 
-    // Clean up the subscription when the component unmounts
     return () => {
       supabase.removeChannel(channel);
     };
