@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { LoadingLink } from "@/components/ui/loading-link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import MobilePlatformNavbar from "@/unsupervised-components/mobile-platform-navbar";
+import MobilePlatformNavbar from "@/components/mobile-platform-navbar";
 import { useMenuItems } from "@/hooks/use-menu-items";
 
 export default function PlatformSidebar() {
@@ -46,7 +46,7 @@ export default function PlatformSidebar() {
 
                 return (
                   <li key={item.name}>
-                    <Link
+                    <LoadingLink
                       href={item.href}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2 rounded-lg transition-all",
@@ -55,18 +55,18 @@ export default function PlatformSidebar() {
                           : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
                         collapsed && "w-fit"
                       )}
+                      unstyled
+                      showSpinner
                     >
                       <Icon className="h-6 w-6 shrink-0" />
                       {!collapsed && <span>{item.name}</span>}
-                    </Link>
+                    </LoadingLink>
                   </li>
                 );
               })}
             </ul>
           </nav>
         </div>
-
-        {/* <ProFeatures collapsed={collapsed} /> */}
       </div>
 
       <div className="fixed bottom-4 right-4 md:hidden z-50">

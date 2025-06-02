@@ -8,12 +8,12 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Content } from "@/components/content";
 import { useClientData } from "@/utils/data/client";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
-import { Button } from "@/components/ui/button";
 import { PlusCircle, CalendarIcon, Table } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUrl } from "@/hooks/use-url";
 import { useHeader } from "@/hooks/useHeader";
 import { TrainingSessionsTable } from "./components/table-view";
+import { LoadingLink } from "@/components/ui/loading-link";
 
 export default function CalendarDemo() {
   const [selectedView, setSelectedView] = useState<
@@ -35,15 +35,11 @@ export default function CalendarDemo() {
   useHeaderConfig({
     centerContent: "Events",
     rightContent: (
-      <Button
-        onClick={() => {
-          router.push(`${path}/calendar/add-event`);
-        }}
-      >
+      <LoadingLink variant="default" href={`${path}/calendar/add-event`} >
         <PlusCircle className="mr-2 h-4 w-4" />
         <span className="hidden sm:inline">Add event</span>
         <span className="sm:hidden">Add</span>
-      </Button>
+      </LoadingLink>
     ),
   });
 

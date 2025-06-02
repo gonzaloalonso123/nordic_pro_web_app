@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
+import { LoadingLink } from "@/components/ui/loading-link";
 import { FileText, ListChecks } from "lucide-react";
 
 export default function HomePage() {
@@ -31,9 +31,9 @@ export default function HomePage() {
           </p>
         </CardContent>
         <CardFooter>
-          <Link href={`${baseUrl}/questions`} className="w-full">
-            <Button className="w-full">Manage Questions</Button>
-          </Link>
+          <LoadingLink variant="default" href={`${baseUrl}/questions`} className="w-full">
+            Manage Questions
+          </LoadingLink>
         </CardFooter>
       </Card>
 
@@ -54,9 +54,9 @@ export default function HomePage() {
           </p>
         </CardContent>
         <CardFooter>
-          <Link href={`${baseUrl}/forms`} className="w-full">
-            <Button className="w-full">Manage Forms</Button>
-          </Link>
+          <LoadingLink variant="default" href={`${baseUrl}/forms`} className="w-full">
+            Manage Forms
+          </LoadingLink>
         </CardFooter>
       </Card>
       <Card>
@@ -76,9 +76,9 @@ export default function HomePage() {
           </p>
         </CardContent>
         <CardFooter>
-          <Link href={`${baseUrl}/programs`} className="w-full">
-            <Button className="w-full">Manage Programs</Button>
-          </Link>
+          <LoadingLink variant="default" href={`${baseUrl}/programs`} className="w-full">
+            Manage Programs
+          </LoadingLink>
         </CardFooter>
       </Card>
     </div>

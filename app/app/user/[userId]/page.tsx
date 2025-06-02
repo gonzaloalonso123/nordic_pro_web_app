@@ -9,11 +9,22 @@ import { Button } from '@/components/ui/button';
 import { Content } from '@/components/content';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { getInitials } from '@/utils/get-initials';
+import { useHeader } from '@/hooks/useHeader';
 
 export default function UserProfilePage() {
   const params = useParams();
   const userId = params.userId as string;
   const dataClient = useClientData();
+  const { useHeaderConfig } = useHeader();
+
+  useHeaderConfig({
+    centerContent: (
+      <h3 className="text-xl font-semibold">
+        User Profile
+      </h3>
+    ),
+  });
+
   const { user: currentUser, isLoading: authLoading } = useCurrentUser();
 
   const { data: user, isLoading: profileIsLoading, error: profileError } = dataClient.users.useById(userId);
@@ -45,8 +56,6 @@ export default function UserProfilePage() {
 
   return (
     <Content>
-      <h1 className="text-3xl font-bold mb-6 text-center">User Profile</h1>
-
       <Card className="mx-auto p-4 max-w-2xl">
         <CardHeader className="flex items-center gap-4">
           <Avatar>

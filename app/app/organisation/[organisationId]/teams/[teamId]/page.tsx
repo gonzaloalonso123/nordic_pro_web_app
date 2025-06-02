@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { serverData } from "@/utils/data/server";
-import Link from "next/link";
 import flags from "@/flags.json";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,6 +8,7 @@ import { format } from "date-fns";
 import { Content } from "@/components/content";
 import Calendar from "@/components/calendar/event-calendar";
 import { getInitials } from "@/utils/get-initials";
+import { LoadingLink } from "@/components/ui/loading-link";
 
 type PageProps = {
   params: Promise<{
@@ -41,15 +41,15 @@ const Page = async (props: PageProps) => {
               <Users className="mr-2 h-5 w-5" />
               Team Members
             </h2>
-            <Button variant="sport" size="sm" asChild>
-              <Link
-                className="flex gap-2 items-center"
-                href={`${flags.current_app}/organisation/${organisationId}/teams/${teamId}/add-member`}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Member
-              </Link>
-            </Button>
+            <LoadingLink
+              variant="sport"
+              size="sm"
+              className="flex gap-2 items-center"
+              href={`${flags.current_app}/organisation/${organisationId}/teams/${teamId}/add-member`}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Member
+            </LoadingLink>
           </div>
 
           <div className="space-y-3">
@@ -72,15 +72,15 @@ const Page = async (props: PageProps) => {
               <CalendarPlus className="mr-2 h-5 w-5" />
               Team Calendar
             </h2>
-            <Button variant="sport" size="sm" asChild>
-              <Link
-                className="flex gap-2 items-center"
-                href={`${flags.current_app}/organisation/${organisationId}/teams/${teamId}/add-event`}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Event
-              </Link>
-            </Button>
+            <LoadingLink
+              variant="sport"
+              size="sm"
+              className="flex gap-2 items-center"
+              href={`${flags.current_app}/organisation/${organisationId}/teams/${teamId}/add-event`}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Event
+            </LoadingLink>
           </div>
 
           <Card>
@@ -139,14 +139,13 @@ const MemberCard = ({ member }: { member: any }) => {
             </p>
           </div>
         </div>
-        <Link
+        <LoadingLink
           href={`${flags.current_app}/admin/users/${user.id}`}
           className="flex gap-2 items-center"
+          size="sm"
         >
-          <Button variant="link" size="sm">
-            View Profile
-          </Button>
-        </Link>
+          View Profile
+        </LoadingLink>
       </CardHeader>
     </Card>
   );
@@ -169,14 +168,13 @@ const EventCard = ({ event }: { event: any }) => {
             </span>
           </div>
         </div>
-        <Link
+        <LoadingLink
           href={`${flags.current_app}/admin/events/${event.id}`}
           className="flex gap-2 items-center"
+          size="sm"
         >
-          <Button variant="link" size="sm">
-            View Details
-          </Button>
-        </Link>
+          View Details
+        </LoadingLink>
       </CardHeader>
     </Card>
   );

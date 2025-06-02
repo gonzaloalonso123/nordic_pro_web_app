@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Paperclip, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { useMessages } from "@/hooks/use-chat-room";
 import { useRealtimeChat } from "@/hooks/use-realtime-chat";
 import { getInitials } from "@/utils/get-initials";

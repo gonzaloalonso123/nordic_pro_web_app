@@ -24,16 +24,33 @@ import {
   Search,
   Eye,
   BarChart,
-  ArrowLeft,
 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useDeleteForm, useForms } from "@/hooks/queries";
+import { LoadingLink } from "@/components/ui/loading-link";
+import BackButton from "@/components/ui/back-button";
+import { useHeader } from "@/hooks/useHeader";
 
 export default function FormList() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const baseUrl = `/app/admin/forms`;
+  const { useHeaderConfig } = useHeader();
+
+  useHeaderConfig({
+    leftContent: <BackButton path={baseUrl} />,
+    centerContent: (
+      <h3 className="text-xl font-semibold">
+        Forms
+      </h3>
+    ),
+    rightContent: (
+      <LoadingLink href={`${baseUrl}/forms/create`} variant="default">
+        <PlusCircle className="h-4 w-4 mr-2" />
+        Create Form
+      </LoadingLink>
+    )
+  }, [baseUrl]);
 
   const { data: forms, isPending, isError } = useForms();
   const onDelete = useDeleteForm();
@@ -59,27 +76,12 @@ export default function FormList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" aria-label="Back">
-            <Link href={baseUrl} className="p-3">
-              <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold">Forms</h1>
-        </div>
-        <Button onClick={() => router.push(`${baseUrl}/forms/create`)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Create Form
-        </Button>
-      </div>
-
       <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search forms..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          icon={<Search className="h-4 w-4 text-muted-foreground" />}
           className="pl-8"
         />
       </div>

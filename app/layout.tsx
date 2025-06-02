@@ -4,6 +4,8 @@ import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ReactQueryProvider } from "@/providers/reactQueryProvider";
 import PWAViewportManager from "@/components/pwa/PWAViewportManager";
+import { LoadingProvider } from "@/contexts/LoadingContext";
+import { GlobalLoadingIndicator } from "@/components/ui/loading-indicators";
 
 
 const inter = Inter({
@@ -41,8 +43,11 @@ export default function RootLayout({
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
         >
-          <PWAViewportManager />
-          <main className="grow">{children}</main>
+          <LoadingProvider>
+            <GlobalLoadingIndicator />
+            <PWAViewportManager />
+            <main className="grow">{children}</main>
+          </LoadingProvider>
         </body>
       </html>
     </ReactQueryProvider>
