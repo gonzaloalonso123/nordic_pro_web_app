@@ -122,8 +122,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
 }
@@ -138,10 +137,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         {...props}
       >
-        {isLoading && (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        )}
-        {children}
+        <>
+          {isLoading && (<Loader2 className="mr-2 h-4 w-4 animate-spin" />)}
+          {children}
+        </>
       </Comp>
     );
   }
