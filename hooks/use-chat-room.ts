@@ -10,12 +10,12 @@ export function useMessages(
 ) {
   const [messages, setMessages] = useState<DisplayMessage[]>(initialMessages);
   const [error, setError] = useState<string | null>(null);
+  const [realtimeTrigger, setRealtimeTrigger] = useState(0);
   const previousMessagesRef = useRef<string[]>([]);
   const pendingRealtimeMessagesRef = useRef<Map<string, Tables<"chat_messages">>>(new Map());
 
   const { users, chatMessages } = useClientData();
 
-  // Fetch messages for the room
   const { data: roomMessages, isPending } = chatMessages.useChatMessagesByRoom(roomId, {
     initialData: () => initialMessages.map(m => ({
       id: m.id,
@@ -26,12 +26,10 @@ export function useMessages(
     }))
   });
 
-  // Setup message creation mutation
   const { mutateAsync: createMessage } = chatMessages.useCreateChatMessage({
     onError: (err) => setError(`Failed to send message: ${err.message}`)
   });
 
-  // Get unique user IDs from messages and pending realtime messages
   const allMessages = [
     ...(roomMessages || []),
     ...Array.from(pendingRealtimeMessagesRef.current.values())
@@ -43,37 +41,30 @@ export function useMessages(
       .map(msg => msg.user_id as string)
   )];
 
-  // Fetch user data for all unique user IDs at once using useByIds
   const { data: userDataList, isPending: usersLoading } = users.useByIds(userIds);
 
-  // Create a map of user data for easy lookup
   const userDataMap = userDataList
     ? Object.fromEntries(userDataList.map(user => [user.id, user]))
     : {};
 
-  // Process messages and add author information
   useEffect(() => {
     if (!roomMessages || usersLoading) {
       return;
     }
 
-    // Check if message list has changed
     const messageIds = roomMessages.map(msg => msg.id);
     const hasChanged = messageIds.length !== previousMessagesRef.current.length ||
       messageIds.some((id, i) => id !== previousMessagesRef.current[i]);
 
     if (!hasChanged && pendingRealtimeMessagesRef.current.size === 0) return;
 
-    // Save current message IDs for comparison
     previousMessagesRef.current = messageIds;
 
-    // Process both database messages and pending realtime messages
     const combinedMessages = [
       ...roomMessages,
       ...Array.from(pendingRealtimeMessagesRef.current.values())
     ];
 
-    // Add author information to messages
     const processedMessages = combinedMessages.map(msg => {
       return {
         ...msg,
@@ -81,33 +72,29 @@ export function useMessages(
       };
     });
 
-    // Sort messages by creation time
     processedMessages.sort((a, b) => {
       return new Date(a.created_at!).getTime() - new Date(b.created_at!).getTime();
     });
 
-    // Clear processed realtime messages
     pendingRealtimeMessagesRef.current.clear();
 
     setMessages(processedMessages);
-  }, [roomMessages, userDataList, usersLoading, userDataMap]);
-
-  const messageAlreadyExists = useCallback((messageId: Tables<"chat_messages">['id']) => {
-    return messages.some(msg => msg.id === messageId);
-  }, [messages]);
+  }, [roomMessages, userDataList, usersLoading, userDataMap, realtimeTrigger]);
 
   const handleNewRealtimeMessage = useCallback((newMessage: Tables<"chat_messages">) => {
-    if (messageAlreadyExists(newMessage.id)) return;
+    const messageExists = pendingRealtimeMessagesRef.current.has(newMessage.id);
+
+    if (messageExists) {
+      return;
+    }
 
     if (newMessage.user_id) {
       pendingRealtimeMessagesRef.current.set(newMessage.id, newMessage);
 
-      // Force a re-render to process the message with author data
-      setMessages(prev => [...prev]);
+      setRealtimeTrigger(prev => prev + 1);
     }
-  }, [messageAlreadyExists]);
+  }, []);
 
-  // Send a new message
   const sendMessage = useCallback(async (content: string) => {
     if (content.trim() === "" || !currentUser || !roomId) {
       if (!currentUser) setError("You must be logged in to send messages.");
@@ -118,7 +105,6 @@ export function useMessages(
       const tempId = `temp_${Date.now()}`;
       const messageContent = content.trim();
 
-      // Add optimistic message
       const optimisticMessage = {
         room_id: roomId,
         user_id: currentUser.id,
@@ -130,14 +116,12 @@ export function useMessages(
 
       setMessages(prev => [...prev, optimisticMessage]);
 
-      // Send to server
       const insertedData = await createMessage({
         room_id: roomId,
         user_id: currentUser.id,
         content: messageContent,
       });
 
-      // Replace optimistic message with server response
       if (insertedData) {
         setMessages(prev => prev.map(msg =>
           msg.id === tempId ? { ...insertedData, author: currentUser } : msg
