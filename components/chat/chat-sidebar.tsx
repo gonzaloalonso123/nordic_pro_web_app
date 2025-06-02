@@ -70,9 +70,9 @@ export default function ChatListSidebar() {
                   unstyled
                   href={`${path}/chat/${room.id}`}
                   key={room.id}
-                  className="block"
+                  className="flex min-h-18 justify-center items-center"
                 >
-                  <div className="flex items-center gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+                  <div className="flex w-full items-center gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors">
                     <div className="relative">
                       <Avatar>
                         <AvatarImage
