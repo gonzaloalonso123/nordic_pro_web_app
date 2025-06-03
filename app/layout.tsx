@@ -49,7 +49,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <ReactQueryProvider>
       <html lang="en">
         <head>
-          <link rel="manifest" href="/manifest.json" />
           <link rel="apple-touch-icon" href="/icon-192x192.png" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta
