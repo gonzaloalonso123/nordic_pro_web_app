@@ -7,7 +7,6 @@ import PWAViewportManager from "@/components/pwa/PWAViewportManager";
 import { LoadingProvider } from "@/contexts/LoadingContext";
 import { GlobalLoadingIndicator } from "@/components/ui/loading-indicators";
 
-
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -24,13 +23,19 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "NordicPro Platform",
   description: "Mental health, motivation, and team management in one place.",
+  generator: "Next.js",
+  manifest: "/manifest.json",
+  keywords: ["nextjs", "next14", "pwa", "next-pwa"],
+  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#fff" }],
+  viewport:
+    "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
+  icons: [
+    { rel: "apple-touch-icon", url: "icon-192x192.png" },
+    { rel: "icon", url: "icon-192x192.png" },
+  ],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <ReactQueryProvider>
       <html lang="en">

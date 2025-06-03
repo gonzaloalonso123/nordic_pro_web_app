@@ -3,7 +3,12 @@
 import { useState } from "react";
 import Calendar from "../../../../../components/calendar/event-calendar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/custom/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/custom/tabs";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Content } from "@/components/content";
 import { useClientData } from "@/utils/data/client";
@@ -35,7 +40,7 @@ export default function CalendarDemo() {
   useHeaderConfig({
     centerContent: "Events",
     rightContent: (
-      <LoadingLink variant="default" href={`${path}/calendar/add-event`} >
+      <LoadingLink variant="default" href={`${path}/calendar/add-event`}>
         <PlusCircle className="mr-2 h-4 w-4" />
         <span className="hidden sm:inline">Add event</span>
         <span className="sm:hidden">Add</span>
