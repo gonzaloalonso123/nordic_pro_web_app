@@ -1,12 +1,10 @@
-const withPWA = require("next-pwa")({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-  register: true,
-  skipWaiting: true,
-});
-
+/** @type {import('next').NextConfig} */
+const isMobile = process.env.NEXT_PUBLIC_IS_MOBILE === "true";
 const nextConfig = {
+  ...(isMobile ? { output: "export" } : {}),
+  reactStrictMode: true,
   images: {
+    unoptimized: true,
     domains: ["rcuficvjsjdizfigkdfx.supabase.co"],
   },
   typescript: {
@@ -15,4 +13,4 @@ const nextConfig = {
   devIndicators: false,
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = nextConfig;

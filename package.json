@@ -5,7 +5,8 @@
     "build": "next build",
     "start": "next start",
     "tsc": "tsc --noEmit",
-    "update-types": "npx supabase gen types typescript --project-id 'rcuficvjsjdizfigkdfx' --schema public > types/database.types.ts"
+    "update-types": "npx supabase gen types typescript --project-id 'rcuficvjsjdizfigkdfx' --schema public > types/database.types.ts",
+    "static": "NEXT_PUBLIC_IS_MOBILE=true next build"
   },
   "engines": {
     "node": "<=23"
