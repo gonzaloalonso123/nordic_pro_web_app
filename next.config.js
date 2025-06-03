@@ -1,4 +1,9 @@
-import withPWA from "next-pwa";
+const withPWA = require("next-pwa")({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+});
 
 const nextConfig = {
   images: {
@@ -8,12 +13,6 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   devIndicators: false,
-  pwa: {
-    dest: "public",
-    disable: process.env.NODE_ENV === "development",
-    register: true,
-    skipWaiting: true,
-  },
 };
 
-export default withPWA(nextConfig);
+module.exports = withPWA(nextConfig);
