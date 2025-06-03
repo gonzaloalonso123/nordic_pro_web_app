@@ -21,18 +21,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "NordicPro Platform",
-  description: "Mental health, motivation, and team management in one place.",
-  generator: "Next.js",
   manifest: "/manifest.json",
-  keywords: ["nextjs", "next14", "pwa", "next-pwa"],
-  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#fff" }],
-  viewport:
-    "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
-  icons: [
-    { rel: "apple-touch-icon", url: "icon-192x192.png" },
-    { rel: "icon", url: "icon-192x192.png" },
-  ],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -44,6 +33,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             name="viewport"
             content="width=device-width, initial-scale=1.0"
           />
+          <link rel="apple-touch-icon" href="/icon-192x192.png" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="mobile-web-app-capable" content="yes" />
+          <meta name="application-name" content="NordicPro" />
+          <meta name="apple-mobile-web-app-title" content="NordicPro" />
+          <meta name="theme-color" content="#007BFF" />
           <link rel="manifest" href="/manifest.json" />
         </head>
         <body
