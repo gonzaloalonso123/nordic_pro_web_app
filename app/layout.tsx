@@ -44,6 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             name="viewport"
             content="width=device-width, initial-scale=1.0"
           />
+          <link rel="manifest" href="/manifest.json" />
         </head>
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}

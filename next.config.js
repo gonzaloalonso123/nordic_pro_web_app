@@ -1,3 +1,5 @@
+import withPWA from "next-pwa";
+
 const nextConfig = {
   images: {
     domains: ["rcuficvjsjdizfigkdfx.supabase.co"],
@@ -6,5 +8,12 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   devIndicators: false,
+  pwa: {
+    dest: "public",
+    disable: process.env.NODE_ENV === "development",
+    register: true,
+    skipWaiting: true,
+  },
 };
-module.exports = nextConfig;
+
+export default withPWA(nextConfig);
