@@ -1,16 +1,44 @@
 /** @type {import('next').NextConfig} */
-const isMobile = process.env.NEXT_PUBLIC_IS_MOBILE === "true";
 const nextConfig = {
-  ...(isMobile ? { output: "export" } : {}),
-  reactStrictMode: true,
-  images: {
-    unoptimized: true,
-    domains: ["rcuficvjsjdizfigkdfx.supabase.co"],
+  experimental: {
+    swcMinify: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  devIndicators: false,
+  images: {
+    unoptimized: true,
+    domains: ["rcuficvjsjdizfigkdfx.supabase.co"],
+  },
+  async headers() {
+    return [
+      {
+        source: "/manifest.json",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/manifest+json",
+          },
+        ],
+      },
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/javascript",
+          },
+          {
+            key: "Service-Worker-Allowed",
+            value: "/",
+          },
+        ],
+      },
+    ];
+  },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

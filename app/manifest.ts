@@ -2,13 +2,15 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "NordicPro App",
-    short_name: "NordicPro",
-    description: "A Progressive Web App for NordicPro",
+    name: "Nordic Pro",
+    short_name: "Nordic Pro",
+    description: "Keep Players In The Game",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#007BFF",
+    theme_color: "#000000",
+    orientation: "portrait-primary",
+    categories: ["productivity", "utilities"],
     icons: [
       {
         src: "/icon-120x120.png",

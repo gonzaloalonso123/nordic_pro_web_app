@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
@@ -21,7 +21,27 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  title: "Nordic Pro",
+  description: "Keep Players In The Game",
+  generator: "Next.js",
   manifest: "/manifest.json",
+  keywords: ["nextjs", "pwa", "progressive web app"],
+  authors: [{ name: "NordicPro" }],
+  icons: [
+    { rel: "apple-touch-icon", url: "/icon-192x192.png" },
+    { rel: "icon", url: "/icon-192x192.png" },
+  ],
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+  minimumScale: 1,
+  initialScale: 1,
+  width: "device-width",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -29,17 +49,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <ReactQueryProvider>
       <html lang="en">
         <head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-          />
+          <link rel="manifest" href="/manifest.json" />
           <link rel="apple-touch-icon" href="/icon-192x192.png" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta
+            name="apple-mobile-web-app-status-bar-style"
+            content="default"
+          />
+          <meta name="apple-mobile-web-app-title" content="Next.js PWA" />
           <meta name="mobile-web-app-capable" content="yes" />
-          <meta name="application-name" content="NordicPro" />
-          <meta name="apple-mobile-web-app-title" content="NordicPro" />
-          <meta name="theme-color" content="#007BFF" />
-          <link rel="manifest" href="/manifest.json" />
+          <meta name="msapplication-config" content="/browserconfig.xml" />
+          <meta name="msapplication-TileColor" content="#000000" />
+          <meta name="msapplication-tap-highlight" content="no" />
         </head>
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
