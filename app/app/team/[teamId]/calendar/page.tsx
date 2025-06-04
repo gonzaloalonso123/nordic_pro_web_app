@@ -98,7 +98,7 @@ export default function CalendarDemo() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="table" className="mt-0 p-6">
+        <TabsContent value="table" className="mt-0">
           <TrainingSessionsTable
             events={events || []}
             onEventClick={handleEventClick}
