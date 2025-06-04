@@ -74,7 +74,7 @@ export const RewardOverview = () => {
         </Progress>
 
         <div className="mt-6 space-y-4">
-          <div className="flex justify-between items-center text-sm">
+          {/* <div className="flex justify-between items-center text-sm">
             <div className="flex items-center">
               <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
               <span>Forms Completed</span>
@@ -92,7 +92,7 @@ export const RewardOverview = () => {
             <Badge variant="outline" className="bg-blue-50">
               3 days
             </Badge>
-          </div>
+          </div> */}
 
           {/* <div className="flex justify-between items-center text-sm">
             <div className="flex items-center">

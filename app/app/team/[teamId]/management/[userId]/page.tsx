@@ -9,8 +9,9 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
   User,
   Shield,
@@ -19,9 +20,7 @@ import {
   Trash2,
   Check,
   X,
-  Edit2,
   Save,
-  XCircle,
   ChevronLeft,
 } from "lucide-react";
 import { getInitials } from "@/utils/get-initials";
@@ -43,7 +42,8 @@ import { useHeader } from "@/hooks/useHeader";
 
 export default function Page() {
   const { useHeaderConfig } = useHeader();
-  const [isEditing, setIsEditing] = useState(false);
+  // Remove these lines or comment them out:
+  // const [isEditing, setIsEditing] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -61,16 +61,7 @@ export default function Page() {
 
   useHeaderConfig({
     centerContent: "Manage User",
-    leftContent: (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => history.back()}
-        className="flex items-center gap-2"
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-    ),
+    leftContent: "back",
   });
 
   const handleRemoveMember = async (userId: string) => {
@@ -122,27 +113,23 @@ export default function Page() {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case "COACH":
-        return "default";
-      case "LEADER":
         return "secondary";
+      case "LEADER":
+        return "default";
       default:
-        return "outline-solid";
+        return "outline";
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  // const handleEdit = () => { setIsEditing(true) }
+  // const handleCancel = () => { setIsEditing(false) }
 
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
-
+  // Update handleSave to remove setIsEditing(false):
   const handleSave = async (values: z.infer<typeof formSchema>) => {
     setIsUpdating(true);
     try {
       await updateMember(member.user.id, values);
-      setIsEditing(false);
+      // Remove this line: setIsEditing(false)
       toast({
         title: t("Success"),
         description: t("Member updated successfully"),
@@ -158,168 +145,199 @@ export default function Page() {
     }
   };
 
+  const getSubscriptionStatusColor = (isActive: boolean) => {
+    return isActive ? "text-emerald-600" : "text-rose-600";
+  };
+
   return (
-    <Content>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Avatar className="h-16 w-16 mr-4">
-                <AvatarFallback>
-                  {member &&
-                    getInitials({
-                      firstName: member.user.first_name,
-                      lastName: member.user.last_name,
-                    })}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="font-medium">
-                  {member?.user.first_name} {member?.user.last_name}
-                </h3>
-                <p className="text-sm text-muted-foreground">
+    <Content className="max-w-2xl mx-auto px-4 py-6">
+      <Card className="shadow-sm border-slate-200">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20 border-2 border-slate-100 shadow-sm">
+              <AvatarFallback className="bg-slate-100 text-slate-700 text-xl font-medium">
+                {member &&
+                  getInitials({
+                    firstName: member.user.first_name,
+                    lastName: member.user.last_name,
+                  })}
+              </AvatarFallback>
+              <AvatarImage
+                src={`/placeholder.svg?height=80&width=80&query=avatar`}
+                alt="User avatar"
+              />
+            </Avatar>
+            <div>
+              <h3 className="text-xl font-semibold text-slate-900">
+                {member?.user.first_name} {member?.user.last_name}
+              </h3>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge
+                  variant={member && getRoleBadgeVariant(member.role)}
+                  className="font-medium"
+                >
+                  {t(member?.role)}
+                </Badge>
+                <span className="text-sm text-slate-500">
                   {getFootballPosition(member?.position)?.label}
-                </p>
+                </span>
               </div>
             </div>
-            {!isEditing && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleEdit}
-                className="shrink-0"
-              >
-                <Edit2 className="h-4 w-4 mr-2" />
-                {t("Edit")}
-              </Button>
-            )}
           </div>
         </CardHeader>
 
-        <CardContent>
-          {isEditing ? (
-            <FormWrapper
-              className="space-y-4"
-              title=""
-              onSubmit={handleSave}
-              defaultValues={{
-                role: member?.role || "PLAYER",
-                position: member?.position || "",
-              }}
-            >
-              <FormItemWrapper name="role">
-                <FormSelect
-                  options={Object.entries(roles).map(([key, value]) => ({
-                    label: value,
-                    value: key,
-                  }))}
-                  placeholder={t("Role")}
-                />
-              </FormItemWrapper>
+        <Separator />
 
-              <FormItemWrapper name="position">
-                <FormSelect
-                  options={footballPositions.map((pos) => ({
-                    label: pos.label,
-                    value: pos.value,
-                  }))}
-                  placeholder={t("Position")}
-                />
-              </FormItemWrapper>
-
-              <div className="flex items-center space-x-2 pt-4">
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={isUpdating}
-                  className="flex-1"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {isUpdating ? t("Saving...") : t("Save changes")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  disabled={isUpdating}
-                  className="flex-1"
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  {t("Cancel")}
-                </Button>
-              </div>
-            </FormWrapper>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground mr-2">
-                  {t("Email")}:
-                </span>
-                <span className="text-sm">{member?.user.email}</span>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Current Information Display */}
+            <div className="space-y-5">
+              <div className="flex items-center gap-2 mb-4">
+                <h4 className="text-lg font-semibold text-slate-900">
+                  {t("Current Information")}
+                </h4>
               </div>
 
-              <div className="flex items-center">
-                <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground mr-2">
-                  {t("Role")}:
-                </span>
-                <Badge variant={member && getRoleBadgeVariant(member.role)}>
-                  {t(member?.role)}
-                </Badge>
-              </div>
+              <div className="space-y-4">
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <div className="flex items-center mb-2">
+                    <Mail className="h-5 w-5 mr-2 text-slate-500" />
+                    <h5 className="font-medium text-slate-700">
+                      {t("Contact")}
+                    </h5>
+                  </div>
+                  <p className="text-sm text-slate-600 break-all pl-7">
+                    {member?.user.email}
+                  </p>
+                </div>
 
-              <div className="flex items-center">
-                <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground mr-2">
-                  {t("Position")}:
-                </span>
-                <span className="text-sm">
-                  {getFootballPosition(member?.position)?.label}
-                </span>
-              </div>
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <div className="flex items-center mb-2">
+                    <Shield className="h-5 w-5 mr-2 text-slate-500" />
+                    <h5 className="font-medium text-slate-700">
+                      {t("Team Role")}
+                    </h5>
+                  </div>
+                  <div className="pl-7">
+                    <Badge
+                      variant={member && getRoleBadgeVariant(member.role)}
+                      className="font-medium"
+                    >
+                      {t(member?.role)}
+                    </Badge>
+                  </div>
+                </div>
 
-              <div className="flex items-center">
-                <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground mr-2">
-                  {t("Subscription")}:
-                </span>
-                <div className="flex items-center space-x-1">
-                  {member?.user.subscription_active ? (
-                    <>
-                      <Check className="h-4 w-4 text-green-600" />
-                      <span className="text-sm text-green-600">
-                        {t("Active")}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <X className="h-4 w-4 text-red-600" />
-                      <span className="text-sm text-red-600">
-                        {t("Inactive")}
-                      </span>
-                    </>
-                  )}
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <div className="flex items-center mb-2">
+                    <Briefcase className="h-5 w-5 mr-2 text-slate-500" />
+                    <h5 className="font-medium text-slate-700">
+                      {t("Position")}
+                    </h5>
+                  </div>
+                  <p className="text-sm text-slate-600 pl-7">
+                    {getFootballPosition(member?.position)?.label}
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <div className="flex items-center mb-2">
+                    <User className="h-5 w-5 mr-2 text-slate-500" />
+                    <h5 className="font-medium text-slate-700">
+                      {t("Subscription")}
+                    </h5>
+                  </div>
+                  <div className="flex items-center pl-7">
+                    {member?.user.subscription_active ? (
+                      <>
+                        <Check className="h-4 w-4 text-emerald-600 mr-1" />
+                        <span
+                          className={`text-sm font-medium ${getSubscriptionStatusColor(true)}`}
+                        >
+                          {t("Active")}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <X className="h-4 w-4 text-rose-600 mr-1" />
+                        <span
+                          className={`text-sm font-medium ${getSubscriptionStatusColor(false)}`}
+                        >
+                          {t("Inactive")}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          )}
+
+            {/* Edit Form */}
+            <div className="space-y-5">
+              <div className="flex items-center gap-2 mb-4">
+                <h4 className="text-lg font-semibold text-slate-900">
+                  {t("Update Information")}
+                </h4>
+              </div>
+
+              <FormWrapper
+                className="space-y-5"
+                title=""
+                onSubmit={handleSave}
+                defaultValues={{
+                  role: member?.role || "PLAYER",
+                  position: member?.position || "",
+                }}
+              >
+                <div className="bg-white border border-slate-200 rounded-lg p-4 space-y-4">
+                  <FormItemWrapper name="role" label={t("Role")}>
+                    <FormSelect
+                      options={Object.entries(roles).map(([key, value]) => ({
+                        label: value,
+                        value: key,
+                      }))}
+                      placeholder={t("Select role")}
+                    />
+                  </FormItemWrapper>
+
+                  <FormItemWrapper name="position" label={t("Position")}>
+                    <FormSelect
+                      options={footballPositions.map((pos) => ({
+                        label: pos.label,
+                        value: pos.value,
+                      }))}
+                      placeholder={t("Select position")}
+                    />
+                  </FormItemWrapper>
+                </div>
+
+                <div className="flex flex-col gap-3 pt-2">
+                  <Button
+                    type="submit"
+                    size="default"
+                    disabled={isUpdating}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {isUpdating ? t("Updating...") : t("Update Member")}
+                  </Button>
+                </div>
+              </FormWrapper>
+            </div>
+          </div>
         </CardContent>
 
-        {!isEditing && (
-          <CardFooter className="flex gap-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setDeleteDialogOpen(true)}
-              className="flex-1"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {t("Remove Member")}
-            </Button>
-          </CardFooter>
-        )}
+        <CardFooter className="pt-2 pb-6 px-6">
+          <Button
+            variant="destructive"
+            size="default"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="w-full sm:w-auto ml-auto"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {t("Remove from Team")}
+          </Button>
+        </CardFooter>
       </Card>
       <DeleteConfirmationDialog
         open={deleteDialogOpen}

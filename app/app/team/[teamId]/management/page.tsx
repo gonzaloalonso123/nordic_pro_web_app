@@ -52,7 +52,7 @@ export default function ManagementPage() {
 
   return (
     <Content>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden border-none">
         {isPending ? (
           <MembersTableLoadingVariants variant="detailed" />
         ) : (
