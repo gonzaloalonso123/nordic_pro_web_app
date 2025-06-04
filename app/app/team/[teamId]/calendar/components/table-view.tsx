@@ -1,14 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -23,9 +15,6 @@ import {
   Calendar,
   Clock,
   MapPin,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
   MoreHorizontal,
   Search,
   Timer,
@@ -37,7 +26,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { format, isAfter, isBefore } from "date-fns";
-import { TrainingSessionsTableLoading } from "./table-loading";
+import {
+  DataTable,
+  type ResponsiveColumnDef,
+  SortableHeader,
+} from "@/components/data-table/data-table";
+import { cn } from "@/lib/utils";
+import { responsiveBreakpoints } from "@/components/data-table/lib/table-utils";
+import { Card } from "@/components/ui/card";
 
 interface TrainingSession {
   id: string;
@@ -67,21 +63,22 @@ interface TrainingSessionsTableProps {
   isLoading?: boolean;
 }
 
-type SortField = "name" | "start_date" | "type" | "location" | "duration";
-type SortDirection = "asc" | "desc";
+type SessionStatus = {
+  label: string;
+  variant: "default" | "secondary" | "destructive" | "outline";
+  value: "upcoming" | "ongoing" | "past" | "unknown";
+};
 
 export function TrainingSessionsTable({
-  events: events,
+  events,
   onEventClick,
   isLoading = false,
 }: TrainingSessionsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sortField, setSortField] = useState<SortField>("start_date");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  const getSessionStatus = (session: TrainingSession) => {
+  const getSessionStatus = (session: TrainingSession): SessionStatus => {
     const now = new Date();
     const startDate = new Date(session.start_date);
     const endDate = new Date(session.end_date);
@@ -89,22 +86,22 @@ export function TrainingSessionsTable({
     if (isAfter(now, endDate))
       return {
         label: "Completed",
-        variant: "secondary" as const,
+        variant: "secondary",
         value: "past",
       };
     if (isAfter(now, startDate) && isBefore(now, endDate))
       return {
         label: "Live",
-        variant: "destructive" as const,
+        variant: "destructive",
         value: "ongoing",
       };
     if (isAfter(startDate, now))
       return {
         label: "Upcoming",
-        variant: "default" as const,
+        variant: "default",
         value: "upcoming",
       };
-    return { label: "Unknown", variant: "outline-solid" as const, value: "unknown" };
+    return { label: "Unknown", variant: "outline", value: "unknown" };
   };
 
   const getTypeColor = (type: string) => {
@@ -129,27 +126,8 @@ export function TrainingSessionsTable({
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
-
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
-    return sortDirection === "asc" ? (
-      <ArrowUp className="h-4 w-4" />
-    ) : (
-      <ArrowDown className="h-4 w-4" />
-    );
-  };
-
   const handleRowClick = (session: TrainingSession) => {
     if (onEventClick) {
-      // Create a mock event object that matches the expected format
       const mockEvent = {
         event: {
           id: session.id,
@@ -159,8 +137,9 @@ export function TrainingSessionsTable({
     }
   };
 
-  const filteredAndSortedSessions = useMemo(() => {
-    const filtered = events.filter((session) => {
+  // Filter data based on search and filters
+  const filteredData = useMemo(() => {
+    return events.filter((session) => {
       const matchesSearch =
         session.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         session.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -175,53 +154,224 @@ export function TrainingSessionsTable({
 
       return matchesSearch && matchesType && matchesStatus;
     });
+  }, [events, searchTerm, typeFilter, statusFilter]);
 
-    filtered.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortField) {
-        case "name":
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case "start_date":
-          aValue = new Date(a.start_date);
-          bValue = new Date(b.start_date);
-          break;
-        case "type":
-          aValue = a.type;
-          bValue = b.type;
-          break;
-        case "location":
-          aValue = a.locations?.name?.toLowerCase() || "";
-          bValue = b.locations?.name?.toLowerCase() || "";
-          break;
-        case "duration":
-          aValue =
-            new Date(a.end_date).getTime() - new Date(a.start_date).getTime();
-          bValue =
-            new Date(b.end_date).getTime() - new Date(b.start_date).getTime();
-          break;
-        default:
-          return 0;
-      }
-
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-
-    return filtered;
-  }, [events, searchTerm, typeFilter, statusFilter, sortField, sortDirection]);
-
-  if (isLoading) {
-    return <TrainingSessionsTableLoading />;
-  }
+  // Column definitions
+  const columns: ResponsiveColumnDef<TrainingSession>[] = [
+    {
+      accessorKey: "name",
+      mobilePriority: 1,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Session</SortableHeader>
+      ),
+      skeleton: {
+        type: "default",
+        width: "w-48",
+      },
+      cell: ({ row }) => {
+        const session = row.original;
+        const status = getSessionStatus(session);
+        return (
+          <div>
+            <div className="font-medium">{session.name}</div>
+            <div className="sm:hidden text-xs text-muted-foreground mt-1 space-x-2">
+              <Badge variant={status.variant} className="mr-2">
+                {status.label}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={cn("text-xs", getTypeColor(session.type))}
+              >
+                {session.type}
+              </Badge>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "type",
+      responsive: responsiveBreakpoints.hiddenMobile,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Type</SortableHeader>
+      ),
+      skeleton: {
+        type: "badge",
+      },
+      cell: ({ row }) => {
+        const type = row.getValue("type") as string;
+        return (
+          <Badge
+            variant="outline"
+            className={cn("text-xs", getTypeColor(type))}
+          >
+            {type}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "start_date",
+      responsive: responsiveBreakpoints.hiddenMobile,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Date & Time</SortableHeader>
+      ),
+      skeleton: {
+        type: "default",
+        width: "w-32",
+      },
+      cell: ({ row }) => {
+        const session = row.original;
+        return (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-3 w-3 text-muted-foreground" />
+              <span>{format(new Date(session.start_date), "MMM d, yyyy")}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-3 w-3 text-muted-foreground" />
+              <span>
+                {format(new Date(session.start_date), "HH:mm")} -{" "}
+                {format(new Date(session.end_date), "HH:mm")}
+              </span>
+            </div>
+          </div>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.start_date);
+        const dateB = new Date(rowB.original.start_date);
+        return dateA.getTime() - dateB.getTime();
+      },
+    },
+    {
+      id: "duration",
+      responsive: responsiveBreakpoints.hiddenTablet,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Duration</SortableHeader>
+      ),
+      skeleton: {
+        type: "default",
+        width: "w-20",
+      },
+      cell: ({ row }) => {
+        const session = row.original;
+        return (
+          <div className="flex items-center gap-2 text-sm">
+            <Timer className="h-3 w-3 text-muted-foreground" />
+            <span>{formatDuration(session.start_date, session.end_date)}</span>
+          </div>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const durationA =
+          new Date(rowA.original.end_date).getTime() -
+          new Date(rowA.original.start_date).getTime();
+        const durationB =
+          new Date(rowB.original.end_date).getTime() -
+          new Date(rowB.original.start_date).getTime();
+        return durationA - durationB;
+      },
+    },
+    {
+      accessorKey: "locations.name",
+      responsive: responsiveBreakpoints.hiddenTablet,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Location</SortableHeader>
+      ),
+      skeleton: {
+        type: "default",
+        width: "w-28",
+      },
+      cell: ({ row }) => {
+        const session = row.original;
+        const hasLocation = !!session.locations?.name;
+        return hasLocation ? (
+          <div className="flex items-center gap-2 text-sm">
+            <MapPin className="h-3 w-3 text-muted-foreground" />
+            <span>{session.locations.name}</span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground text-sm">-</span>
+        );
+      },
+    },
+    {
+      id: "status",
+      responsive: responsiveBreakpoints.hiddenMobile,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Status</SortableHeader>
+      ),
+      skeleton: {
+        type: "badge",
+      },
+      cell: ({ row }) => {
+        const session = row.original;
+        const status = getSessionStatus(session);
+        return <Badge variant={status.variant}>{status.label}</Badge>;
+      },
+      sortingFn: (rowA, rowB) => {
+        const statusA = getSessionStatus(rowA.original);
+        const statusB = getSessionStatus(rowB.original);
+        const statusOrder = { upcoming: 0, ongoing: 1, past: 2, unknown: 3 };
+        return statusOrder[statusA.value] - statusOrder[statusB.value];
+      },
+    },
+    {
+      id: "actions",
+      header: "",
+      skeleton: {
+        type: "button",
+      },
+      cell: ({ row }) => {
+        const session = row.original;
+        const hasLocation =
+          !!session.locations?.name && !!session.locations?.coordinates;
+        return (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleRowClick(session)}>
+                  View Details
+                </DropdownMenuItem>
+                {hasLocation && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const [lat, lng] =
+                        session.locations!.coordinates!.split(" ");
+                      window.open(
+                        `https://www.google.com/maps?q=${lat},${lng}`,
+                        "_blank"
+                      );
+                    }}
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Open in Maps
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
+      <Card className="p-6 space-y-3">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -240,7 +390,8 @@ export function TrainingSessionsTable({
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="TRAINING">Training</SelectItem>
-              <SelectItem value="GAME">Match</SelectItem>
+              <SelectItem value="MATCH">Match</SelectItem>
+              <SelectItem value="MEETING">Meeting</SelectItem>
             </SelectContent>
           </Select>
 
@@ -258,200 +409,44 @@ export function TrainingSessionsTable({
         </div>
 
         <div className="text-sm text-muted-foreground">
-          Showing {filteredAndSortedSessions.length} of {events.length} sessions
+          Showing {filteredData.length} of {events.length} sessions
+        </div>
+      </Card>
+
+      <div
+        className="cursor-pointer"
+        onClick={(e) => {
+          const target = e.target as HTMLElement;
+          const row = target.closest("[data-row-id]");
+          if (row && !target.closest("button")) {
+            const sessionId = row.getAttribute("data-row-id");
+            const session = filteredData.find((s) => s.id === sessionId);
+            if (session) handleRowClick(session);
+          }
+        }}
+      >
+        <div className="bg-white rounded-md">
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            isLoading={isLoading}
+            skeletonRows={5}
+            className="[&_tr]:cursor-pointer [&_tr]:hover:bg-muted/50"
+          />
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[250px]">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("name")}
-                  className="h-auto p-0 font-semibold hover:bg-transparent"
-                >
-                  Session
-                  {getSortIcon("name")}
-                </Button>
-              </TableHead>
-              <TableHead className="hidden sm:table-cell">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("type")}
-                  className="h-auto p-0 font-semibold hover:bg-transparent"
-                >
-                  Type
-                  {getSortIcon("type")}
-                </Button>
-              </TableHead>
-              <TableHead className="hidden sm:table-cell">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("start_date")}
-                  className="h-auto p-0 font-semibold hover:bg-transparent"
-                >
-                  Date & Time
-                  {getSortIcon("start_date")}
-                </Button>
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("duration")}
-                  className="h-auto p-0 font-semibold hover:bg-transparent"
-                >
-                  Duration
-                  {getSortIcon("duration")}
-                </Button>
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("location")}
-                  className="h-auto p-0 font-semibold hover:bg-transparent"
-                >
-                  Location
-                  {getSortIcon("location")}
-                </Button>
-              </TableHead>
-              <TableHead className="hidden sm:table-cell">Status</TableHead>
-              <TableHead className="text-right">
-                <span className="sr-only">Actions</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAndSortedSessions.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
-                  <div className="flex flex-col items-center gap-2">
-                    <Calendar className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-muted-foreground">No sessions found</p>
-                    <p className="text-sm text-muted-foreground">
-                      Try adjusting your search or filter criteria
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredAndSortedSessions.map((session) => {
-                const status = getSessionStatus(session);
-                const hasLocation = !!session.locations?.name;
-
-                return (
-                  <TableRow
-                    key={session.id}
-                    className="hover:bg-muted/50 cursor-pointer"
-                    onClick={() => handleRowClick(session)}
-                  >
-                    <TableCell>
-                      <div className="font-medium">{session.name}</div>
-                      <div className="sm:hidden text-xs text-muted-foreground mt-1">
-                        <Badge variant={status.variant} className="mr-2">
-                          {status.label}
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className={getTypeColor(session.type)}
-                        >
-                          {session.type}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <Badge
-                        variant="outline"
-                        className={getTypeColor(session.type)}
-                      >
-                        {session.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-3 w-3 text-muted-foreground" />
-                          <span>
-                            {format(
-                              new Date(session.start_date),
-                              "MMM d, yyyy"
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-3 w-3 text-muted-foreground" />
-                          <span>
-                            {format(new Date(session.start_date), "HH:mm")} -{" "}
-                            {format(new Date(session.end_date), "HH:mm")}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Timer className="h-3 w-3 text-muted-foreground" />
-                        <span>
-                          {formatDuration(session.start_date, session.end_date)}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {hasLocation && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="h-3 w-3 text-muted-foreground" />
-                          <span>{session.locations.name}</span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <Badge variant={status.variant}>{status.label}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleRowClick(session)}
-                          >
-                            View Details
-                          </DropdownMenuItem>
-                          {hasLocation && (
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const [lat, lng] =
-                                  session.locations!.coordinates!.split(" ");
-                                window.open(
-                                  `https://www.google.com/maps?q=${lat},${lng}`,
-                                  "_blank"
-                                );
-                              }}
-                            >
-                              <MapPin className="h-4 w-4 mr-2" />
-                              Open in Maps
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {!isLoading && filteredData.length === 0 && (
+        <div className="text-center py-8">
+          <div className="flex flex-col items-center gap-2">
+            <Calendar className="h-8 w-8 text-muted-foreground" />
+            <p className="text-muted-foreground">No sessions found</p>
+            <p className="text-sm text-muted-foreground">
+              Try adjusting your search or filter criteria
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

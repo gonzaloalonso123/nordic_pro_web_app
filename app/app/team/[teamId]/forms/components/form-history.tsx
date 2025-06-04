@@ -1,97 +1,229 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { FileText, Clock, Users } from "lucide-react"
-import { useClientData } from "@/utils/data/client"
-import Link from "next/link"
-import { useUrl } from "@/hooks/use-url"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileText, Clock, Users, Eye } from "lucide-react";
+import {
+  DataTable,
+  type ResponsiveColumnDef,
+  SortableHeader,
+} from "@/components/data-table/data-table";
+import { useClientData } from "@/utils/data/client";
+import Link from "next/link";
+import { useUrl } from "@/hooks/use-url";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { responsiveBreakpoints } from "@/components/data-table/lib/table-utils";
+import { useHeader } from "@/hooks/useHeader";
+
+// Type definition for form invitation data
+type FormInvitation = {
+  id: string;
+  created_at: string;
+  form: {
+    id: string;
+    title: string;
+    description?: string;
+  };
+  invitations?: Array<{
+    id: string;
+    response?: any;
+    user_id: string;
+  }>;
+};
 
 interface FormHistoryProps {
-  teamId: string
+  teamId: string;
 }
 
 export function FormHistory({ teamId }: FormHistoryProps) {
-  const { data: sentFormInvitations, isPending: sentFormsPending } = useClientData().formInvitations.useByTeam(teamId)
-  const path = useUrl()
+  const { useHeaderConfig } = useHeader();
+  useHeaderConfig({
+    centerContent: "Form History",
+  });
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Form History</CardTitle>
-        <CardDescription>Previously sent forms and their responses</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {sentFormsPending ? (
-          <div className="space-y-3">
-            <Skeleton className="h-[120px] w-full rounded-md" />
-            <Skeleton className="h-[120px] w-full rounded-md" />
+  const { data: sentFormInvitations = [], isPending: sentFormsPending } =
+    useClientData().formInvitations.useByTeam(teamId);
+  const path = useUrl();
+  const columns: ResponsiveColumnDef<FormInvitation>[] = [
+    {
+      accessorKey: "form.title",
+      mobilePriority: 1,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Form</SortableHeader>
+      ),
+      skeleton: {
+        type: "default",
+        width: "w-48",
+      },
+      cell: ({ row }) => {
+        const invitation = row.original;
+        return (
+          <div className="flex items-center space-x-3">
+            <FileText className="h-4 w-4 text-primary shrink-0" />
+            <div className="min-w-0">
+              <div className="font-medium truncate">
+                {invitation.form.title}
+              </div>
+              {invitation.form.description && (
+                <div className="text-sm text-muted-foreground truncate max-w-xs">
+                  {invitation.form.description}
+                </div>
+              )}
+            </div>
           </div>
-        ) : sentFormInvitations && sentFormInvitations.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {sentFormInvitations.map((invitation) => (
-              <FormCard key={invitation.id} invitation={invitation} path={path} />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-md border border-dashed p-8 text-center">
-            <h3 className="text-lg font-medium">No forms sent yet</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              When you send forms to this team, they will appear here.
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
-interface FormCardProps {
-  invitation: any
-  path: string
-}
-
-function FormCard({ invitation, path }: FormCardProps) {
-  const responded = invitation.invitations?.filter((inv: any) => inv.response).length || 0
-  const total = invitation.invitations?.length || 0
-  const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0
-
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-muted/50 pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center">
-            <FileText className="mr-2 h-5 w-5 text-primary" />
-            <CardTitle className="text-base">{invitation.form.title}</CardTitle>
-          </div>
-          <Badge variant="outline" className="ml-2">
-            {responseRate}% complete
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-4">
-        <div className="space-y-3">
+        );
+      },
+    },
+    {
+      accessorKey: "created_at",
+      responsive: responsiveBreakpoints.hiddenMobile,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Date Sent</SortableHeader>
+      ),
+      skeleton: {
+        type: "default",
+        width: "w-24",
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("created_at"));
+        return (
           <div className="flex items-center text-sm">
             <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-            <span>Sent on {new Date(invitation.created_at).toLocaleDateString()}</span>
+            <span>{date.toLocaleDateString()}</span>
           </div>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.created_at);
+        const dateB = new Date(rowB.original.created_at);
+        return dateA.getTime() - dateB.getTime();
+      },
+    },
+    {
+      id: "completion",
+      mobilePriority: 2,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Completion</SortableHeader>
+      ),
+      skeleton: {
+        type: "badge",
+      },
+      cell: ({ row }) => {
+        const invitation = row.original;
+        const responded =
+          invitation.invitations?.filter((inv) => inv.response).length || 0;
+        const total = invitation.invitations?.length || 0;
+        const responseRate =
+          total > 0 ? Math.round((responded / total) * 100) : 0;
+
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Badge
+                variant={
+                  responseRate === 100
+                    ? "default"
+                    : responseRate > 50
+                      ? "secondary"
+                      : "outline"
+                }
+              >
+                {responseRate}% complete
+              </Badge>
+            </div>
+            <div className="hidden sm:block">
+              <Progress value={responseRate} className="h-2" />
+            </div>
+          </div>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const getResponseRate = (invitation: FormInvitation) => {
+          const responded =
+            invitation.invitations?.filter((inv) => inv.response).length || 0;
+          const total = invitation.invitations?.length || 0;
+          return total > 0 ? (responded / total) * 100 : 0;
+        };
+        return getResponseRate(rowA.original) - getResponseRate(rowB.original);
+      },
+    },
+    {
+      id: "responses",
+      responsive: responsiveBreakpoints.hiddenMobile,
+      header: ({ column }) => (
+        <SortableHeader column={column}>Responses</SortableHeader>
+      ),
+      skeleton: {
+        type: "default",
+        width: "w-20",
+      },
+      cell: ({ row }) => {
+        const invitation = row.original;
+        const responded =
+          invitation.invitations?.filter((inv) => inv.response).length || 0;
+        const total = invitation.invitations?.length || 0;
+
+        return (
           <div className="flex items-center text-sm">
             <Users className="mr-2 h-4 w-4 text-muted-foreground" />
             <span>
-              {responded} of {total} responses received
+              {responded} of {total}
             </span>
           </div>
-        </div>
-      </CardContent>
-      <CardFooter className="border-t bg-muted/20 px-4 py-3">
-        <Link href={`${path}/forms/${invitation.id}`} className="w-full">
-          <Button variant="outline" size="sm" className="w-full">
-            View Results
-          </Button>
-        </Link>
-      </CardFooter>
-    </Card>
-  )
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const getTotal = (invitation: FormInvitation) =>
+          invitation.invitations?.length || 0;
+        return getTotal(rowA.original) - getTotal(rowB.original);
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      skeleton: {
+        type: "button",
+      },
+      cell: ({ row }) => {
+        const invitation = row.original;
+        return (
+          <div className="flex justify-end">
+            <Link href={`${path}/forms/${invitation.id}`}>
+              <Button variant="outline" size="sm">
+                <Eye className="mr-2 h-4 w-4" />
+                View Results
+              </Button>
+            </Link>
+          </div>
+        );
+      },
+    },
+  ];
+
+  if (!sentFormsPending && sentFormInvitations.length === 0) {
+    return (
+      <div className="rounded-md border border-dashed p-8 text-center">
+        <h3 className="text-lg font-medium">No forms sent yet</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          When you send forms to this team, they will appear here.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <DataTable
+      columns={columns}
+      data={sentFormInvitations}
+      isLoading={sentFormsPending}
+      skeletonRows={4}
+    />
+  );
 }

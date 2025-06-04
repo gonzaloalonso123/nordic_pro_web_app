@@ -10,6 +10,7 @@ import { Content } from "@/components/content";
 import { useParams } from "next/navigation";
 import { AvailableForms } from "./components/available-forms";
 import { FormHistory } from "./components/form-history";
+import { Card } from "@/components/ui/card";
 
 export default function FormsTab() {
   const { teamId } = useParams();
@@ -23,11 +24,15 @@ export default function FormsTab() {
         </TabsList>
 
         <TabsContent value="available" className="pt-4">
-          <AvailableForms teamId={teamId as string} />
+          <Card>
+            <AvailableForms teamId={teamId as string} />
+          </Card>
         </TabsContent>
 
         <TabsContent value="history" className="pt-4">
-          <FormHistory teamId={teamId as string} />
+          <Card>
+            <FormHistory teamId={teamId as string} />
+          </Card>
         </TabsContent>
       </Tabs>
     </Content>

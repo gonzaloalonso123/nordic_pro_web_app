@@ -1,20 +1,43 @@
 "use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash2, Check, X, Edit2 } from "lucide-react";
+import { Eye, Check, X } from "lucide-react";
+import {
+  DataTable,
+  type ResponsiveColumnDef,
+  SortableHeader,
+} from "@/components/data-table/data-table";
 import { getInitials } from "@/utils/get-initials";
 import { useTranslation } from "react-i18next";
 import { getFootballPosition } from "@/content/football-position";
-import Image from "next/image";
+import { responsiveBreakpoints } from "@/components/data-table/lib/table-utils";
+
+type Member = {
+  user: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    avatar?: string;
+    subscription_active: boolean;
+  };
+  role: "COACH" | "LEADER" | "PLAYER";
+  position?: string;
+};
 
 interface MembersTableProps {
-  members: any[];
+  members: Member[];
   isLoading: boolean;
-  onViewDetails: (member: any) => void;
+  onViewDetails: (member: Member) => void;
 }
 
-export function MembersTable({ members, onViewDetails }: MembersTableProps) {
+export function MembersTable({
+  members,
+  isLoading,
+  onViewDetails,
+}: MembersTableProps) {
   const { t } = useTranslation();
 
   const getRoleBadgeVariant = (role: string) => {
@@ -24,26 +47,29 @@ export function MembersTable({ members, onViewDetails }: MembersTableProps) {
       case "LEADER":
         return "secondary";
       default:
-        return "outline-solid";
+        return "outline";
     }
   };
 
-  return (
-    <div>
-      <div className="hidden sm:grid sm:grid-cols-10 gap-4 px-4 py-2 text-sm font-medium text-muted-foreground border-b">
-        <div className="col-span-4">{t("Member")}</div>
-        <div className="col-span-2">{t("Role")}</div>
-        <div className="col-span-2">{t("Position")}</div>
-        <div className="col-span-2">{t("Subscription")}</div>
-      </div>
-
-      {members.map((member) => (
-        <div key={member.user.id}>
-          <div
-            className="flex sm:hidden items-center space-x-3 p-4 border-b hover:bg-muted/50 transition-colors cursor-pointer active:bg-muted"
-            onClick={() => onViewDetails(member)}
-          >
+  // Column definitions with responsive behavior
+  const columns: ResponsiveColumnDef<Member>[] = [
+    {
+      accessorKey: "user" as keyof Member,
+      id: "member",
+      mobilePriority: 1,
+      header: ({ column }) => (
+        <SortableHeader column={column}>{t("Member")}</SortableHeader>
+      ),
+      skeleton: {
+        type: "avatar",
+        width: "w-40",
+      },
+      cell: ({ row }) => {
+        const member = row.original;
+        return (
+          <div className="flex items-center space-x-3">
             <Avatar className="h-10 w-10 shrink-0">
+              <AvatarImage src={member.user.avatar || undefined} />
               <AvatarFallback className="text-sm">
                 {getInitials({
                   firstName: member.user.first_name,
@@ -62,66 +88,118 @@ export function MembersTable({ members, onViewDetails }: MembersTableProps) {
               )}
             </div>
           </div>
-
-          <div
-            className="hidden cursor-pointer sm:grid sm:grid-cols-10 border-b gap-4 p-4 hover:bg-muted/50 transition-colors"
-            onClick={() => onViewDetails(member)}
-          >
-            <div className="flex items-center space-x-3 col-span-4">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="text-sm">
-                  {getInitials({
-                    firstName: member.user.first_name,
-                    lastName: member.user.last_name,
-                  })}
-                </AvatarFallback>
-                <AvatarImage src={member.user.avatar || undefined} />
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium truncate">
-                  {member.user.first_name} {member.user.last_name}
-                </p>
-                <p className="text-sm text-muted-foreground truncate">
-                  {member.user.email}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center col-span-2">
-              <Badge
-                variant={getRoleBadgeVariant(member.role)}
-                className="text-xs"
-              >
-                {t(member.role)}
-              </Badge>
-            </div>
-
-            <div className="flex items-center col-span-2">
-              <span className="text-sm">
-                {getFootballPosition(member.position)?.label}
-              </span>
-            </div>
-
-            <div className="flex items-center col-span-2">
-              <div className="flex items-center space-x-1">
-                {member.user.subscription_active ? (
-                  <>
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-green-600">{t("Paid")}</span>
-                  </>
-                ) : (
-                  <>
-                    <X className="h-4 w-4 text-red-600" />
-                    <span className="text-sm text-red-600">{t("Unpaid")}</span>
-                  </>
-                )}
-              </div>
-            </div>
+        );
+      },
+      // Custom sorting function for names
+      sortingFn: (rowA, rowB) => {
+        const nameA = `${rowA.original.user.first_name} ${rowA.original.user.last_name}`;
+        const nameB = `${rowB.original.user.first_name} ${rowB.original.user.last_name}`;
+        return nameA.localeCompare(nameB);
+      },
+    },
+    {
+      accessorKey: "role" as keyof Member,
+      responsive: responsiveBreakpoints.hiddenMobile,
+      header: ({ column }) => (
+        <SortableHeader column={column}>{t("Role")}</SortableHeader>
+      ),
+      skeleton: {
+        type: "badge",
+      },
+      cell: ({ row }) => {
+        const role = row.getValue("role") as string;
+        return (
+          <Badge variant={getRoleBadgeVariant(role)} className="text-xs">
+            {t(role)}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "position" as keyof Member,
+      responsive: responsiveBreakpoints.hiddenMobile,
+      header: ({ column }) => (
+        <SortableHeader column={column}>{t("Position")}</SortableHeader>
+      ),
+      skeleton: {
+        type: "default",
+        width: "w-24",
+      },
+      cell: ({ row }) => {
+        const position = row.getValue("position") as string;
+        return (
+          <span className="text-sm">
+            {position ? getFootballPosition(position)?.label : "-"}
+          </span>
+        );
+      },
+    },
+    {
+      accessorFn: (row) => row.user.subscription_active,
+      id: "subscription",
+      responsive: responsiveBreakpoints.hiddenMobile,
+      header: ({ column }) => (
+        <SortableHeader column={column}>{t("Subscription")}</SortableHeader>
+      ),
+      skeleton: {
+        type: "badge",
+      },
+      cell: ({ row }) => {
+        const isActive = row.original.user.subscription_active;
+        return (
+          <div className="flex items-center space-x-1">
+            {isActive ? (
+              <>
+                <Check className="h-4 w-4 text-green-600" />
+                <span className="text-sm text-green-600">{t("Paid")}</span>
+              </>
+            ) : (
+              <>
+                <X className="h-4 w-4 text-red-600" />
+                <span className="text-sm text-red-600">{t("Unpaid")}</span>
+              </>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "",
+      skeleton: {
+        type: "button",
+      },
+      cell: ({ row }) => {
+        const member = row.original;
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails(member);
+            }}
+            className="h-8 w-8 p-0"
+          >
+            <Eye className="h-4 w-4" />
+            <span className="sr-only">{t("View details")}</span>
+          </Button>
+        );
+      },
+    },
+  ];
 
-      {members.length === 0 && (
+  return (
+    <div className="w-full">
+      <DataTable
+        columns={columns}
+        data={members}
+        isLoading={isLoading}
+        skeletonRows={5}
+        className="cursor-pointer"
+      />
+
+      {!isLoading && members.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           {t("No team members found. Add your first member to get started.")}
         </div>

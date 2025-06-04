@@ -88,23 +88,23 @@ export default function CalendarDemo() {
             <span className="sm:hidden">Table</span>
           </TabsTrigger>
         </TabsList>
-        <Card>
-          <TabsContent value="calendar" className="mt-0">
+        <TabsContent value="calendar" className="mt-0">
+          <Card>
             <Calendar
               events={events || []}
               onEventClick={handleEventClick}
               initialView={selectedView}
             />
-          </TabsContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="table" className="mt-0 p-6">
-            <TrainingSessionsTable
-              events={events || []}
-              onEventClick={handleEventClick}
-              isLoading={eventsQuery.isLoading}
-            />
-          </TabsContent>
-        </Card>
+        <TabsContent value="table" className="mt-0 p-6">
+          <TrainingSessionsTable
+            events={events || []}
+            onEventClick={handleEventClick}
+            isLoading={eventsQuery.isLoading}
+          />
+        </TabsContent>
       </Tabs>
     </Content>
   );

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useFormWithQuestions } from "@/hooks/queries";
 import { useUrl } from "@/hooks/use-url";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useHeader } from "@/hooks/useHeader";
 import { useClientData } from "@/utils/data/client";
 import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -21,12 +22,16 @@ export default () => {
     useClientData().formInvitations.useById(formInvitationId);
   const updateInvitation = useClientData().formInvitations.useUpdate();
   const createFormResponse = useClientData().formResponses.useSubmit();
+  const { useHeaderConfig } = useHeader();
+  useHeaderConfig({
+    leftContent: "back",
+  });
 
   const {
     data: formWithQuestions,
     isPending,
     isError,
-  } = useFormWithQuestions(invitation?.form_id);
+  } = useFormWithQuestions(invitation.form_id);
 
   if (isPending) {
     return <div>Loading...</div>;

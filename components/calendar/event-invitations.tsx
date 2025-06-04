@@ -168,9 +168,6 @@ export function EventInvitations({ eventId }: EventInvitationsProps) {
                         {invitation.users.first_name}{" "}
                         {invitation.users.last_name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {invitation.users.email}
-                      </p>
                     </div>
                     {getStatusBadge(invitation.will_attend)}
                   </div>
