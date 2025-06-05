@@ -4,11 +4,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   useChatRoomsByUser,
   useUnreadMessageCountBatch,
@@ -22,19 +19,14 @@ import { formatChatTime, formatMessagePreviewWithSender } from "@/utils/format-t
 import { cn } from "@/lib/utils";
 import { useChatRoomDisplayName } from "@/hooks/useChatRoomDisplayName";
 import { useChatRoomAvatar } from "@/hooks/useChatRoomAvatar";
-import CreateChatRoom from "./create-chat-room";
-import { useRole } from "@/app/app/(role-provider)/role-provider";
 
 export default function ChatListSidebar() {
   const { user } = useCurrentUser();
   const { data: chatRooms = [], isLoading } = useChatRoomsByUser(user?.id);
   const [searchQuery, setSearchQuery] = useState("");
-  const [createRoomDialogOpen, setCreateRoomDialogOpen] = useState(false);
   const markRoomAsReadMutation = useMarkRoomAsRead();
   const { getRoomDisplayName } = useChatRoomDisplayName();
   const { getChatAvatarInfo } = useChatRoomAvatar();
-  const { team: { id: teamId } } = useRole();
-  const isMobile = useIsMobile();
 
   const path = useUrl();
 
@@ -82,51 +74,18 @@ export default function ChatListSidebar() {
     }
   }, [user?.id, markRoomAsReadMutation]);
 
-  const handleCreateRoomSuccess = useCallback(() => {
-    setCreateRoomDialogOpen(false);
-  }, []);
-
-  const handleCreateRoomCancel = useCallback(() => {
-    setCreateRoomDialogOpen(false);
-  }, []);
 
 
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="px-4 py-3 border-b shrink-0">
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Search chats..."
-            icon={<Search className="h-4 w-4 text-muted-foreground" />}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1"
-          />
-          <Dialog open={createRoomDialogOpen} onOpenChange={setCreateRoomDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                size="sm"
-                variant="outline"
-                className="shrink-0"
-                title="Create new chat"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className={cn(
-              isMobile
-                ? "fixed inset-0 max-w-none w-full h-full max-h-none p-0 translate-x-0 translate-y-0 border-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom"
-                : "max-w-md"
-            )}>
-              <CreateChatRoom
-                teamId={teamId}
-                onSuccess={handleCreateRoomSuccess}
-                onCancel={handleCreateRoomCancel}
-                isModal={true}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Input
+          placeholder="Search chats..."
+          icon={<Search className="h-4 w-4 text-muted-foreground" />}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full"
+        />
       </CardHeader>
 
       <CardContent className="p-0 overflow-y-auto grow">
