@@ -45,7 +45,7 @@ const questionSchema = z.object({
   inputType: z.enum(["text", "number", "emoji", "slider", "yesno", "multiple"]),
   required: z.boolean(),
   description: z.string().optional(),
-  experience: z.number().min(1, "Experience points are required"),
+  experience: z.string(),
   options: z
     .array(
       z.object({
