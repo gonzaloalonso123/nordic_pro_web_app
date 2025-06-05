@@ -31,7 +31,7 @@ export default () => {
     data: formWithQuestions,
     isPending,
     isError,
-  } = useFormWithQuestions(invitation.form_id);
+  } = useFormWithQuestions(invitation?.form_id);
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -40,7 +40,7 @@ export default () => {
     return <div>Error loading form</div>;
   }
 
-  const onSubmit = (values) => {
+  const onSubmit = (values: any, experience: number) => {
     updateInvitation.mutate({
       id: formInvitationId,
       updates: {
@@ -48,11 +48,11 @@ export default () => {
       },
     });
     createFormResponse.mutate({
-      formId: invitation?.form_id,
+      formId: invitation?.form_id as string,
       answers: values,
-      earnedExperience: 15,
-      invitationId: invitation?.id,
-      userId: user?.id,
+      earnedExperience: experience,
+      invitationId: invitation?.id as string,
+      userId: user?.id as string,
     });
   };
 

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getInitials } from '@/utils/get-initials';
+import { useHeader } from '@/hooks/useHeader';
 
 export default function EditUserProfilePage() {
   const dataClient = useClientData();
@@ -18,6 +19,10 @@ export default function EditUserProfilePage() {
   const { user: currentUser, isLoading: authLoading } = useCurrentUser();
   const router = useRouter();
 
+  const { useHeaderConfig } = useHeader();
+  useHeaderConfig({
+    centerContent: "Edit profile",
+  }, []);
   const updateUserMutation = dataClient.users.useUpdate();
   const uploadAvatarMutation = dataClient.avatars.useUpload();
 
@@ -167,8 +172,6 @@ export default function EditUserProfilePage() {
 
   return (
     <div className="container mx-auto p-4 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6 text-center">Edit Profile</h1>
-
       {feedbackMessage && (
         <div className={`p-3 mb-4 rounded-md text-sm ${feedbackMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
           {feedbackMessage.message}

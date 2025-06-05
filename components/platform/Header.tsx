@@ -5,8 +5,7 @@ import { useHeader } from "@/hooks/useHeader";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { ProfileMenu } from "./ProfileMenu";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import BackButton from "../ui/back-button";
 
 const Header = () => {
   const { headerConfig } = useHeader();
@@ -25,7 +24,7 @@ const Header = () => {
               leftContent
             )
           ) : (
-            <Link href="/" className="mr-8">
+            <Link href="/app" className="mr-8">
               <Image
                 src="/icon.png"
                 alt="NordicPro Logo"
@@ -55,18 +54,6 @@ const Header = () => {
         </div>
       </div>
     </header>
-  );
-};
-
-const BackButton = () => {
-  const router = useRouter();
-  return (
-    <button
-      onClick={() => router.back()}
-      className="text-gray-500 hover:text-gray-700"
-    >
-      <ChevronLeft className="h-6 w-6" />
-    </button>
   );
 };
 

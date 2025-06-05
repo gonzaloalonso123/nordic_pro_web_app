@@ -89,7 +89,7 @@ export const useFormsByOrganization = <TData = FormRow[]>(
 
 // Get form with questions
 export const useFormWithQuestions = <TData = Tables<"forms">>(
-  formId: string | undefined,
+  formId?: string | null,
   options?: Omit<
     UseQueryOptions<any | null, Error, TData>,
     "queryKey" | "queryFn" | "enabled"
