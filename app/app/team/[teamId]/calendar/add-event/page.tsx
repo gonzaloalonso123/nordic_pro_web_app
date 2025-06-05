@@ -114,61 +114,57 @@ const AddTeamEventPage = () => {
 
     try {
       setIsSubmitting(true);
-      const date = dates.dates[0];
       const [startHours, startMinutes] = dates.startTime.split(":").map(Number);
       const [endHours, endMinutes] = dates.endTime.split(":").map(Number);
       const [timeToComeHours, timeToComeMinutes] = dates.timeToCome
         ?.split(":")
         .map(Number) || [0, 0];
-      const timeToCome = new Date(date);
-      if (dates.timeToCome) {
-        timeToCome.setHours(timeToComeHours, timeToComeMinutes);
-      }
-      const createdEvents = [];
+
       for (const date of dates.dates) {
+        let cleanDate = date.split("T")[0];
+        const timeToCome = new Date(cleanDate);
+        timeToCome.setHours(timeToComeHours, timeToComeMinutes);
         const startDate = addMinutes(
-          addHours(new Date(date), startHours),
+          addHours(new Date(cleanDate), startHours),
           startMinutes
         );
         const endDate = addMinutes(
-          addHours(new Date(date), endHours),
+          addHours(new Date(cleanDate), endHours),
           endMinutes
         );
-        const event = await createEvent.mutateAsync({
-          name: values.name,
-          description: values.description,
-          start_date: startDate.toISOString(),
-          end_date: endDate.toISOString(),
-          time_to_come: dates.timeToCome ? timeToCome.toISOString() : null,
-          location_id: selectedLocation?.id,
-          type: values.type,
-          calendar_id: calendar.id,
-          invite_future_members: inviteFutureMembers,
-        });
-
-        createdEvents.push(event);
-        if (selectedUsers.length > 0 && event) {
-          await Promise.all(
-            selectedUsers.map((userId) =>
-              createInvitation.mutateAsync({
-                event_id: event.id,
-                user_id: userId,
-                description: values.description,
-              })
-            )
-          );
-
-          await sendEventsToCalendars.mutateAsync({
-            usersIds: selectedUsers,
-            eventId: event.id,
-            teamIds: [teamId],
+        createEvent
+          .mutateAsync({
+            name: values.name,
+            description: values.description,
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+            time_to_come: dates.timeToCome ? timeToCome.toISOString() : null,
+            location_id: selectedLocation?.id,
+            type: values.type,
+            calendar_id: calendar.id,
+            invite_future_members: inviteFutureMembers,
+          })
+          .then((event) => {
+            if (selectedUsers.length > 0 && event) {
+              selectedUsers.map((userId) =>
+                createInvitation.mutateAsync({
+                  event_id: event.id,
+                  user_id: userId,
+                  description: values.description,
+                })
+              );
+              sendEventsToCalendars.mutateAsync({
+                usersIds: selectedUsers,
+                eventId: event.id,
+                teamIds: [teamId],
+              });
+            }
           });
-        }
       }
       router.push(`${path}/calendar`);
       toast({
         title: "Success",
-        description: `${createdEvents.length} recurring events created with ${selectedUsers.length} invitations each`,
+        description: "Creation was successful",
       });
     } finally {
       setIsSubmitting(false);
