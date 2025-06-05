@@ -21,7 +21,6 @@ import {
   Check,
   X,
   Save,
-  ChevronLeft,
 } from "lucide-react";
 import { getInitials } from "@/utils/get-initials";
 import { useToast } from "@/hooks/use-toast";
@@ -269,8 +268,6 @@ export default function Page() {
                 </div>
               </div>
             </div>
-
-            {/* Edit Form */}
             <div className="space-y-5">
               <div className="flex items-center gap-2 mb-4">
                 <h4 className="text-lg font-semibold text-slate-900">

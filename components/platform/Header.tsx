@@ -10,7 +10,6 @@ import BackButton from "../ui/back-button";
 const Header = () => {
   const { headerConfig } = useHeader();
   const { user } = useCurrentUser();
-
   const { leftContent, centerContent, rightContent } = headerConfig;
 
   return (
