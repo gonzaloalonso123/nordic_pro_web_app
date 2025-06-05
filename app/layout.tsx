@@ -6,6 +6,7 @@ import { ReactQueryProvider } from "@/providers/reactQueryProvider";
 import PWAViewportManager from "@/components/pwa/PWAViewportManager";
 import { LoadingProvider } from "@/contexts/LoadingContext";
 import { GlobalLoadingIndicator } from "@/components/ui/loading-indicators";
+import SplashScreenProvider from "@/components/SplashScreenProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -55,11 +56,53 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             name="apple-mobile-web-app-status-bar-style"
             content="default"
           />
-          <meta name="apple-mobile-web-app-title" content="Next.js PWA" />
+          <meta name="apple-mobile-web-app-title" content="Nordic Pro" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="msapplication-config" content="/browserconfig.xml" />
           <meta name="msapplication-TileColor" content="#000000" />
           <meta name="msapplication-tap-highlight" content="no" />
+
+          {/* Splash Screen for iOS PWA */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" />
+
+          {/* Device-specific splash screens for better PWA experience */}
+          {/* iPhone 15 Pro Max, 14 Pro Max */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" />
+
+          {/* iPhone 15 Pro, 14 Pro */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" />
+
+          {/* iPhone 15, 15 Plus, 14, 14 Plus */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+
+          {/* iPhone 13 Pro Max, 12 Pro Max */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" />
+
+          {/* iPhone 13, 13 Pro, 12, 12 Pro */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+
+          {/* iPhone 11 Pro Max, XS Max */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
+
+          {/* iPhone 11, XR */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" />
+
+          {/* iPhone 11 Pro, XS, X */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+
+          {/* iPhone 8 Plus, 7 Plus */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
+
+          {/* iPhone 8, 7, 6s, 6 */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+
+          {/* iPhone SE 3rd gen, SE 2nd gen */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+
+          {/* iPhone SE 1st gen, 5s */}
+          <link rel="apple-touch-startup-image" href="/splash-screen.svg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
+
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         </head>
         <body
           className={`${inter.variable} ${montserrat.variable} font-sans antialiased bg-gray-50`}
@@ -67,7 +110,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <LoadingProvider>
             <GlobalLoadingIndicator />
             <PWAViewportManager />
-            <main className="grow">{children}</main>
+            <SplashScreenProvider>
+              <main className="grow">{children}</main>
+            </SplashScreenProvider>
           </LoadingProvider>
         </body>
       </html>
