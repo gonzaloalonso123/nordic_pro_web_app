@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Tables } from "@/types/database.types";
 import type { DisplayMessage } from "@/components/chat/chat-interface";
 import { useClientData } from "@/utils/data/client";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { createClient } from "@/utils/supabase/client";
+import { chatRoomsService } from "@/utils/supabase/services";
 
 export function useMessages(
   roomId: string,
@@ -141,4 +144,43 @@ export function useMessages(
     sendMessage,
     handleNewRealtimeMessage
   };
+}
+
+// Types for paginated messages
+type PaginatedMessageResult = {
+  messages: Tables<"chat_messages">[];
+  hasMore: boolean;
+  total: number;
+  nextOffset?: number;
+};
+
+// New hook for paginated message loading
+export function usePaginatedMessages(roomId: string | undefined) {
+  const supabase = createClient();
+
+  return useInfiniteQuery<PaginatedMessageResult, Error, any, any[], number>({
+    queryKey: ["chatMessages", "paginated", roomId],
+    queryFn: async ({ pageParam }: { pageParam: number }) => {
+      if (!roomId) throw new Error("Room ID is required");
+      
+      const result = await chatRoomsService.getMessagesByRoomPaginated(
+        supabase,
+        roomId,
+        {
+          limit: 100,
+          offset: pageParam * 100
+        }
+      );
+      
+      return {
+        ...result,
+        nextOffset: result.hasMore ? pageParam + 1 : undefined
+      };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: PaginatedMessageResult) => lastPage.nextOffset,
+    enabled: !!roomId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
 }

@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send } from "lucide-react";
-import { useMessages } from "@/hooks/use-chat-room";
+import { useMessages, usePaginatedMessages } from "@/hooks/use-chat-room";
 import { useRealtimeChat } from "@/hooks/use-realtime-chat";
 import { getInitials } from "@/utils/get-initials";
+import { useMemo, useCallback } from "react";
 
 export type UserProfileSnippet = Pick<
   Tables<"users">,
@@ -32,15 +33,41 @@ export function ChatInterface({
   initialMessages = [],
 }: ChatInterfaceProps) {
   const [newMessage, setNewMessage] = useState<string>("");
+  const [isSending, setIsSending] = useState(false);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // First, check if we should use pagination
+  const paginatedQuery = usePaginatedMessages(roomId);
+  const shouldUsePagination = paginatedQuery.data?.pages?.[0]?.total > 100;
+
+  // Use regular messages hook for small conversations
+  const regularMessages = useMessages(roomId, currentUser, initialMessages);
+
+  // Choose which data to use based on message count
   const {
     messages,
     isLoading,
     error: chatError,
     sendMessage,
     handleNewRealtimeMessage
-  } = useMessages(roomId, currentUser, initialMessages);
+  } = useMemo(() => {
+    if (shouldUsePagination) {
+      // For paginated messages, flatten all pages
+      const allMessages = paginatedQuery.data?.pages?.flatMap((page: any) => page.messages) || [];
+      
+      return {
+        messages: allMessages.map((msg: any) => ({ ...msg, author: null })) as DisplayMessage[], // We'll need to fetch user data separately
+        isLoading: paginatedQuery.isLoading,
+        error: paginatedQuery.error?.message || null,
+        sendMessage: regularMessages.sendMessage, // Use regular send for real-time updates
+        handleNewRealtimeMessage: regularMessages.handleNewRealtimeMessage
+      };
+    }
+    
+    return regularMessages;
+  }, [shouldUsePagination, paginatedQuery, regularMessages]);
 
   const { error: realtimeError } = useRealtimeChat<Tables<"chat_messages">>(
     roomId,
@@ -49,21 +76,86 @@ export function ChatInterface({
 
   const error = chatError || realtimeError;
 
+  // Load more messages function for pagination
+  const loadMoreMessages = useCallback(() => {
+    if (shouldUsePagination && paginatedQuery.hasNextPage && !paginatedQuery.isFetchingNextPage) {
+      // Store current scroll position before loading more
+      const scrollElement = scrollAreaRef.current;
+      if (scrollElement) {
+        const currentScrollHeight = scrollElement.scrollHeight;
+        
+        paginatedQuery.fetchNextPage().then(() => {
+          // After loading, maintain scroll position relative to new content
+          setTimeout(() => {
+            if (scrollElement) {
+              const newScrollHeight = scrollElement.scrollHeight;
+              const heightDifference = newScrollHeight - currentScrollHeight;
+              scrollElement.scrollTop = heightDifference;
+            }
+          }, 50);
+        });
+      } else {
+        paginatedQuery.fetchNextPage();
+      }
+    }
+  }, [shouldUsePagination, paginatedQuery]);
+
+  // Initial scroll to bottom when component mounts or when switching to pagination
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (messages.length > 0 && messagesEndRef.current) {
+      // For initial load, scroll to bottom immediately
+      messagesEndRef.current.scrollIntoView({ behavior: "instant" });
+    }
+  }, [messages.length > 0]); // Only trigger on initial load
+
+  // Auto-scroll to bottom only for new messages (when user is near bottom)
+  useEffect(() => {
+    if (shouldAutoScroll && messagesEndRef.current && messages.length > 0) {
+      const scrollElement = scrollAreaRef.current;
+      if (scrollElement) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+        
+        if (isNearBottom) {
+          messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    }
+  }, [messages, shouldAutoScroll]);
 
   const handleSendMessageSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (newMessage.trim() === "") return;
+    if (newMessage.trim() === "" || isSending) return;
 
+    setIsSending(true);
     try {
       await sendMessage(newMessage);
       setNewMessage("");
+      // Always scroll to bottom after sending a message
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     } catch (err) {
       console.error("ChatInterface: Error sending message:", err);
+    } finally {
+      setIsSending(false);
     }
   };
+
+  // Smart scroll behavior - detect if user is near bottom
+  useEffect(() => {
+    const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShouldAutoScroll(isNearBottom);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
 
   if (!currentUser) {
     return (
@@ -82,6 +174,20 @@ export function ChatInterface({
       )}
       <ScrollArea className="p-4 h-full">
         <div className="space-y-4">
+          {/* Load More Messages Button */}
+          {shouldUsePagination && paginatedQuery.hasNextPage && (
+            <div className="flex justify-center py-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadMoreMessages}
+                disabled={paginatedQuery.isFetchingNextPage}
+              >
+                {paginatedQuery.isFetchingNextPage ? "Loading..." : "Load Earlier Messages"}
+              </Button>
+            </div>
+          )}
+          
           {isLoading ? (
             <div className="flex items-center justify-center h-20 text-muted-foreground">
               Loading messages...

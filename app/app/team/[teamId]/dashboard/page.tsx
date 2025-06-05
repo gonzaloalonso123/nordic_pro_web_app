@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { Content } from "@/components/content";
 import { FormInvitations } from "./components/form-invitations";

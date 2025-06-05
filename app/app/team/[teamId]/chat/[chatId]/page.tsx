@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
 
-import { useChatRoom, useChatMessagesByRoom, useChatRoomMembers } from "@/hooks/queries/useChatRooms";
+import { useChatRoomWithUsers, useChatMessagesByRoom, useChatRoomMembers } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUrl } from "@/hooks/use-url";
@@ -12,8 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatInterface, DisplayMessage, UserProfileSnippet } from "@/components/chat/chat-interface";
 import { useHeader } from "@/hooks/useHeader";
-import { getInitials } from "@/utils/get-initials";
 import BackButton from "@/components/ui/back-button";
+import { useChatRoomAvatar } from "@/hooks/useChatRoomAvatar";
 
 export default function ChatRoomPage() {
   const params = useParams();
@@ -22,37 +22,40 @@ export default function ChatRoomPage() {
   const path = useUrl();
   const isMobile = useIsMobile();
   const { useHeaderConfig } = useHeader();
+  const { getChatAvatarInfo } = useChatRoomAvatar();
 
-  const { data: chatRoom, isLoading: isLoadingRoom } = useChatRoom(chatId);
+  const { data: chatRoom, isLoading: isLoadingRoom } = useChatRoomWithUsers(chatId);
   const { data: initialDbMessages = [], isLoading: isLoadingMessages } = useChatMessagesByRoom(chatId);
   const { data: roomMembers = [] } = useChatRoomMembers(chatId);
+
+  const avatarInfo = chatRoom ? getChatAvatarInfo(chatRoom) : null;
 
   useHeaderConfig({
     leftContent: isMobile ? <BackButton path={`${path}/chat`} /> : undefined,
     centerContent: (
-      !isLoadingRoom ? (
+      !isLoadingRoom && avatarInfo ? (
         <div className="flex gap-3 items-center justify-center">
           <Avatar>
             <AvatarImage
-              src={chatRoom?.avatar || undefined}
-              alt={chatRoom?.name || ""}
+              src={avatarInfo.avatarUrl || undefined}
+              alt={avatarInfo.displayName}
             />
             <AvatarFallback>
-              {getInitials(chatRoom?.name)}
+              {avatarInfo.initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <h3>{chatRoom?.name || "Chat"}</h3>
+            <h3>{avatarInfo.displayName}</h3>
             <p className="text-xs text-muted-foreground">
-              {roomMembers.length > 0
+              {roomMembers.length > 2
                 ? `${roomMembers.length} member${roomMembers.length > 1 ? "s" : ""}`
-                : "No members"}
+                : null}
             </p>
           </div>
         </div>
       ) : (<Skeleton className="h-6 w-32" />)
     ),
-  }, [isMobile, path, chatRoom?.name, isLoadingRoom, roomMembers.length]);
+  }, [isMobile, path, avatarInfo?.displayName, isLoadingRoom, roomMembers.length, chatRoom, getChatAvatarInfo]);
 
   const initialMessagesForInterface: DisplayMessage[] = useMemo(() => {
     return initialDbMessages.map((msg: any) => {

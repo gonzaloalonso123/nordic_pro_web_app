@@ -11,6 +11,41 @@ type ChatRoomMemberRow = Tables<"chat_room_members">
 type ChatRoomMemberInsert = TablesInsert<"chat_room_members">
 type MessageReadRow = Tables<"message_reads">
 type MessageReadInsert = TablesInsert<"message_reads">
+type UserProfile = Pick<Tables<"users">, "id" | "first_name" | "last_name">
+
+type LastMessageData = Pick<Tables<"chat_messages">, "id" | "content" | "created_at" | "user_id"> & {
+  users: UserProfile | null
+}
+
+type ChatMessageWithDetails = Pick<Tables<"chat_messages">, "id" | "content" | "user_id" | "created_at"> & {
+  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar"> | null
+  message_reads: MessageReadRow[]
+}
+
+type ChatRoomMemberWithUser = Pick<Tables<"chat_room_members">, "user_id"> & {
+  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar"> | null
+}
+
+export type ChatRoomWithMessagesAndMembers = Tables<"chat_rooms"> & {
+  chat_messages: ChatMessageWithDetails[]
+  chat_room_members: ChatRoomMemberWithUser[]
+}
+
+type ChatRoomMemberWithBasicUser = Pick<Tables<"chat_room_members">, "user_id" | "last_read_at"> & {
+  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "email" | "avatar"> | null
+}
+export type ChatRoomWithDetails = Tables<"chat_rooms"> & {
+  chat_room_members: ChatRoomMemberWithBasicUser[]
+  last_message: LastMessageData[] | null
+}
+export type ChatRoomMemberWithFullUser = Pick<Tables<"chat_room_members">, "user_id"> & {
+  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "email" | "avatar"> | null
+}
+
+export type ChatRoomWithUsers = Tables<"chat_rooms"> & {
+  chat_room_members: ChatRoomMemberWithFullUser[]
+}
+
 
 export const chatRoomsService = {
   // Get all chat rooms
@@ -29,15 +64,33 @@ export const chatRoomsService = {
     return data
   },
 
-  // Get chat rooms by user with enhanced sidebar data
-  async getByUser(supabase: SupabaseClient<Database>, userId: string): Promise<any[]> {
+  async getByUser(supabase: SupabaseClient<Database>, userId: string): Promise<ChatRoomWithDetails[]> {
+    // First, get all room IDs where the user is a member
+    const { data: userRooms, error: userRoomsError } = await supabase
+      .from("chat_room_members")
+      .select("room_id")
+      .eq("user_id", userId);
+
+    if (userRoomsError) throw userRoomsError;
+    if (!userRooms || userRooms.length === 0) return [];
+
+    const roomIds = userRooms.map(ur => ur.room_id);
+
+    // Then get full room details with ALL members for those rooms
     const { data, error } = await supabase
       .from("chat_rooms")
       .select(`
         *,
-        chat_room_members!inner(
+        chat_room_members(
           user_id,
-          last_read_at
+          last_read_at,
+          users(
+            id,
+            first_name,
+            last_name,
+            email,
+            avatar
+          )
         ),
         last_message:chat_messages(
           id,
@@ -51,11 +104,11 @@ export const chatRoomsService = {
           )
         )
       `)
-      .eq("chat_room_members.user_id", userId)
+      .in("id", roomIds)
       .order("updated_at", { ascending: false })
-      .order("created_at", { 
-        foreignTable: "last_message", 
-        ascending: false 
+      .order("created_at", {
+        foreignTable: "last_message",
+        ascending: false
       })
       .limit(1, { foreignTable: "last_message" })
 
@@ -88,7 +141,7 @@ export const chatRoomsService = {
   },
 
   // Get chat room with messages
-  async getWithMessages(supabase: SupabaseClient<Database>, chatRoomId: string): Promise<any> {
+  async getWithMessages(supabase: SupabaseClient<Database>, chatRoomId: string): Promise<ChatRoomWithMessagesAndMembers | null> {
     const { data, error } = await supabase
       .from("chat_rooms")
       .select(`
@@ -97,7 +150,6 @@ export const chatRoomsService = {
           id,
           content,
           user_id,
-          attachments,
           created_at,
           users(
             id,
@@ -126,7 +178,7 @@ export const chatRoomsService = {
   },
 
   // Get chat room with users
-  async getWithUsers(supabase: SupabaseClient<Database>, chatRoomId: string): Promise<any> {
+  async getWithUsers(supabase: SupabaseClient<Database>, chatRoomId: string): Promise<ChatRoomWithUsers | null> {
     const { data, error } = await supabase
       .from("chat_rooms")
       .select(`
@@ -164,14 +216,71 @@ export const chatRoomsService = {
       `)
       .eq("room_id", roomId)
       .order("created_at", { ascending: true })
-  
+
     if (error) throw error
     return data || []
   },
-  
+
+  // Add paginated message loading method
+  async getMessagesByRoomPaginated(
+    supabase: SupabaseClient<Database>, 
+    roomId: string, 
+    options: {
+      limit?: number;
+      offset?: number;
+      before?: string; // ISO timestamp to get messages before this time
+    } = {}
+  ): Promise<{ messages: ChatMessageRow[]; hasMore: boolean; total: number }> {
+    const { limit = 100, offset = 0, before } = options;
+
+    // First get total count
+    const { count: totalCount, error: countError } = await supabase
+      .from("chat_messages")
+      .select("*", { count: "exact", head: true })
+      .eq("room_id", roomId);
+
+    if (countError) throw countError;
+
+    // Build query for messages
+    let query = supabase
+      .from("chat_messages")
+      .select(`
+        *,
+        users(
+          id,
+          first_name,
+          last_name,
+          avatar
+        ),
+        message_reads(*)
+      `)
+      .eq("room_id", roomId)
+      .order("created_at", { ascending: false }) // Get newest first for pagination
+      .range(offset, offset + limit - 1);
+
+    // If we have a "before" timestamp, only get messages before that time
+    if (before) {
+      query = query.lt("created_at", before);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    // Reverse the order to show oldest first (for chat display)
+    const messages = (data || []).reverse();
+    const hasMore = offset + limit < (totalCount || 0);
+
+    return {
+      messages,
+      hasMore,
+      total: totalCount || 0
+    };
+  },
+
   // Add a new method to send a message
   async sendMessage(
-    supabase: SupabaseClient<Database>, 
+    supabase: SupabaseClient<Database>,
     message: ChatMessageInsert
   ): Promise<ChatMessageRow> {
     const { data, error } = await supabase
@@ -179,11 +288,11 @@ export const chatRoomsService = {
       .insert(message)
       .select()
       .single()
-  
+
     if (error) throw error
     return data
   },
-  
+
   // Add methods for chat room members
   async getChatRoomMembers(supabase: SupabaseClient<Database>, roomId: string): Promise<ChatRoomMemberRow[]> {
     const { data, error } = await supabase
@@ -198,11 +307,11 @@ export const chatRoomsService = {
         )
       `)
       .eq("room_id", roomId)
-  
+
     if (error) throw error
     return data || []
   },
-  
+
   async addChatRoomMember(
     supabase: SupabaseClient<Database>,
     member: ChatRoomMemberInsert
@@ -212,11 +321,11 @@ export const chatRoomsService = {
       .insert(member)
       .select()
       .single()
-  
+
     if (error) throw error
     return data
   },
-  
+
   async removeChatRoomMember(
     supabase: SupabaseClient<Database>,
     roomId: string,
@@ -227,10 +336,10 @@ export const chatRoomsService = {
       .delete()
       .eq("room_id", roomId)
       .eq("user_id", userId)
-  
+
     if (error) throw error
   },
-  
+
   // Add methods for message reads
   async markMessageAsRead(
     supabase: SupabaseClient<Database>,
@@ -241,11 +350,11 @@ export const chatRoomsService = {
       .insert(messageRead)
       .select()
       .single()
-  
+
     if (error) throw error
     return data
   },
-  
+
   async getUnreadMessageCount(
     supabase: SupabaseClient<Database>,
     roomId: string,
@@ -280,7 +389,7 @@ export const chatRoomsService = {
       .eq("room_id", roomId)
       .gt("created_at", memberData.last_read_at)
       .neq("user_id", userId); // Exclude messages sent by the user
-  
+
     if (error) throw error;
     return count || 0;
   },
@@ -298,6 +407,14 @@ export const chatRoomsService = {
       .eq("user_id", userId);
 
     if (error) throw error;
+
+    // Clear notifications for this room when marking as read
+    try {
+      const { clearChatNotificationsForUser } = await import("@/utils/notificationService");
+      await clearChatNotificationsForUser(roomId, userId);
+    } catch (notificationError) {
+      console.error(`Error clearing notifications for room ${roomId} and user ${userId}:`, notificationError);
+    }
   },
 
   // Get unread counts for multiple rooms efficiently
@@ -318,7 +435,7 @@ export const chatRoomsService = {
     if (memberError) throw memberError;
 
     const counts: Record<string, number> = {};
-    
+
     // Create a map of room_id to last_read_at
     const lastReadMap = new Map(
       memberData?.map(m => [m.room_id, m.last_read_at]) || []
@@ -328,7 +445,7 @@ export const chatRoomsService = {
     await Promise.all(
       roomIds.map(async (roomId) => {
         const lastRead = lastReadMap.get(roomId);
-        
+
         if (!lastRead) {
           // No last read timestamp, count all messages NOT sent by the user
           const { count, error } = await supabase
@@ -336,7 +453,7 @@ export const chatRoomsService = {
             .select('*', { count: 'exact', head: true })
             .eq("room_id", roomId)
             .neq("user_id", userId); // Exclude messages sent by the user
-          
+
           if (!error) {
             counts[roomId] = count || 0;
           }
@@ -348,7 +465,7 @@ export const chatRoomsService = {
             .eq("room_id", roomId)
             .gt("created_at", lastRead)
             .neq("user_id", userId); // Exclude messages sent by the user
-          
+
           if (!error) {
             counts[roomId] = count || 0;
           }

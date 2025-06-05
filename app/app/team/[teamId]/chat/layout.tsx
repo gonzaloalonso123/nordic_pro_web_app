@@ -1,7 +1,6 @@
 "use client";
 
 import { useHeader } from "@/hooks/useHeader";
-import { NewChatModal } from "@/components/chat/new-chat-modal";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -52,11 +51,6 @@ export default function ChatLayout({
           )}
         </div>
       </div>
-
-      <NewChatModal
-        isOpen={isNewChatModalOpen}
-        onOpenChange={setIsNewChatModalOpen}
-      />
     </div>
   );
 }

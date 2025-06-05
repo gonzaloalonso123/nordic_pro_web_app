@@ -1,9 +1,14 @@
+"use client";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Plus } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   useChatRoomsByUser,
   useUnreadMessageCountBatch,
@@ -12,71 +17,46 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUrl } from "@/hooks/use-url";
-import { getInitials } from "@/utils/get-initials";
 import { LoadingLink } from "../ui/loading-link";
 import { formatChatTime, formatMessagePreviewWithSender } from "@/utils/format-time";
 import { cn } from "@/lib/utils";
-
-type EnhancedChatRoom = {
-  id: string;
-  name: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-  last_message: Array<{
-    id: string;
-    content: string;
-    created_at: string;
-    user_id: string;
-    users: {
-      id: string;
-      first_name: string | null;
-      last_name: string | null;
-    } | null;
-  }> | null;
-  chat_room_members: Array<{
-    user_id: string;
-    last_read_at: string | null;
-  }>;
-};
+import { useChatRoomDisplayName } from "@/hooks/useChatRoomDisplayName";
+import { useChatRoomAvatar } from "@/hooks/useChatRoomAvatar";
+import CreateChatRoom from "./create-chat-room";
+import { useRole } from "@/app/app/(role-provider)/role-provider";
 
 export default function ChatListSidebar() {
   const { user } = useCurrentUser();
-  const { data: chatRooms, isLoading } = useChatRoomsByUser(user?.id);
+  const { data: chatRooms = [], isLoading } = useChatRoomsByUser(user?.id);
   const [searchQuery, setSearchQuery] = useState("");
+  const [createRoomDialogOpen, setCreateRoomDialogOpen] = useState(false);
   const markRoomAsReadMutation = useMarkRoomAsRead();
+  const { getRoomDisplayName } = useChatRoomDisplayName();
+  const { getChatAvatarInfo } = useChatRoomAvatar();
+  const { team: { id: teamId } } = useRole();
+  const isMobile = useIsMobile();
 
   const path = useUrl();
 
-  // Transform the data structure for type safety
-  const typedRooms = useMemo(() => {
-    return (chatRooms as EnhancedChatRoom[]) || [];
-  }, [chatRooms]);
+  const roomIds = useMemo(() => chatRooms.map((room) => room.id), [chatRooms]);
 
-  const roomIds = useMemo(
-    () => typedRooms.map((room) => room.id),
-    [typedRooms]
-  );
-
-  const { data: unreadCounts = {} } = useUnreadMessageCountBatch(
-    roomIds,
-    user?.id
-  );
+  const { data: unreadCounts = {} } = useUnreadMessageCountBatch(roomIds, user?.id);
 
   // Sort rooms by latest message timestamp, with empty rooms at the bottom
   const sortedRooms = useMemo(() => {
-    return [...typedRooms].sort((a, b) => {
+    return chatRooms.sort((a, b) => {
       const aLastMessage = a.last_message?.[0];
       const bLastMessage = b.last_message?.[0];
-      
+
       // If both have messages, sort by message timestamp (newest first)
       if (aLastMessage && bLastMessage) {
         return new Date(bLastMessage.created_at).getTime() - new Date(aLastMessage.created_at).getTime();
       }
-      
+
       // If only one has messages, prioritize the one with messages
       if (aLastMessage && !bLastMessage) return -1;
       if (!aLastMessage && bLastMessage) return 1;
-      
+
       // If neither has messages, sort by room creation date (newest first)
       const aTimestamp = a.updated_at || a.created_at;
       const bTimestamp = b.updated_at || b.created_at;
@@ -87,13 +67,14 @@ export default function ChatListSidebar() {
 
       return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
     });
-  }, [typedRooms]);
+  }, [chatRooms]);
 
   const filteredRooms = useMemo(() => {
-    return sortedRooms.filter((room) =>
-      room.name?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [sortedRooms, searchQuery]);
+    return sortedRooms.filter((room) => {
+      const displayName = getRoomDisplayName(room);
+      return displayName.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [sortedRooms, searchQuery, getRoomDisplayName]);
 
   const handleRoomClick = useCallback((roomId: string) => {
     if (user?.id) {
@@ -101,18 +82,53 @@ export default function ChatListSidebar() {
     }
   }, [user?.id, markRoomAsReadMutation]);
 
+  const handleCreateRoomSuccess = useCallback(() => {
+    setCreateRoomDialogOpen(false);
+  }, []);
+
+  const handleCreateRoomCancel = useCallback(() => {
+    setCreateRoomDialogOpen(false);
+  }, []);
+
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="px-4 py-3 border-b shrink-0">
-        <div className="relative">
+        <div className="flex items-center gap-2">
           <Input
             placeholder="Search chats..."
             icon={<Search className="h-4 w-4 text-muted-foreground" />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1"
           />
+          <Dialog open={createRoomDialogOpen} onOpenChange={setCreateRoomDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="shrink-0"
+                title="Create new chat"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className={cn(
+              isMobile
+                ? "fixed inset-0 max-w-none w-full h-full max-h-none p-0 translate-x-0 translate-y-0 border-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom"
+                : "max-w-md"
+            )}>
+              <CreateChatRoom
+                teamId={teamId}
+                onSuccess={handleCreateRoomSuccess}
+                onCancel={handleCreateRoomCancel}
+                isModal={true}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </CardHeader>
+
       <CardContent className="p-0 overflow-y-auto grow">
         <div className="divide-y">
           {isLoading ? (
@@ -133,16 +149,18 @@ export default function ChatListSidebar() {
               const hasUnread = unreadCount > 0;
               const lastMessage = room.last_message?.[0];
               const lastMessageTime = lastMessage?.created_at || room.updated_at;
+              const avatarInfo = getChatAvatarInfo(room);
+              const displayName = avatarInfo.displayName;
 
               // Format message preview with sender name
               const messagePreview = lastMessage
                 ? formatMessagePreviewWithSender(
-                    lastMessage.content,
-                    lastMessage.users?.first_name || null,
-                    lastMessage.users?.last_name || null,
-                    user?.id || '',
-                    lastMessage.user_id
-                  )
+                  lastMessage.content,
+                  lastMessage.users?.first_name || null,
+                  lastMessage.users?.last_name || null,
+                  user?.id || '',
+                  lastMessage.user_id
+                )
                 : "No recent messages";
 
               return (
@@ -160,11 +178,11 @@ export default function ChatListSidebar() {
                     <div className="relative">
                       <Avatar>
                         <AvatarImage
-                          src={undefined} // Remove avatar_url as it's not in schema
-                          alt={room.name || ""}
+                          src={avatarInfo.avatarUrl || undefined}
+                          alt={displayName}
                         />
                         <AvatarFallback>
-                          {getInitials(room.name)}
+                          {avatarInfo.initials}
                         </AvatarFallback>
                       </Avatar>
                       {hasUnread && (
@@ -177,7 +195,7 @@ export default function ChatListSidebar() {
                           "text-sm truncate",
                           hasUnread ? "font-semibold text-gray-900" : "font-medium text-gray-700"
                         )}>
-                          {room.name || "Unnamed Chat"}
+                          {displayName}
                         </h4>
                         {lastMessageTime && (
                           <span className="text-xs text-gray-500 ml-2 shrink-0">
@@ -213,6 +231,6 @@ export default function ChatListSidebar() {
           )}
         </div>
       </CardContent>
-    </Card>
+    </Card >
   );
 }

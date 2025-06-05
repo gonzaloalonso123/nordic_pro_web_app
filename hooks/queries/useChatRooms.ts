@@ -5,7 +5,7 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import { chatRoomsService } from "@/utils/supabase/services";
+import { chatRoomsService, ChatRoomWithDetails, type ChatRoomWithMessagesAndMembers } from "@/utils/supabase/services";
 import { createClient } from "@/utils/supabase/client";
 import type {
   Tables,
@@ -54,7 +54,7 @@ export const useChatRoom = <TData = ChatRoomRow>(
   });
 };
 
-export const useChatRoomsByUser = <TData = ChatRoomRow[]>(
+export const useChatRoomsByUser = <TData = ChatRoomWithDetails[]>(
   userId: string | undefined,
   options?: Omit<
     UseQueryOptions<ChatRoomRow[] | null, Error, TData>,
@@ -71,7 +71,7 @@ export const useChatRoomsByUser = <TData = ChatRoomRow[]>(
   });
 };
 
-export const useChatRoomWithMessages = <TData = any>(
+export const useChatRoomWithMessages = <TData = ChatRoomWithMessagesAndMembers>(
   chatRoomId: string | undefined,
   options?: Omit<
     UseQueryOptions<any | null, Error, TData>,
@@ -436,8 +436,6 @@ export const useMarkRoomAsRead = (
 interface StartDirectChatVariables {
   currentUserId: string;
   selectedUserId: string;
-  currentUserFirstName?: string | null; // For naming the room
-  selectedUserFirstName?: string | null; // For naming the room
 }
 
 async function findOrCreateDirectChatRoomLogic(
@@ -451,7 +449,7 @@ async function findOrCreateDirectChatRoomLogic(
   variables: StartDirectChatVariables
 ): Promise<string> {
   // Returns the roomId
-  const { currentUserId, selectedUserId, selectedUserFirstName } = variables;
+  const { currentUserId, selectedUserId } = variables;
 
   if (currentUserId === selectedUserId) {
     throw new Error("Cannot start a chat with yourself.");
@@ -526,12 +524,11 @@ async function findOrCreateDirectChatRoomLogic(
 
   // If no existing *strictly 1-on-1* chat room found, create a new one
   console.log(
-    `No existing 1-on-1 chat found. Creating new direct chat room with ${selectedUserFirstName || "user"}...`
+    `No existing 1-on-1 chat found. Creating new direct chat room...`
   );
-  const roomName = `Chat with ${selectedUserFirstName || selectedUserId.substring(0, 6)}`; // Default naming
 
   const newRoomData: ChatRoomInsert = await createChatRoomMutationAsync({
-    name: roomName,
+    // No name field - leave it null/undefined for direct chats
     // any other fields required by ChatRoomInsert
   });
 
