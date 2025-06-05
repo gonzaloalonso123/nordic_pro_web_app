@@ -1,16 +1,14 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import React from "react";
 import { motion } from "framer-motion";
-import { Calendar, CheckCircle, Sparkles, Trophy } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getLevelByExperience } from "@/content/level-calculator";
 
@@ -72,38 +70,6 @@ export const RewardOverview = () => {
             transition={{ duration: 1, delay: 0.5 }}
           />
         </Progress>
-
-        <div className="mt-6 space-y-4">
-          {/* <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-              <span>Forms Completed</span>
-            </div>
-            <Badge variant="outline" className="bg-green-50">
-              12
-            </Badge>
-          </div>
-
-          <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center">
-              <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-              <span>Current Streak</span>
-            </div>
-            <Badge variant="outline" className="bg-blue-50">
-              3 days
-            </Badge>
-          </div> */}
-
-          {/* <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center">
-              <Trophy className="h-4 w-4 mr-2 text-amber-500" />
-              <span>Trophies Earned</span>
-            </div>
-            <Badge variant="outline" className="bg-amber-50">
-              {trophies.filter((t) => t.earned).length}/{trophies.length}
-            </Badge>
-          </div> */}
-        </div>
       </CardContent>
       <CardFooter className="bg-linear-to-r from-indigo-100/50 py-2 to-purple-100/50 border-t border-indigo-200">
         <div className="text-xs text-muted-foreground">
