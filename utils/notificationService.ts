@@ -1,6 +1,6 @@
 "use server";
 
-import { sendNotification } from '@/app/pushNotificationActions';
+import { sendNotification, clearChatNotifications } from '@/app/pushNotificationActions';
 import { NotificationType, SendNotificationOptions } from '@/types/notifications';
 import { serverData } from '@/utils/data/server';
 import { getUserRoles } from './get-user-roles';
@@ -231,5 +231,14 @@ export async function triggerNewFormAvailableNotification(params: NewFormAvailab
     await sendPreparedNotification(recipientUserIds, notificationOptions);
   } catch (error) {
     console.error(`Error sending NEW_FORM_AVAILABLE for form ${formId}:`, error);
+  }
+}
+
+export async function clearChatNotificationsForUser(roomId: string, userId: string) {
+  try {
+    console.log(`Clearing chat notifications for room ${roomId} and user ${userId}`);
+    await clearChatNotifications(roomId, userId);
+  } catch (error) {
+    console.error(`Error clearing chat notifications for room ${roomId} and user ${userId}:`, error);
   }
 }
