@@ -13,7 +13,7 @@ import { FormSelect } from "@/components/form/form-select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DateSelector } from "@/components/create-event/date-selector/date-selector";
-import { addHours } from "date-fns";
+import { addHours, addMinutes } from "date-fns";
 import { useUrl } from "@/hooks/use-url";
 import { LocationSelectorPopup } from "@/components/create-event/location-selector/location-selector-popup";
 import { TeamUserSelectorPopup } from "@/components/create-event/team-user-selector/team-user-selector";
@@ -120,18 +120,20 @@ const AddTeamEventPage = () => {
       const [timeToComeHours, timeToComeMinutes] = dates.timeToCome
         ?.split(":")
         .map(Number) || [0, 0];
-      const startDate = new Date(date);
-      startDate.setHours(startHours, startMinutes, 0, 0);
-      const endDate = new Date(date);
-      endDate.setHours(endHours, endMinutes, 0, 0);
       const timeToCome = new Date(date);
       if (dates.timeToCome) {
-        timeToCome.setHours(timeToComeHours, timeToComeMinutes, 0, 0);
+        timeToCome.setHours(timeToComeHours, timeToComeMinutes);
       }
       const createdEvents = [];
       for (const date of dates.dates) {
-        const startDate = addHours(new Date(date), startHours);
-        const endDate = addHours(new Date(date), endHours);
+        const startDate = addMinutes(
+          addHours(new Date(date), startHours),
+          startMinutes
+        );
+        const endDate = addMinutes(
+          addHours(new Date(date), endHours),
+          endMinutes
+        );
         const event = await createEvent.mutateAsync({
           name: values.name,
           description: values.description,

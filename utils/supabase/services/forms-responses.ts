@@ -147,7 +147,6 @@ export const formResponsesService = {
             *,
             categories(name),
             question_options(*),
-            emoji_options(*)
           )
         )
       `
