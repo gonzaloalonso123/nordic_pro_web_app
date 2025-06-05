@@ -1,0 +1,15 @@
+<svg width="375" height="812" viewBox="0 0 375 812" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="375" height="812" fill="#1e40af"/>
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="375" height="812" fill="url(#gradient)"/>
+  <circle cx="187.5" cy="356" r="80" fill="white" opacity="0.1"/>
+  <circle cx="187.5" cy="356" r="60" fill="white"/>
+  <text x="187.5" y="480" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="700" fill="white">Nordic Pro</text>
+  <text x="187.5" y="510" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#94a3b8">Keep Players In The Game</text>
+</svg>
+
