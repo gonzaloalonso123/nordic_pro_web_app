@@ -17,7 +17,7 @@ interface FormRendererProps {
     })[];
   };
   redirectUrl?: string;
-  onSubmit?: (values: Record<string, any>) => void;
+  onSubmit?: (values: Record<string, any>, experience: number) => void;
 }
 
 export default function FormRenderer({
@@ -94,7 +94,7 @@ export default function FormRenderer({
     });
 
     if (onSubmit) {
-      onSubmit(values);
+      onSubmit(values, totalExperience);
     }
     console.log(values);
     setFormValues(values);
@@ -141,7 +141,6 @@ export default function FormRenderer({
               name={question.id}
               label=""
               description=""
-              className="space-y-0"
             >
               {(field) => (
                 <QuestionRenderer

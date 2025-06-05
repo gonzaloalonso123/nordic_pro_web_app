@@ -18,7 +18,7 @@ import { QuestionRenderer } from "./question-renderer";
 interface SequentialFormProps {
   form: FormWithQuestions;
   redirectUrl?: string;
-  onSubmit: (answers: Record<string, any>) => void;
+  onSubmit: (answers: Record<string, any>, experience: number) => void;
 }
 
 export default function SequentialForm({
@@ -77,12 +77,21 @@ export default function SequentialForm({
   };
 
   const completeForm = () => {
+    let updatedProgress = { ...progress };
+    // Asegura que la última pregunta esté en answeredQuestions
+    if (!updatedProgress.answeredQuestions.includes(currentQuestion.id)) {
+      updatedProgress = {
+        ...updatedProgress,
+        answeredQuestions: [...updatedProgress.answeredQuestions, currentQuestion.id],
+        earnedExperience: updatedProgress.earnedExperience + currentQuestion.experience,
+      };
+    }
     setShowCompletionScreen(true);
     setProgress({
-      ...progress,
+      ...updatedProgress,
       completed: true,
     });
-    onSubmit(answers);
+    onSubmit(answers, updatedProgress.earnedExperience);
   };
 
   const handleAnswerChange = (questionId: string, value: any) => {

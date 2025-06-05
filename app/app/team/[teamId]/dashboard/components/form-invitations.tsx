@@ -77,7 +77,7 @@ const FormInvitation = ({
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
+        {/* <CardContent>
           <div className="flex flex-wrap gap-2 text-sm">
             <Badge
               variant="outline"
@@ -86,7 +86,7 @@ const FormInvitation = ({
               {form.form.category}
             </Badge>
           </div>
-        </CardContent>
+        </CardContent> */}
         <CardFooter className="flex justify-between bg-gray-50 border-t rounded-b-md py-2">
           <Button
             size="xl"

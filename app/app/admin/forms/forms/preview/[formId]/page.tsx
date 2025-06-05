@@ -39,7 +39,7 @@ export default function PreviewFormPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <FormRenderer form={formWithQuestions} />
+          {/* <FormRenderer form={formWithQuestions} /> */}
         </div>
         <div className="md:col-span-1">
           <ExperienceProgress />
