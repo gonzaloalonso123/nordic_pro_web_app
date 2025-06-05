@@ -11,10 +11,9 @@ interface SplashScreenProviderProps {
 export default function SplashScreenProvider({ children }: SplashScreenProviderProps) {
   const { showSplash, hideSplash } = useSplashScreen();
 
-  return (
-    <>
-      {showSplash && <SplashScreen onFinish={hideSplash} />}
-      {children}
-    </>
-  );
+  // Don't render children until splash is done - like native apps
+  if (showSplash) {
+    return <SplashScreen onFinish={hideSplash} />;
+  }
+  return <>{children}</>;
 }
