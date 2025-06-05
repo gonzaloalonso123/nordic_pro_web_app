@@ -8,23 +8,14 @@ interface SplashScreenProps {
 }
 
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
-  const [isVisible, setIsVisible] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     // Start fade-in animation after component mounts
     setIsAnimating(true);
 
-    // Auto-hide after 2 seconds
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-      onFinish?.();
-    }, 2000);
-
-    return () => clearTimeout(timer);
   }, [onFinish]);
 
-  if (!isVisible) return null;
 
   return (
     <div 

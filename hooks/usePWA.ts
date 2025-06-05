@@ -7,14 +7,17 @@ export const usePWA = () => {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // Check if running as PWA
+    if (typeof window === 'undefined') return;
+
     const isStandaloneMode =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true ||
-      document.referrer.includes('android-app://');
+      document.referrer.includes('android-app://') ||
+      window.matchMedia('(display-mode: fullscreen)').matches;
 
-    // Check if it's actually a mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(navigator.userAgent) ||
+      window.matchMedia('(max-width: 768px)').matches ||
+      ('ontouchstart' in window);
 
     setIsStandalone(isStandaloneMode);
     setIsPWA(isStandaloneMode && isMobile);
