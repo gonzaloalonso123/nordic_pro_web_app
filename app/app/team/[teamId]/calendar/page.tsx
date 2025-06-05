@@ -39,13 +39,13 @@ export default function CalendarDemo() {
 
   useHeaderConfig({
     centerContent: "Events",
-    rightContent: (
+    rightContent: isCoach ? (
       <LoadingLink variant="default" href={`${path}/calendar/add-event`}>
         <PlusCircle className="mr-2 h-4 w-4" />
         <span className="hidden sm:inline">Add event</span>
         <span className="sm:hidden">Add</span>
       </LoadingLink>
-    ),
+    ) : null,
   });
 
   const eventsQuery = isCoach

@@ -1,16 +1,14 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import React from "react";
 import { motion } from "framer-motion";
-import { Calendar, CheckCircle, Sparkles, Trophy } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getLevelByExperience } from "@/content/level-calculator";
 

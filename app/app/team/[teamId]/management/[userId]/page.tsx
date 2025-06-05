@@ -42,8 +42,6 @@ import { useHeader } from "@/hooks/useHeader";
 
 export default function Page() {
   const { useHeaderConfig } = useHeader();
-  // Remove these lines or comment them out:
-  // const [isEditing, setIsEditing] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
