@@ -58,21 +58,21 @@ export type Database = {
       chat_messages: {
         Row: {
           content: string
-          created_at: string | null
+          created_at: string
           id: string
           room_id: string | null
           user_id: string | null
         }
         Insert: {
           content: string
-          created_at?: string | null
+          created_at?: string
           id?: string
           room_id?: string | null
           user_id?: string | null
         }
         Update: {
           content?: string
-          created_at?: string | null
+          created_at?: string
           id?: string
           room_id?: string | null
           user_id?: string | null

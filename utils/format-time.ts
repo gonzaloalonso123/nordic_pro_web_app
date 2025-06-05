@@ -11,7 +11,7 @@ import { formatDistanceToNow, format, isToday, isYesterday, isThisWeek } from 'd
 export function formatChatTime(timestamp: string | Date): string {
   const date = new Date(timestamp);
   const now = new Date();
-  
+
   // Handle invalid dates
   if (isNaN(date.getTime())) {
     return '';
@@ -53,14 +53,14 @@ export function formatChatTime(timestamp: string | Date): string {
  */
 export function formatMessagePreview(content: string, maxLength: number = 50): string {
   if (!content) return 'No recent messages';
-  
+
   // Remove extra whitespace and newlines
   const cleaned = content.replace(/\s+/g, ' ').trim();
-  
+
   if (cleaned.length <= maxLength) {
     return cleaned;
   }
-  
+
   return cleaned.substring(0, maxLength - 3) + '...';
 }
 
@@ -76,16 +76,16 @@ export function formatMessagePreviewWithSender(
   maxLength: number = 50
 ): string {
   const preview = formatMessagePreview(content, maxLength - 10); // Leave room for sender name
-  
+
   if (!messageSenderId) {
     return preview;
   }
-  
+
   // If the current user sent the message, prefix with "You:"
   if (messageSenderId === currentUserId) {
     return `You: ${preview}`;
   }
-  
+
   // Otherwise, use the sender's first name
   const senderName = senderFirstName || 'Someone';
   return `${senderName}: ${preview}`;
