@@ -15,13 +15,13 @@ export const useChatRoomAvatar = () => {
 
   const getChatAvatarInfo = useCallback((room: any): ChatAvatarInfo => {
     if (!room) {
-      return { 
-        avatarUrl: undefined, 
-        initials: "?", 
-        displayName: "Chat" 
+      return {
+        avatarUrl: undefined,
+        initials: "?",
+        displayName: "Chat"
       };
     }
-    
+
     // Check if this is a 1-1 chat (exactly 2 members)
     const members = room.chat_room_members || [];
     if (members.length === 2) {
@@ -39,7 +39,7 @@ export const useChatRoomAvatar = () => {
         };
       }
     }
-    
+
     // For group chats or when other user info is not available, use room display name
     const displayName = getRoomDisplayName(room);
     return {
