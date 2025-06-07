@@ -12,14 +12,7 @@ import {
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -82,6 +75,7 @@ export function DataTable<TData, TValue>({
   className,
   isLoading = false,
   skeletonRows = 5,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -101,78 +95,45 @@ export function DataTable<TData, TValue>({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table
-              .getHeaderGroups()
-              .map((headerGroup: { id: string; headers: any[] }) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const columnDef = header.column
-                      .columnDef as ResponsiveColumnDef<TData, TValue>;
-                    return (
-                      <TableHead
-                        key={header.id}
-                        className={cn(
-                          columnDef.responsive?.visible || "",
-                          columnDef.responsive?.hidden || ""
-                        )}
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
+            {table.getHeaderGroups().map((headerGroup: { id: string; headers: any[] }) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const columnDef = header.column.columnDef as ResponsiveColumnDef<TData, TValue>;
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={cn(columnDef.responsive?.visible || "", columnDef.responsive?.hidden || "")}
+                    >
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: skeletonRows }).map((_, index) => (
                 <TableRow key={`skeleton-${index}`}>
                   {columns.map((column, colIndex) => {
-                    const columnDef = column as ResponsiveColumnDef<
-                      TData,
-                      TValue
-                    >;
+                    const columnDef = column as ResponsiveColumnDef<TData, TValue>;
                     const skeletonConfig = columnDef.skeleton || {};
 
                     return (
                       <TableCell
                         key={`skeleton-${index}-${colIndex}`}
-                        className={cn(
-                          columnDef.responsive?.visible || "",
-                          columnDef.responsive?.hidden || ""
-                        )}
+                        className={cn(columnDef.responsive?.visible || "", columnDef.responsive?.hidden || "")}
                       >
                         {skeletonConfig.type === "avatar" ? (
                           <div className="flex items-center space-x-3">
                             <Skeleton className="h-8 w-8 rounded-full" />
-                            <Skeleton
-                              className={cn(
-                                "h-4",
-                                skeletonConfig.width || "w-24"
-                              )}
-                            />
+                            <Skeleton className={cn("h-4", skeletonConfig.width || "w-24")} />
                           </div>
                         ) : skeletonConfig.type === "badge" ? (
-                          <Skeleton
-                            className={cn(
-                              "h-5 w-16 rounded-full",
-                              skeletonConfig.className
-                            )}
-                          />
+                          <Skeleton className={cn("h-5 w-16 rounded-full", skeletonConfig.className)} />
                         ) : skeletonConfig.type === "button" ? (
-                          <Skeleton
-                            className={cn(
-                              "h-8 w-8 rounded",
-                              skeletonConfig.className
-                            )}
-                          />
-                        ) : skeletonConfig.type === "custom" &&
-                          skeletonConfig.customComponent ? (
+                          <Skeleton className={cn("h-8 w-8 rounded", skeletonConfig.className)} />
+                        ) : skeletonConfig.type === "custom" && skeletonConfig.customComponent ? (
                           skeletonConfig.customComponent
                         ) : (
                           <Skeleton
@@ -194,22 +155,17 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => onRowClick && onRowClick(row)}
+                  className={cn("cursor-pointer hover:bg-slate-50", onRowClick && "hover:bg-muted/50")}>
                 >
                   {row.getVisibleCells().map((cell) => {
-                    const columnDef = cell.column
-                      .columnDef as ResponsiveColumnDef<TData, TValue>;
+                    const columnDef = cell.column.columnDef as ResponsiveColumnDef<TData, TValue>;
                     return (
                       <TableCell
                         key={cell.id}
-                        className={cn(
-                          columnDef.responsive?.visible || "",
-                          columnDef.responsive?.hidden || ""
-                        )}
+                        className={cn(columnDef.responsive?.visible || "", columnDef.responsive?.hidden || "")}
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     );
                   })}
@@ -217,10 +173,7 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>

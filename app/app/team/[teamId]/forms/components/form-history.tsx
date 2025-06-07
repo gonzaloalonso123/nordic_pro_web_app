@@ -1,21 +1,14 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
-import { FileText, Clock, Users, Eye } from "lucide-react";
-import {
-  DataTable,
-  type ResponsiveColumnDef,
-  SortableHeader,
-} from "@/components/data-table/data-table";
+import { FileText, Clock, Users } from "lucide-react";
+import { DataTable, type ResponsiveColumnDef, SortableHeader } from "@/components/data-table/data-table";
 import { useClientData } from "@/utils/data/client";
-import Link from "next/link";
 import { useUrl } from "@/hooks/use-url";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { responsiveBreakpoints } from "@/components/data-table/lib/table-utils";
 import { useHeader } from "@/hooks/useHeader";
+import { useRouter } from "next/navigation";
 
-// Type definition for form invitation data
 type FormInvitation = {
   id: string;
   created_at: string;
@@ -40,17 +33,16 @@ export function FormHistory({ teamId }: FormHistoryProps) {
   useHeaderConfig({
     centerContent: "Form History",
   });
+  const router = useRouter();
+  const path = useUrl();
 
   const { data: sentFormInvitations = [], isPending: sentFormsPending } =
     useClientData().formInvitations.useByTeam(teamId);
-  const path = useUrl();
   const columns: ResponsiveColumnDef<FormInvitation>[] = [
     {
       accessorKey: "form.title",
       mobilePriority: 1,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Form</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Form</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-48",
@@ -61,13 +53,9 @@ export function FormHistory({ teamId }: FormHistoryProps) {
           <div className="flex items-center space-x-3">
             <FileText className="h-4 w-4 text-primary shrink-0" />
             <div className="min-w-0">
-              <div className="font-medium truncate">
-                {invitation.form.title}
-              </div>
+              <div className="font-medium truncate">{invitation.form.title}</div>
               {invitation.form.description && (
-                <div className="text-sm text-muted-foreground truncate max-w-xs">
-                  {invitation.form.description}
-                </div>
+                <div className="text-sm text-muted-foreground truncate max-w-xs">{invitation.form.description}</div>
               )}
             </div>
           </div>
@@ -77,9 +65,7 @@ export function FormHistory({ teamId }: FormHistoryProps) {
     {
       accessorKey: "created_at",
       responsive: responsiveBreakpoints.hiddenMobile,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Date Sent</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Date Sent</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-24",
@@ -102,32 +88,20 @@ export function FormHistory({ teamId }: FormHistoryProps) {
     {
       id: "completion",
       mobilePriority: 2,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Completion</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Completion</SortableHeader>,
       skeleton: {
         type: "badge",
       },
       cell: ({ row }) => {
         const invitation = row.original;
-        const responded =
-          invitation.invitations?.filter((inv) => inv.response).length || 0;
+        const responded = invitation.invitations?.filter((inv) => inv.response).length || 0;
         const total = invitation.invitations?.length || 0;
-        const responseRate =
-          total > 0 ? Math.round((responded / total) * 100) : 0;
+        const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0;
 
         return (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Badge
-                variant={
-                  responseRate === 100
-                    ? "default"
-                    : responseRate > 50
-                      ? "secondary"
-                      : "outline"
-                }
-              >
+              <Badge variant={responseRate === 100 ? "default" : responseRate > 50 ? "secondary" : "outline"}>
                 {responseRate}% complete
               </Badge>
             </div>
@@ -139,8 +113,7 @@ export function FormHistory({ teamId }: FormHistoryProps) {
       },
       sortingFn: (rowA, rowB) => {
         const getResponseRate = (invitation: FormInvitation) => {
-          const responded =
-            invitation.invitations?.filter((inv) => inv.response).length || 0;
+          const responded = invitation.invitations?.filter((inv) => inv.response).length || 0;
           const total = invitation.invitations?.length || 0;
           return total > 0 ? (responded / total) * 100 : 0;
         };
@@ -150,17 +123,14 @@ export function FormHistory({ teamId }: FormHistoryProps) {
     {
       id: "responses",
       responsive: responsiveBreakpoints.hiddenMobile,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Responses</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Responses</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-20",
       },
       cell: ({ row }) => {
         const invitation = row.original;
-        const responded =
-          invitation.invitations?.filter((inv) => inv.response).length || 0;
+        const responded = invitation.invitations?.filter((inv) => inv.response).length || 0;
         const total = invitation.invitations?.length || 0;
 
         return (
@@ -173,29 +143,8 @@ export function FormHistory({ teamId }: FormHistoryProps) {
         );
       },
       sortingFn: (rowA, rowB) => {
-        const getTotal = (invitation: FormInvitation) =>
-          invitation.invitations?.length || 0;
+        const getTotal = (invitation: FormInvitation) => invitation.invitations?.length || 0;
         return getTotal(rowA.original) - getTotal(rowB.original);
-      },
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      skeleton: {
-        type: "button",
-      },
-      cell: ({ row }) => {
-        const invitation = row.original;
-        return (
-          <div className="flex justify-end">
-            <Link href={`${path}/forms/${invitation.id}`}>
-              <Button variant="outline" size="sm">
-                <Eye className="mr-2 h-4 w-4" />
-                View Results
-              </Button>
-            </Link>
-          </div>
-        );
       },
     },
   ];
@@ -204,9 +153,7 @@ export function FormHistory({ teamId }: FormHistoryProps) {
     return (
       <div className="rounded-md border border-dashed p-8 text-center">
         <h3 className="text-lg font-medium">No forms sent yet</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          When you send forms to this team, they will appear here.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">When you send forms to this team, they will appear here.</p>
       </div>
     );
   }
@@ -217,6 +164,11 @@ export function FormHistory({ teamId }: FormHistoryProps) {
       data={sentFormInvitations}
       isLoading={sentFormsPending}
       skeletonRows={4}
+      onRowClick={(row) => {
+        const invitation = row.original;
+        router.push(`${path}/forms/${invitation.id}`);
+      }}
+      rowClassName="cursor-pointer hover:bg-muted/50"
     />
   );
 }
