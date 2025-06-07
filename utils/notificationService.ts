@@ -1,21 +1,18 @@
 "use server";
 
-import { sendNotification, clearChatNotifications } from '@/app/pushNotificationActions';
-import { NotificationType, SendNotificationOptions } from '@/types/notifications';
-import { serverData } from '@/utils/data/server';
-import { getUserRoles } from './get-user-roles';
+import { sendNotification, clearChatNotifications } from "@/app/pushNotificationActions";
+import { NotificationType, SendNotificationOptions } from "@/types/notifications";
+import { serverData } from "@/utils/data/server";
+import { getUserRoles } from "./get-user-roles";
 
-async function sendPreparedNotification(
-  recipientUserIds: string[],
-  options: SendNotificationOptions
-) {
+async function sendPreparedNotification(recipientUserIds: string[], options: SendNotificationOptions) {
   if (!recipientUserIds || recipientUserIds.length === 0) {
-    console.log('No recipients for notification. Skipping.');
+    console.log("No recipients for notification. Skipping.");
     return;
   }
 
   const notificationPromises = recipientUserIds
-    .filter(userId => userId)
+    .filter((userId) => userId)
     .map(async (userId) => {
       try {
         console.log(`Sending ${options.type} notification to user ${userId}`);
@@ -39,18 +36,14 @@ async function getChatMessageRecipients(
 
   try {
     const members = await serverData.chatRooms.getChatRoomMembers(roomId);
-    return members
-      .map(member => member.user_id)
-      .filter(id => id !== actorUserId && id !== null);
+    return members.map((member) => member.user_id).filter((id) => id !== actorUserId && id !== null);
   } catch (error) {
     console.error(`Error fetching room members for chat message notification (room ${roomId}):`, error);
     return null;
   }
 }
 
-async function getActorDetails(
-  actorUserId: string
-): Promise<{ name: string; avatar: string } | null> {
+async function getActorDetails(actorUserId: string): Promise<{ name: string; avatar: string } | null> {
   try {
     const actor = await serverData.users.getById(actorUserId);
     if (!actor) return null;
@@ -58,7 +51,7 @@ async function getActorDetails(
     const fullName = `${actor.first_name} ${actor.last_name}`;
     return {
       name: fullName,
-      avatar: actor.avatar || '/icon-192x192.png',
+      avatar: actor.avatar || "/icon-192x192.png",
     };
   } catch (error) {
     console.error(`Error fetching actor details for user ${actorUserId}:`, error);
@@ -69,12 +62,12 @@ async function getActorDetails(
 function defaultNotificationOptions(): SendNotificationOptions {
   return {
     type: NotificationType.GENERIC,
-    title: 'Notification',
-    body: 'You have a new notification.',
-    icon: '/icon-192x192.png',
-    tag: 'default-notification',
+    title: "Notification",
+    body: "You have a new notification.",
+    icon: "/icon-192x192.png",
+    tag: "default-notification",
     data: {
-      url: '/',
+      url: "/",
     },
   };
 }
@@ -92,7 +85,7 @@ export async function triggerNewChatMessageNotification(params: NewChatMessageNo
   const finalRecipientUserIds = await getChatMessageRecipients(roomId, actorUserId, initialRecipients);
 
   if (!finalRecipientUserIds || finalRecipientUserIds.length === 0) {
-    console.log('No recipients for new chat message notification. Skipping or failed to fetch.');
+    console.log("No recipients for new chat message notification. Skipping or failed to fetch.");
     return;
   }
 
@@ -102,14 +95,16 @@ export async function triggerNewChatMessageNotification(params: NewChatMessageNo
     return;
   }
 
-  const { team: { id: teamId } } = await getUserRoles();
+  const {
+    team: { id: teamId },
+  } = await getUserRoles();
 
   try {
     const notificationOptions: SendNotificationOptions = {
       ...defaultNotificationOptions(),
       type: NotificationType.NEW_CHAT_MESSAGE,
       title: `New message from ${actorDetails.name}`,
-      body: messageContent.substring(0, 100) + (messageContent.length > 100 ? '...' : ''),
+      body: messageContent.substring(0, 100) + (messageContent.length > 100 ? "..." : ""),
       icon: actorDetails.avatar,
       tag: `chat-message-${roomId}`,
       data: {
@@ -132,7 +127,7 @@ export async function triggerNewEventCreatedNotification(params: NewEventCreated
   const { recipientUserIds, eventId } = params;
 
   if (!recipientUserIds || recipientUserIds.length === 0) {
-    console.log('No recipients for new event created notification. Skipping.');
+    console.log("No recipients for new event created notification. Skipping.");
     return;
   }
 
@@ -141,20 +136,22 @@ export async function triggerNewEventCreatedNotification(params: NewEventCreated
     console.error(`Event with ID ${eventId} not found. Skipping notification.`);
     return;
   }
-  const { name: eventTitle, start_date: eventStartTime, description: eventDescription, } = eventDetails;
+  const { name: eventTitle, start_date: eventStartTime, description: eventDescription } = eventDetails;
 
   const formattedEventStartTime = new Date(eventStartTime).toLocaleString();
-  const { team: { id: teamId } } = await getUserRoles();
+  const {
+    team: { id: teamId },
+  } = await getUserRoles();
 
   try {
     const notificationOptions: SendNotificationOptions = {
       ...defaultNotificationOptions(),
       type: NotificationType.NEW_EVENT_INVITATION,
       title: `New Event: ${eventTitle}`,
-      body: `You have been invited to an event starting ${formattedEventStartTime} ${eventDescription ? ` - ${eventDescription.substring(0, 50)}${eventDescription.length > 50 ? '...' : ''}` : ''}`,
+      body: `You have been invited to an event starting ${formattedEventStartTime} ${eventDescription ? ` - ${eventDescription.substring(0, 50)}${eventDescription.length > 50 ? "..." : ""}` : ""}`,
       tag: `new-event-${eventId}`,
       data: {
-        url: `app/team/${teamId}/calendar`
+        url: `app/team/${teamId}/calendar`,
       },
     };
 
@@ -175,7 +172,7 @@ export async function triggerCalendarEventReminderNotification(params: CalendarE
   const { recipientUserIds, eventId, eventTitle, eventStartTime } = params;
 
   if (!recipientUserIds || recipientUserIds.length === 0) {
-    console.log('No recipients for calendar event reminder. Skipping.');
+    console.log("No recipients for calendar event reminder. Skipping.");
     return;
   }
 
@@ -187,7 +184,7 @@ export async function triggerCalendarEventReminderNotification(params: CalendarE
       body: `Starts at ${eventStartTime}`,
       tag: `event-reminder-${eventId}`,
       data: {
-        url: `/app/user/calendar?eventId=${eventId}`
+        url: `/app/user/calendar?eventId=${eventId}`,
       },
     };
 
@@ -206,7 +203,7 @@ export async function triggerNewFormAvailableNotification(params: NewFormAvailab
   const { recipientUserIds, formId } = params;
 
   if (!recipientUserIds || recipientUserIds.length === 0) {
-    console.log('No recipients for new form available notification. Skipping.');
+    console.log("No recipients for new form available notification. Skipping.");
     return;
   }
 
@@ -221,10 +218,10 @@ export async function triggerNewFormAvailableNotification(params: NewFormAvailab
       ...defaultNotificationOptions(),
       type: NotificationType.NEW_FORM_AVAILABLE,
       title: `New Form: ${form.title}`,
-      body: 'A new form is ready for you to fill out.',
+      body: "A new form is ready for you to fill out.",
       tag: `new-form-${formId}`,
       data: {
-        url: `/`
+        url: `/`,
       },
     };
 

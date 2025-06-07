@@ -197,10 +197,8 @@ export const useClientData = () => {
       // Queries
       useAll: organisationsInvitationQueries.useOrganisationsInvitations,
       useById: organisationsInvitationQueries.useOrganisationInvitation,
-      useByOrganisation:
-        organisationsInvitationQueries.useOrganisationInvitationsByOrganisation,
-      useByEmail:
-        organisationsInvitationQueries.useOrganisationInvitationsByEmail,
+      useByOrganisation: organisationsInvitationQueries.useOrganisationInvitationsByOrganisation,
+      useByEmail: organisationsInvitationQueries.useOrganisationInvitationsByEmail,
       // Mutations
       useCreate: organisationsInvitationQueries.useCreateOrganisationInvitation,
       useUpdate: organisationsInvitationQueries.useUpdateOrganisationInvitation,
@@ -215,10 +213,8 @@ export const useClientData = () => {
       useById: eventsInvitationQueries.useEventInvitation,
       useByEvent: eventsInvitationQueries.useEventInvitationsByEvent,
       useByUser: eventsInvitationQueries.useEventInvitationsByUser,
-      useByEventAndUser:
-        eventsInvitationQueries.useEventInvitationByEventAndUser,
-      useWithUserDetails:
-        eventsInvitationQueries.useEventInvitationWithUserDetails,
+      useByEventAndUser: eventsInvitationQueries.useEventInvitationByEventAndUser,
+      useWithUserDetails: eventsInvitationQueries.useEventInvitationWithUserDetails,
       // Mutations
       useCreate: eventsInvitationQueries.useCreateEventInvitation,
       useUpdate: eventsInvitationQueries.useUpdateEventInvitation,
@@ -238,6 +234,7 @@ export const useClientData = () => {
       useDelete: formInvitationQueries.useDeleteFormInvitation,
       useBulkCreate: formInvitationQueries.useBulkCreateFormInvitations,
       useSendToTeam: formInvitationQueries.useSendInvitationsToTeam,
+      useSendToUsers: formInvitationQueries.useSendInvitationsToUsers,
     },
     locations: {
       useAll: locationQueries.useLocations,

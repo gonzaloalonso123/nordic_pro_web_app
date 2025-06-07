@@ -1,16 +1,19 @@
 "use client";
 
 import type React from "react";
-import confetti from "canvas-confetti";
 import { Content } from "@/components/content";
 import { FormInvitations } from "./components/form-invitations";
 import { RewardOverview } from "./components/reward-overview";
-import AccountSetupCard from "@/components/onboarding/account-setup-card";
 import { useHeader } from "@/hooks/useHeader";
+import { useClientData } from "@/utils/data/client";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import NextEventCard from "./components/next-event-card";
 
 export default function DashboardPage() {
   const { useHeaderConfig } = useHeader();
   useHeaderConfig({ centerContent: "Dashboard" });
+  const { user } = useCurrentUser();
+  const { data: events } = useClientData().events.useByUserId(user?.id as string);
 
   // useEffect(() => {
   //   const duration = 3 * 1000;
@@ -49,9 +52,10 @@ export default function DashboardPage() {
 
   return (
     <Content>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
+      <div className="flex flex-col gap-2">
         <FormInvitations />
         <RewardOverview />
+        <NextEventCard events={events || []} />
       </div>
     </Content>
   );

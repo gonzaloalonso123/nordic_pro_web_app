@@ -48,19 +48,14 @@ const AddTeamEventPage = () => {
   });
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [inviteFutureMembers, setInviteFutureMembers] = useState<boolean>(true);
-  const { data: team, isPending: isTeamPending } =
-    useClientData().teams.useWithUsers(teamId);
-  const { data: calendar, isPending: isCalendarPending } =
-    useClientData().calendars.useByTeam(teamId);
+  const { data: team, isPending: isTeamPending } = useClientData().teams.useWithUsers(teamId);
+  const { data: calendar, isPending: isCalendarPending } = useClientData().calendars.useByTeam(teamId);
   const createEvent = useClientData().events.useCreate();
   const createInvitation = useClientData().eventsInvitation.useCreate();
-  const sendEventsToCalendars =
-    useClientData().calendars.useSendEventsToCalendars();
+  const sendEventsToCalendars = useClientData().calendars.useSendEventsToCalendars();
   const { user } = useCurrentUser();
   const { organisation } = useRole();
-  const teamUsersWithoutMe = team?.users
-    .filter((u) => u.user.id !== user?.id)
-    .filter((user) => user.role !== "COACH");
+  const teamUsersWithoutMe = team?.users.filter((u) => u.user.id !== user?.id).filter((user) => user.role !== "COACH");
 
   const handleToggleUser = (userId: string) => {
     if (selectedUsers.includes(userId)) {
@@ -116,22 +111,14 @@ const AddTeamEventPage = () => {
       setIsSubmitting(true);
       const [startHours, startMinutes] = dates.startTime.split(":").map(Number);
       const [endHours, endMinutes] = dates.endTime.split(":").map(Number);
-      const [timeToComeHours, timeToComeMinutes] = dates.timeToCome
-        ?.split(":")
-        .map(Number) || [0, 0];
+      const [timeToComeHours, timeToComeMinutes] = dates.timeToCome?.split(":").map(Number) || [0, 0];
 
       for (const date of dates.dates) {
         let cleanDate = date.split("T")[0];
         const timeToCome = new Date(cleanDate);
         timeToCome.setHours(timeToComeHours, timeToComeMinutes);
-        const startDate = addMinutes(
-          addHours(new Date(cleanDate), startHours),
-          startMinutes
-        );
-        const endDate = addMinutes(
-          addHours(new Date(cleanDate), endHours),
-          endMinutes
-        );
+        const startDate = addMinutes(addHours(new Date(cleanDate), startHours), startMinutes);
+        const endDate = addMinutes(addHours(new Date(cleanDate), endHours), endMinutes);
         createEvent
           .mutateAsync({
             name: values.name,
@@ -145,14 +132,16 @@ const AddTeamEventPage = () => {
             invite_future_members: inviteFutureMembers,
           })
           .then((event) => {
-            if (selectedUsers.length > 0 && event) {
-              selectedUsers.map((userId) =>
-                createInvitation.mutateAsync({
-                  event_id: event.id,
-                  user_id: userId,
-                  description: values.description,
-                })
-              );
+            if (event) {
+              if (selectedUsers.length > 0) {
+                selectedUsers.map((userId) =>
+                  createInvitation.mutateAsync({
+                    event_id: event.id,
+                    user_id: userId,
+                    description: values.description,
+                  })
+                );
+              }
               sendEventsToCalendars.mutateAsync({
                 usersIds: selectedUsers,
                 eventId: event.id,
@@ -184,24 +173,12 @@ const AddTeamEventPage = () => {
         showBackButton
       >
         {createEvent.isError && (
-          <Disclaimer
-            variant="error"
-            title={t("Error")}
-            description={createEvent.error.message}
-          />
+          <Disclaimer variant="error" title={t("Error")} description={createEvent.error.message} />
         )}
         {createEvent.isSuccess && (
-          <Disclaimer
-            variant="success"
-            title={t("Success")}
-            description={t("Event created successfully")}
-          />
+          <Disclaimer variant="success" title={t("Success")} description={t("Event created successfully")} />
         )}
-        <FormItemWrapper
-          label={t("Event Name")}
-          description={t("Enter a name for this event")}
-          name="name"
-        >
+        <FormItemWrapper label={t("Event Name")} description={t("Enter a name for this event")} name="name">
           <Input placeholder={t("Event name")} />
         </FormItemWrapper>
         <FormItemWrapper
@@ -211,11 +188,7 @@ const AddTeamEventPage = () => {
         >
           <Textarea placeholder={t("Event description")} />
         </FormItemWrapper>
-        <FormItemWrapper
-          label={t("Event Type")}
-          description={t("Select the type of event")}
-          name="type"
-        >
+        <FormItemWrapper label={t("Event Type")} description={t("Select the type of event")} name="type">
           <FormSelect
             placeholder={t("Select event type")}
             options={eventTypeOptions.map((option) => ({
@@ -241,17 +214,8 @@ const AddTeamEventPage = () => {
           />
         )}
 
-        <SubmitButton
-          disabled={
-            isSubmitting ||
-            createEvent.isPending ||
-            !dates.dates ||
-            dates.dates.length === 0
-          }
-        >
-          {isSubmitting || createEvent.isPending
-            ? t("Creating...")
-            : t("Create")}
+        <SubmitButton disabled={isSubmitting || createEvent.isPending || !dates.dates || dates.dates.length === 0}>
+          {isSubmitting || createEvent.isPending ? t("Creating...") : t("Create")}
         </SubmitButton>
       </FormWrapper>
     </div>

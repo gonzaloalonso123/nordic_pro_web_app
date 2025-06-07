@@ -1,33 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Send, FileText } from "lucide-react";
-import {
-  DataTable,
-  type ResponsiveColumnDef,
-  SortableHeader,
-} from "@/components/data-table/data-table";
+import { DataTable, type ResponsiveColumnDef, SortableHeader } from "@/components/data-table/data-table";
 import { useClientData } from "@/utils/data/client";
-import { useToast } from "@/hooks/use-toast";
 import { useHeader } from "@/hooks/useHeader";
+import { SendFormDialog } from "./send-form-dialog";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useRole } from "@/app/app/(role-provider)/role-provider";
 
-// Type definition for form data
 type Form = {
   id: string;
   title: string;
@@ -36,60 +19,38 @@ type Form = {
   updated_at?: string;
 };
 
-interface AvailableFormsProps {
-  teamId: string;
-}
-
-export function AvailableForms({ teamId }: AvailableFormsProps) {
+export function AvailableForms() {
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
-    data: forms = [],
-    isPending,
-    isError,
-  } = useClientData().forms.useAll();
-  const createFormInvitation = useClientData().formInvitations.useSendToTeam();
-  const { toast } = useToast();
+    team: { id: teamId },
+  } = useRole();
+  const { data: forms = [], isPending, isError } = useClientData().forms.useAll();
+  const { user } = useCurrentUser();
+  const { data: team, isPending: isTeamPending } = useClientData().teams.useWithUsers(teamId);
+
+  const teamUsersWithoutMe = team?.users.filter((u) => u.user.id !== user?.id).filter((user) => user.role !== "COACH");
+
   const { useHeaderConfig } = useHeader();
   useHeaderConfig({
     centerContent: "Send Forms",
   });
-  const handleSendForm = async () => {
-    if (selectedForm && teamId) {
-      try {
-        setIsSubmitting(true);
-        await createFormInvitation.mutateAsync({
-          formId: selectedForm,
-          teamId: teamId as string,
-        });
 
-        toast({
-          title: "Success",
-          description: "Form sent to team players successfully",
-        });
+  const handleSendClick = (formId: string) => {
+    setSelectedForm(formId);
+    setConfirmDialogOpen(true);
+  };
 
-        setSelectedForm(null);
-        setConfirmDialogOpen(false);
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to send form invitations",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
+  const handleDialogClose = () => {
+    setConfirmDialogOpen(false);
+    setSelectedForm(null);
   };
 
   // Column definitions
   const columns: ResponsiveColumnDef<Form>[] = [
     {
       accessorKey: "title",
-      header: ({ column }) => (
-        <SortableHeader column={column}>Form</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Form</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-48",
@@ -102,9 +63,7 @@ export function AvailableForms({ teamId }: AvailableFormsProps) {
             <div>
               <div className="font-medium">{form.title}</div>
               {form.description && (
-                <div className="text-sm text-muted-foreground truncate max-w-md">
-                  {form.description}
-                </div>
+                <div className="text-sm text-muted-foreground truncate max-w-md">{form.description}</div>
               )}
             </div>
           </div>
@@ -122,14 +81,7 @@ export function AvailableForms({ teamId }: AvailableFormsProps) {
         const form = row.original;
         return (
           <div className="flex justify-end">
-            <Button
-              onClick={() => {
-                setSelectedForm(form.id);
-                setConfirmDialogOpen(true);
-              }}
-              size="sm"
-              disabled={isSubmitting}
-            >
+            <Button onClick={() => handleSendClick(form.id)} size="sm">
               <Send className="mr-2 h-4 w-4" />
               Send
             </Button>
@@ -147,9 +99,7 @@ export function AvailableForms({ teamId }: AvailableFormsProps) {
           <CardDescription>Send forms to your team members</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            Failed to load forms. Please try again later.
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Failed to load forms. Please try again later.</div>
         </CardContent>
       </Card>
     );
@@ -165,35 +115,15 @@ export function AvailableForms({ teamId }: AvailableFormsProps) {
 
   return (
     <>
-      <DataTable
-        columns={columns}
-        data={forms}
-        isLoading={isPending}
-        skeletonRows={3}
+      <DataTable columns={columns} data={forms} isLoading={isPending} skeletonRows={3} />
+      <SendFormDialog
+        open={confirmDialogOpen}
+        onOpenChange={setConfirmDialogOpen}
+        formId={selectedForm}
+        teamId={teamId}
+        teamUsers={teamUsersWithoutMe || []}
+        isLoading={isTeamPending}
       />
-
-      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Send Form</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to send this form to all team members?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmDialogOpen(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSendForm} disabled={isSubmitting}>
-              {isSubmitting ? "Sending..." : "Send Form"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

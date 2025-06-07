@@ -12,8 +12,13 @@ import { useTranslation } from "react-i18next";
 import { FormWrapper } from "@/components/form/form-wrapper";
 import { Disclaimer } from "@/components/disclaimer";
 import { Content } from "@/components/content";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Phone } from "lucide-react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/custom/tabs";
 
 export default function Login() {
   const { t } = useTranslation();
