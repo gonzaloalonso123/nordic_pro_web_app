@@ -78,7 +78,6 @@ export default function SequentialForm({
 
   const completeForm = () => {
     let updatedProgress = { ...progress };
-    // Asegura que la última pregunta esté en answeredQuestions
     if (!updatedProgress.answeredQuestions.includes(currentQuestion.id)) {
       updatedProgress = {
         ...updatedProgress,

@@ -18,8 +18,7 @@ export default () => {
   const router = useRouter();
   const path = useUrl();
   const { user } = useCurrentUser();
-  const { data: invitation } =
-    useClientData().formInvitations.useById(formInvitationId);
+  const { data: invitation } = useClientData().formInvitations.useById(formInvitationId);
   const updateInvitation = useClientData().formInvitations.useUpdate();
   const createFormResponse = useClientData().formResponses.useSubmit();
   const { useHeaderConfig } = useHeader();
@@ -27,11 +26,7 @@ export default () => {
     leftContent: "back",
   });
 
-  const {
-    data: formWithQuestions,
-    isPending,
-    isError,
-  } = useFormWithQuestions(invitation?.form_id);
+  const { data: formWithQuestions, isPending, isError } = useFormWithQuestions(invitation?.form_id);
 
   if (isPending) {
     return <div>Loading...</div>;
@@ -58,24 +53,9 @@ export default () => {
 
   return (
     <div className="container py-8">
-      <div className="mb-6">
-        <Button
-          variant="outline"
-          onClick={() => router.back()}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <FormRenderer
-            onSubmit={onSubmit}
-            form={formWithQuestions}
-            redirectUrl={`${path}/dashboard`}
-          />
+          <FormRenderer onSubmit={onSubmit} form={formWithQuestions} redirectUrl={`${path}/dashboard`} />
         </div>
         <div className="md:col-span-1">
           <ExperienceProgress />

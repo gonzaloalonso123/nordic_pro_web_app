@@ -8,12 +8,16 @@ import { useHeader } from "@/hooks/useHeader";
 import { useClientData } from "@/utils/data/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import NextEventCard from "./components/next-event-card";
+import { FormCompletionStreak } from "./components/form-completion-streak";
 
 export default function DashboardPage() {
   const { useHeaderConfig } = useHeader();
   useHeaderConfig({ centerContent: "Dashboard" });
   const { user } = useCurrentUser();
-  const { data: events } = useClientData().events.useByUserId(user?.id as string);
+  const { data: events, isPaused: eventsPending } = useClientData().events.useByUserId(user?.id as string);
+  const { data: formInvitations, isPending: invitationsPending } = useClientData().formInvitations.useByUser(
+    user?.id as string
+  );
 
   // useEffect(() => {
   //   const duration = 3 * 1000;
@@ -49,12 +53,16 @@ export default function DashboardPage() {
 
   //   return () => clearInterval(interval);
   // }, []);
+  if (eventsPending || invitationsPending) {
+    return <div className="container py-8">Loading...</div>;
+  }
 
   return (
     <Content>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-8">
         <RewardOverview />
-        <FormInvitations />
+        <FormInvitations formInvitations={formInvitations} />
+        <FormCompletionStreak formInvitations={formInvitations} />
         <NextEventCard events={events || []} />
       </div>
     </Content>

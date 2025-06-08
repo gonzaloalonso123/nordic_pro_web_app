@@ -4,11 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Check, X } from "lucide-react";
-import {
-  DataTable,
-  type ResponsiveColumnDef,
-  SortableHeader,
-} from "@/components/data-table/data-table";
+import { DataTable, type ResponsiveColumnDef, SortableHeader } from "@/components/data-table/data-table";
 import { getInitials } from "@/utils/get-initials";
 import { useTranslation } from "react-i18next";
 import { getFootballPosition } from "@/content/football-position";
@@ -33,11 +29,7 @@ interface MembersTableProps {
   onViewDetails: (member: Member) => void;
 }
 
-export function MembersTable({
-  members,
-  isLoading,
-  onViewDetails,
-}: MembersTableProps) {
+export function MembersTable({ members, isLoading, onViewDetails }: MembersTableProps) {
   const { t } = useTranslation();
 
   const getRoleBadgeVariant = (role: string) => {
@@ -57,9 +49,7 @@ export function MembersTable({
       accessorKey: "user" as keyof Member,
       id: "member",
       mobilePriority: 1,
-      header: ({ column }) => (
-        <SortableHeader column={column}>{t("Member")}</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>{t("Member")}</SortableHeader>,
       skeleton: {
         type: "avatar",
         width: "w-40",
@@ -81,11 +71,7 @@ export function MembersTable({
               <p className="font-medium truncate">
                 {member.user.first_name} {member.user.last_name}
               </p>
-              {member.user.email && (
-                <p className="text-sm text-muted-foreground truncate">
-                  {member.user.email}
-                </p>
-              )}
+              {member.user.email && <p className="text-sm text-muted-foreground truncate">{member.user.email}</p>}
             </div>
           </div>
         );
@@ -100,9 +86,7 @@ export function MembersTable({
     {
       accessorKey: "role" as keyof Member,
       responsive: responsiveBreakpoints.hiddenMobile,
-      header: ({ column }) => (
-        <SortableHeader column={column}>{t("Role")}</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>{t("Role")}</SortableHeader>,
       skeleton: {
         type: "badge",
       },
@@ -118,29 +102,21 @@ export function MembersTable({
     {
       accessorKey: "position" as keyof Member,
       responsive: responsiveBreakpoints.hiddenMobile,
-      header: ({ column }) => (
-        <SortableHeader column={column}>{t("Position")}</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>{t("Position")}</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-24",
       },
       cell: ({ row }) => {
         const position = row.getValue("position") as string;
-        return (
-          <span className="text-sm">
-            {position ? getFootballPosition(position)?.label : "-"}
-          </span>
-        );
+        return <span className="text-sm">{position ? getFootballPosition(position)?.label : "-"}</span>;
       },
     },
     {
       accessorFn: (row) => row.user.subscription_active,
       id: "subscription",
       responsive: responsiveBreakpoints.hiddenMobile,
-      header: ({ column }) => (
-        <SortableHeader column={column}>{t("Subscription")}</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>{t("Subscription")}</SortableHeader>,
       skeleton: {
         type: "badge",
       },
@@ -163,30 +139,6 @@ export function MembersTable({
         );
       },
     },
-    {
-      id: "actions",
-      header: "",
-      skeleton: {
-        type: "button",
-      },
-      cell: ({ row }) => {
-        const member = row.original;
-        return (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewDetails(member);
-            }}
-            className="h-8 w-8 p-0"
-          >
-            <Eye className="h-4 w-4" />
-            <span className="sr-only">{t("View details")}</span>
-          </Button>
-        );
-      },
-    },
   ];
 
   return (
@@ -197,6 +149,10 @@ export function MembersTable({
         isLoading={isLoading}
         skeletonRows={5}
         className="cursor-pointer"
+        onRowClick={(row) => {
+          const member = row.original;
+          onViewDetails(member);
+        }}
       />
 
       {!isLoading && members.length === 0 && (

@@ -36,7 +36,7 @@ export default function EmojiRow({
       {EMOJIS.map((option) => (
         <button
           key={option.value}
-          className={`text-4xl sm:text-4xl p-3 rounded-md transition-all ${
+          className={`text-3xl sm:text-4xl p-2 rounded-md transition-all ${
             selectedEmoji === option.emoji
               ? "bg-primary/10 scale-110"
               : "hover:bg-muted"
