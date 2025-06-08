@@ -17,12 +17,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useCategories,
-  useCreateQuestion,
-  useUpdateQuestion,
-  useQuestion,
-} from "@/hooks/queries/useQuestions";
+import { useCategories, useCreateQuestion, useUpdateQuestion, useQuestion } from "@/hooks/queries/useQuestions";
 import { useEffect } from "react";
 
 const inputTypeOptions = [
@@ -66,8 +61,7 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
   const router = useRouter();
 
   const { data: categories, isLoading: categoriesLoading } = useCategories();
-  const { data: questionData, isLoading: questionLoading } =
-    useQuestion(questionId);
+  const { data: questionData, isLoading: questionLoading } = useQuestion(questionId);
 
   const createQuestion = useCreateQuestion({
     onSuccess: () => {
@@ -127,27 +121,17 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
         imageUrl: question.image_url || "",
         options: question.question_options || [],
         min_value:
-          question.input_type === "slider" || question.input_type === "number"
-            ? question.min_value?.toString()
-            : "",
+          question.input_type === "slider" || question.input_type === "number" ? question.min_value?.toString() : "",
         max_value:
-          question.input_type === "slider" || question.input_type === "number"
-            ? question.max_value?.toString()
-            : "",
-        step_value:
-          question.input_type === "slider"
-            ? question.step_value?.toString()
-            : "",
+          question.input_type === "slider" || question.input_type === "number" ? question.max_value?.toString() : "",
+        step_value: question.input_type === "slider" ? question.step_value?.toString() : "",
       });
     }
   }, [questionData, form]);
 
   const handleAddOption = () => {
     const currentOptions = getValues("options") || [];
-    setValue("options", [
-      ...currentOptions,
-      { id: uuidv4(), label: "", value: "" },
-    ]);
+    setValue("options", [...currentOptions, { id: uuidv4(), label: "", value: currentOptions.length + 1 + "" }]);
   };
 
   const handleRemoveOption = (id: string) => {
@@ -158,17 +142,11 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
     );
   };
 
-  const handleOptionChange = (
-    id: string,
-    field: "label" | "value",
-    value: string
-  ) => {
+  const handleOptionChange = (id: string, field: "label" | "value", value: string) => {
     const currentOptions = getValues("options") || [];
     setValue(
       "options",
-      currentOptions.map((option) =>
-        option.id === id ? { ...option, [field]: value } : option
-      )
+      currentOptions.map((option) => (option.id === id ? { ...option, [field]: value } : option))
     );
   };
 
@@ -203,16 +181,9 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
       required: formData.required,
       description: formData.description || null,
       experience: formData.experience ? Number(formData.experience) : null,
-      min_value:
-        formData.inputType === "slider" || formData.inputType === "number"
-          ? Number(formData.min_value)
-          : null,
-      max_value:
-        formData.inputType === "slider" || formData.inputType === "number"
-          ? Number(formData.max_value)
-          : null,
-      step_value:
-        formData.inputType === "slider" ? Number(formData.step_value) : null,
+      min_value: formData.inputType === "slider" || formData.inputType === "number" ? Number(formData.min_value) : null,
+      max_value: formData.inputType === "slider" || formData.inputType === "number" ? Number(formData.max_value) : null,
+      step_value: formData.inputType === "slider" ? Number(formData.step_value) : null,
       image_url: formData.imageUrl || null,
     };
 
@@ -279,11 +250,7 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
       </FormItemWrapper>
 
       <FormItemWrapper label="Experience Points" name="experience">
-        <Input
-          type="number"
-          min="1"
-          placeholder="Points awarded for answering this question"
-        />
+        <Input type="number" min="1" placeholder="Points awarded for answering this question" />
       </FormItemWrapper>
 
       <div className="space-y-3">
@@ -312,9 +279,7 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
           ) : (
             <div className="border border-dashed rounded-md p-6 flex flex-col items-center justify-center text-muted-foreground gap-2">
               <ImageIcon className="h-10 w-10 opacity-50" />
-              <p className="text-sm">
-                Upload an image to display with this question
-              </p>
+              <p className="text-sm">Upload an image to display with this question</p>
               <div className="mt-2">
                 <Label
                   htmlFor="image-upload"
@@ -326,32 +291,17 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
               </div>
             </div>
           )}
-          <Input
-            id="image-upload"
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-          />
+          <Input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
         </div>
       </div>
 
       <FormItemWrapper label="Input Type" name="inputType">
-        <FormSelect
-          placeholder="Select input type"
-          options={inputTypeOptions}
-        />
+        <FormSelect placeholder="Select input type" options={inputTypeOptions} />
       </FormItemWrapper>
 
       <div className="flex items-center space-x-2 py-2">
         <FormItemWrapper name="required">
-          {(field) => (
-            <Switch
-              checked={field.value}
-              onCheckedChange={field.onChange}
-              id="required"
-            />
-          )}
+          {(field) => <Switch checked={field.value} onCheckedChange={field.onChange} id="required" />}
         </FormItemWrapper>
         <Label htmlFor="required">Required field</Label>
       </div>
@@ -376,12 +326,7 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-medium">Options</h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddOption}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={handleAddOption}>
               <PlusCircle className="h-4 w-4 mr-2" />
               Add Option
             </Button>
@@ -393,17 +338,13 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
                 <Input
                   placeholder="Option label"
                   value={option.label}
-                  onChange={(e) =>
-                    handleOptionChange(option.id, "label", e.target.value)
-                  }
+                  onChange={(e) => handleOptionChange(option.id, "label", e.target.value)}
                   className="mb-2"
                 />
                 <Input
                   placeholder="Option value"
                   value={option.value}
-                  onChange={(e) =>
-                    handleOptionChange(option.id, "value", e.target.value)
-                  }
+                  onChange={(e) => handleOptionChange(option.id, "value", e.target.value)}
                 />
               </div>
               <Button
@@ -426,11 +367,7 @@ export default function QuestionForm({ questionId }: QuestionFormProps) {
         </div>
       )}
 
-      <Button
-        type="submit"
-        className="mt-4"
-        disabled={createQuestion.isPending || updateQuestion.isPending}
-      >
+      <Button type="submit" className="mt-4" disabled={createQuestion.isPending || updateQuestion.isPending}>
         {createQuestion.isPending || updateQuestion.isPending
           ? "Saving..."
           : questionId

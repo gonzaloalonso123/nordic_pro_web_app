@@ -20,7 +20,7 @@ export const RewardOverview = () => {
   const progress = (experienceInLevel / levelTotalExperience) * 100;
 
   return (
-    <Card className="bg-linear-to-br from-indigo-50 to-purple-50 border-indigo-200 overflow-hidden mb-6">
+    <Card className="bg-linear-to-br from-indigo-50 to-purple-50 border-indigo-200 overflow-hidden">
       <CardHeader className="pb-2 relative">
         <motion.div
           className="absolute -top-6 -right-6 w-24 h-24 bg-indigo-500 rounded-full opacity-10"

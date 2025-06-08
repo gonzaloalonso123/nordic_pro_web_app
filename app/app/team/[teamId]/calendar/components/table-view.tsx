@@ -4,21 +4,8 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  MoreHorizontal,
-  Search,
-  Timer,
-} from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar, Clock, MapPin, MoreHorizontal, Search, Timer } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,14 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { format, isAfter, isBefore } from "date-fns";
-import {
-  DataTable,
-  type ResponsiveColumnDef,
-  SortableHeader,
-} from "@/components/data-table/data-table";
+import { DataTable, type ResponsiveColumnDef, SortableHeader } from "@/components/data-table/data-table";
 import { cn } from "@/lib/utils";
 import { responsiveBreakpoints } from "@/components/data-table/lib/table-utils";
 import { Card } from "@/components/ui/card";
+import { useUrl } from "@/hooks/use-url";
+import { useRouter } from "next/navigation";
 
 interface TrainingSession {
   id: string;
@@ -59,7 +44,6 @@ interface TrainingSession {
 
 interface TrainingSessionsTableProps {
   events: TrainingSession[];
-  onEventClick?: (event: any) => void;
   isLoading?: boolean;
 }
 
@@ -69,14 +53,12 @@ type SessionStatus = {
   value: "upcoming" | "ongoing" | "past" | "unknown";
 };
 
-export function TrainingSessionsTable({
-  events,
-  onEventClick,
-  isLoading = false,
-}: TrainingSessionsTableProps) {
+export function TrainingSessionsTable({ events, isLoading = false }: TrainingSessionsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const path = useUrl();
+  const router = useRouter();
 
   const getSessionStatus = (session: TrainingSession): SessionStatus => {
     const now = new Date();
@@ -108,10 +90,8 @@ export function TrainingSessionsTable({
     switch (type) {
       case "TRAINING":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "MATCH":
+      case "GAME":
         return "bg-green-100 text-green-800 border-green-200";
-      case "MEETING":
-        return "bg-purple-100 text-purple-800 border-purple-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -127,43 +107,29 @@ export function TrainingSessionsTable({
   };
 
   const handleRowClick = (session: TrainingSession) => {
-    if (onEventClick) {
-      const mockEvent = {
-        event: {
-          id: session.id,
-        },
-      };
-      onEventClick(mockEvent);
-    }
+    router.push(`${path}/calendar/${session.id}`);
   };
 
-  // Filter data based on search and filters
   const filteredData = useMemo(() => {
     return events.filter((session) => {
       const matchesSearch =
         session.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         session.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        session.locations?.name
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
+        session.locations?.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesType = typeFilter === "all" || session.type === typeFilter;
       const sessionStatus = getSessionStatus(session);
-      const matchesStatus =
-        statusFilter === "all" || sessionStatus.value === statusFilter;
+      const matchesStatus = statusFilter === "all" || sessionStatus.value === statusFilter;
 
       return matchesSearch && matchesType && matchesStatus;
     });
   }, [events, searchTerm, typeFilter, statusFilter]);
 
-  // Column definitions
   const columns: ResponsiveColumnDef<TrainingSession>[] = [
     {
       accessorKey: "name",
       mobilePriority: 1,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Session</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Session</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-48",
@@ -176,12 +142,9 @@ export function TrainingSessionsTable({
             <div className="font-medium">{session.name}</div>
             <div className="sm:hidden text-xs text-muted-foreground mt-1 space-x-2">
               <Badge variant={status.variant} className="mr-2">
-                {status.label}
+                {new Date(session.start_date).toLocaleDateString()}
               </Badge>
-              <Badge
-                variant="outline"
-                className={cn("text-xs", getTypeColor(session.type))}
-              >
+              <Badge variant="outline" className={cn("text-xs", getTypeColor(session.type))}>
                 {session.type}
               </Badge>
             </div>
@@ -192,19 +155,14 @@ export function TrainingSessionsTable({
     {
       accessorKey: "type",
       responsive: responsiveBreakpoints.hiddenMobile,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Type</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Type</SortableHeader>,
       skeleton: {
         type: "badge",
       },
       cell: ({ row }) => {
         const type = row.getValue("type") as string;
         return (
-          <Badge
-            variant="outline"
-            className={cn("text-xs", getTypeColor(type))}
-          >
+          <Badge variant="outline" className={cn("text-xs", getTypeColor(type))}>
             {type}
           </Badge>
         );
@@ -213,9 +171,7 @@ export function TrainingSessionsTable({
     {
       accessorKey: "start_date",
       responsive: responsiveBreakpoints.hiddenMobile,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Date & Time</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Date & Time</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-32",
@@ -231,8 +187,7 @@ export function TrainingSessionsTable({
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-3 w-3 text-muted-foreground" />
               <span>
-                {format(new Date(session.start_date), "HH:mm")} -{" "}
-                {format(new Date(session.end_date), "HH:mm")}
+                {format(new Date(session.start_date), "HH:mm")} - {format(new Date(session.end_date), "HH:mm")}
               </span>
             </div>
           </div>
@@ -247,9 +202,7 @@ export function TrainingSessionsTable({
     {
       id: "duration",
       responsive: responsiveBreakpoints.hiddenTablet,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Duration</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Duration</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-20",
@@ -264,21 +217,15 @@ export function TrainingSessionsTable({
         );
       },
       sortingFn: (rowA, rowB) => {
-        const durationA =
-          new Date(rowA.original.end_date).getTime() -
-          new Date(rowA.original.start_date).getTime();
-        const durationB =
-          new Date(rowB.original.end_date).getTime() -
-          new Date(rowB.original.start_date).getTime();
+        const durationA = new Date(rowA.original.end_date).getTime() - new Date(rowA.original.start_date).getTime();
+        const durationB = new Date(rowB.original.end_date).getTime() - new Date(rowB.original.start_date).getTime();
         return durationA - durationB;
       },
     },
     {
       accessorKey: "locations.name",
       responsive: responsiveBreakpoints.hiddenTablet,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Location</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Location</SortableHeader>,
       skeleton: {
         type: "default",
         width: "w-28",
@@ -299,9 +246,7 @@ export function TrainingSessionsTable({
     {
       id: "status",
       responsive: responsiveBreakpoints.hiddenMobile,
-      header: ({ column }) => (
-        <SortableHeader column={column}>Status</SortableHeader>
-      ),
+      header: ({ column }) => <SortableHeader column={column}>Status</SortableHeader>,
       skeleton: {
         type: "badge",
       },
@@ -325,36 +270,24 @@ export function TrainingSessionsTable({
       },
       cell: ({ row }) => {
         const session = row.original;
-        const hasLocation =
-          !!session.locations?.name && !!session.locations?.coordinates;
+        const hasLocation = !!session.locations?.name && !!session.locations?.coordinates;
         return (
           <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
                   <MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">Open menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleRowClick(session)}>
-                  View Details
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleRowClick(session)}>View Details</DropdownMenuItem>
                 {hasLocation && (
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      const [lat, lng] =
-                        session.locations!.coordinates!.split(" ");
-                      window.open(
-                        `https://www.google.com/maps?q=${lat},${lng}`,
-                        "_blank"
-                      );
+                      const [lat, lng] = session.locations!.coordinates!.split(" ");
+                      window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
                     }}
                   >
                     <MapPin className="h-4 w-4 mr-2" />
@@ -390,8 +323,7 @@ export function TrainingSessionsTable({
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="TRAINING">Training</SelectItem>
-              <SelectItem value="MATCH">Match</SelectItem>
-              <SelectItem value="MEETING">Meeting</SelectItem>
+              <SelectItem value="GAME">GAME</SelectItem>
             </SelectContent>
           </Select>
 
@@ -432,6 +364,10 @@ export function TrainingSessionsTable({
             isLoading={isLoading}
             skeletonRows={5}
             className="[&_tr]:cursor-pointer [&_tr]:hover:bg-muted/50"
+            onRowClick={(row) => {
+              const session = row.original;
+              handleRowClick(session);
+            }}
           />
         </div>
       </div>
@@ -441,9 +377,7 @@ export function TrainingSessionsTable({
           <div className="flex flex-col items-center gap-2">
             <Calendar className="h-8 w-8 text-muted-foreground" />
             <p className="text-muted-foreground">No sessions found</p>
-            <p className="text-sm text-muted-foreground">
-              Try adjusting your search or filter criteria
-            </p>
+            <p className="text-sm text-muted-foreground">Try adjusting your search or filter criteria</p>
           </div>
         </div>
       )}

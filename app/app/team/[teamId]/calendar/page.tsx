@@ -2,13 +2,8 @@
 
 import { useState } from "react";
 import Calendar from "../../../../../components/calendar/event-calendar";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/custom/tabs";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/custom/tabs";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Content } from "@/components/content";
 import { useClientData } from "@/utils/data/client";
@@ -21,10 +16,8 @@ import { TrainingSessionsTable } from "./components/table-view";
 import { LoadingLink } from "@/components/ui/loading-link";
 
 export default function CalendarDemo() {
-  const [selectedView, setSelectedView] = useState<
-    "dayGridMonth" | "timeGridWeek"
-  >("dayGridMonth");
-  const [activeTab, setActiveTab] = useState("calendar");
+  const [selectedView, setSelectedView] = useState<"dayGridMonth" | "timeGridWeek">("dayGridMonth");
+  const [activeTab, setActiveTab] = useState("table");
 
   const { user } = useCurrentUser();
   const { team } = useRole();
@@ -48,62 +41,35 @@ export default function CalendarDemo() {
     ) : null,
   });
 
-  const eventsQuery = isCoach
-    ? clientData.events.useByTeam(team.id)
-    : clientData.events.useByUserId(userId);
+  const eventsQuery = isCoach ? clientData.events.useByTeam(team.id) : clientData.events.useByUserId(userId);
   const events = eventsQuery.data || [];
 
   const handleEventClick = (info: any) => {
     router.push(`${path}/calendar/${info.event.id}`);
   };
 
-  if (!isCoach) {
-    return (
-      <Content>
-        <Card>
-          <CardContent className="p-0">
-            <Calendar
-              events={events || []}
-              onEventClick={handleEventClick}
-              initialView={selectedView}
-            />
-          </CardContent>
-        </Card>
-      </Content>
-    );
-  }
-
   return (
     <Content>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 lg:w-[400px] mx-auto mb-6">
-          <TabsTrigger value="calendar" className="flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Calendar View</span>
-            <span className="sm:hidden">Calendar</span>
-          </TabsTrigger>
           <TabsTrigger value="table" className="flex items-center gap-2">
             <Table className="h-4 w-4" />
             <span className="hidden sm:inline">Table View</span>
             <span className="sm:hidden">Table</span>
           </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">Calendar View</span>
+            <span className="sm:hidden">Calendar</span>
+          </TabsTrigger>
         </TabsList>
+        <TabsContent value="table" className="mt-0">
+          <TrainingSessionsTable events={events || []} isLoading={eventsQuery.isLoading} />
+        </TabsContent>
         <TabsContent value="calendar" className="mt-0">
           <Card>
-            <Calendar
-              events={events || []}
-              onEventClick={handleEventClick}
-              initialView={selectedView}
-            />
+            <Calendar events={events || []} onEventClick={handleEventClick} initialView={selectedView} />
           </Card>
-        </TabsContent>
-
-        <TabsContent value="table" className="mt-0">
-          <TrainingSessionsTable
-            events={events || []}
-            onEventClick={handleEventClick}
-            isLoading={eventsQuery.isLoading}
-          />
         </TabsContent>
       </Tabs>
     </Content>

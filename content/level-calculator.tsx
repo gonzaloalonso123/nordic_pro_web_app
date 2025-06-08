@@ -12,11 +12,17 @@ export const getLevelByExperience = (experience: number) => {
     levelTotalExperience = levels[i];
     if (remainingExperience >= levels[i]) {
       level = i + 1;
+      remainingExperience -= levels[i];
     } else {
       experienceInLevel = remainingExperience;
       break;
     }
   }
+
+  console.log("experience", experience);
+  console.log("level", level);
+  console.log("experienceInLevel", experienceInLevel);
+  console.log("levelTotalExperience", levelTotalExperience);
 
   return {
     level: level + 1,

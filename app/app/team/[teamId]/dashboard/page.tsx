@@ -52,9 +52,9 @@ export default function DashboardPage() {
 
   return (
     <Content>
-      <div className="flex flex-col gap-2">
-        <FormInvitations />
+      <div className="flex flex-col gap-4">
         <RewardOverview />
+        <FormInvitations />
         <NextEventCard events={events || []} />
       </div>
     </Content>

@@ -38,6 +38,7 @@ interface DataTableProps<TData, TValue> {
   className?: string;
   isLoading?: boolean;
   skeletonRows?: number;
+  onRowClick?: (row: any) => void;
 }
 
 interface SortableHeaderProps {
@@ -156,7 +157,7 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => onRowClick && onRowClick(row)}
-                  className={cn("cursor-pointer hover:bg-slate-50", onRowClick && "hover:bg-muted/50")}>
+                  className={cn("cursor-pointer hover:bg-slate-50", onRowClick && "hover:bg-muted/50")}
                 >
                   {row.getVisibleCells().map((cell) => {
                     const columnDef = cell.column.columnDef as ResponsiveColumnDef<TData, TValue>;
