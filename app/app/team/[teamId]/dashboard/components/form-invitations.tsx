@@ -60,6 +60,8 @@ const FormInvitation = ({
   const router = useRouter();
   const isFirst = index === 0;
 
+  console.log(invitation);
+
   return (
     <motion.div
       key={invitation.id}
@@ -113,7 +115,7 @@ const FormInvitation = ({
                     : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-200"
                 }`}
               >
-                +{invitation.form.experience || 500} XP ⚡
+                +{invitation.form.total_experience || 500} XP ⚡
               </Badge>
             </motion.div>
           </div>
