@@ -29,7 +29,6 @@ export default function ChatList() {
     unreadCounts,
     isLoading,
     error,
-    handleRoomClick,
   } = useChatListData(user?.id);
 
   const filteredRooms = useFilteredRooms(chatRooms, searchQuery);
@@ -85,7 +84,6 @@ export default function ChatList() {
                 room={room}
                 unreadCount={unreadCounts[room.id] || 0}
                 currentUserId={user?.id || ''}
-                onRoomClick={handleRoomClick}
               />
             ))
           ) : (

@@ -12,14 +12,12 @@ interface ChatListItemProps {
   room: any;
   unreadCount: number;
   currentUserId: string;
-  onRoomClick: (roomId: string) => void;
 }
 
 export const ChatListItem = memo(function ChatListItem({
   room,
   unreadCount,
   currentUserId,
-  onRoomClick,
 }: ChatListItemProps) {
   const path = useUrl();
   const hasUnread = unreadCount > 0;
@@ -36,7 +34,6 @@ export const ChatListItem = memo(function ChatListItem({
       unstyled
       href={`${path}/chat/${room.id}`}
       className="flex min-h-18 justify-center items-center"
-      onClick={() => onRoomClick(room.id)}
       role="listitem"
     >
       <div className={cn(

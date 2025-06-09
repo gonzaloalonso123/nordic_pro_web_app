@@ -20,6 +20,7 @@ export function ChatInterface({
   roomId,
   currentUser,
 }: ChatInterfaceProps) {
+  debugger;
   const [newMessage, setNewMessage] = useState<string>("");
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -47,6 +48,7 @@ export function ChatInterface({
     connectionStatus,
     isConnected
   } = useChatRoom(roomId);
+
 
   useEffect(() => {
     if (messages.length > 0 && messagesEndRef.current) {

@@ -1,8 +1,6 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useUrl } from "@/hooks/use-url";
 import { useChatRoomsByUser } from "@/hooks/queries/useChatRooms";
 import { useChatRoomAvatar } from "@/hooks/useChatRoomAvatar";
 import { useClientData } from "@/utils/data/client";
@@ -23,8 +21,6 @@ export interface ProcessedChatRoom {
 }
 
 export function useChatListData(userId?: string) {
-  const router = useRouter();
-  const currentPath = useUrl();
   const { getChatAvatarInfo } = useChatRoomAvatar();
   const { chatRooms: chatRoomQueries } = useClientData();
 
@@ -83,9 +79,6 @@ export function useChatListData(userId?: string) {
     });
   }, [rawChatRooms, getChatAvatarInfo]);
 
-  const handleRoomClick = useCallback((roomId: string) => {
-    router.push(`${currentPath}/${roomId}`);
-  }, [router, currentPath]);
 
   const isLoading = isLoadingRooms || isLoadingCounts;
   const error = roomsError?.message || null;
@@ -95,6 +88,5 @@ export function useChatListData(userId?: string) {
     unreadCounts,
     isLoading,
     error,
-    handleRoomClick,
   };
 }
