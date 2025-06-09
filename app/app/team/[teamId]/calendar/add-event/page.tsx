@@ -89,6 +89,9 @@ const AddTeamEventPage = () => {
     type: string;
     invite_future_members: boolean;
   }) => {
+
+
+    console.log(calendar, dates);
     if (!calendar) {
       toast({
         title: "Error",

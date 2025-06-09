@@ -164,7 +164,7 @@ export function SendFormDialog({
                       disabled={isSubmitting || isLoading}
                     />
                     <label htmlFor={`user-${teamUser.user.id}`} className="text-sm flex-1">
-                      {teamUser.user.name || teamUser.user.email}
+                      {`${teamUser.user.first_name} ${teamUser.user.last_name}` || teamUser.user.email}
                       <span className="text-muted-foreground ml-1">({teamUser.role.toLowerCase()})</span>
                     </label>
                   </div>
