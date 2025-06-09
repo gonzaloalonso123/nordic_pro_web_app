@@ -5,23 +5,18 @@ import * as organisationQueries from "@/hooks/queries/useOrganisations";
 import * as teamQueries from "@/hooks/queries/useTeams";
 import * as eventQueries from "@/hooks/queries/useEvents";
 import * as calendarQueries from "@/hooks/queries/useCalendars";
-import * as chatRoomQueries from "@/hooks/queries/useChatRooms";
 import * as organisationsInvitationQueries from "@/hooks/queries/useOrganisationsInvitation";
 import * as formQueries from "@/hooks/queries/useForms";
 import * as questionQueries from "@/hooks/queries/useQuestions";
 import * as formResponseQueries from "@/hooks/queries/useFormResponses";
 import * as eventsInvitationQueries from "@/hooks/queries/useEventsInvitation";
 import * as formInvitationQueries from "@/hooks/queries/useFormInvitations";
-import * as chatMessagesQueries from "@/hooks/queries/useChatMessages";
 import * as avatarsQueries from "@/hooks/queries/useAvatars";
 import * as locationQueries from "@/hooks/queries/useLocations";
-
-import { createClient } from "../supabase/client";
 import { useCallback } from "react";
+import { supabase } from "../supabase/client";
 
 export const useClientData = () => {
-  const supabase = createClient();
-
   const auth = {
     getCurrentUser: useCallback(async () => {
       const { data } = await supabase.auth.getUser();
@@ -156,41 +151,6 @@ export const useClientData = () => {
       // Mutations
       useSubmit: formResponseQueries.useSubmitFormResponse,
       useDelete: formResponseQueries.useDeleteFormResponse,
-    },
-    chatRooms: {
-      // Queries
-      useAll: chatRoomQueries.useChatRooms,
-      useById: chatRoomQueries.useChatRoom,
-      useByUser: chatRoomQueries.useChatRoomsByUser,
-      useWithMessages: chatRoomQueries.useChatRoomWithMessages,
-
-      useWithUsers: chatRoomQueries.useChatRoomWithUsers,
-      // Message methods
-      useMessagesByRoom: chatRoomQueries.useChatMessagesByRoom,
-      useSendMessage: chatRoomQueries.useSendChatMessage,
-
-      // Chat room members methods
-      useMembers: chatRoomQueries.useChatRoomMembers,
-      useAddMember: chatRoomQueries.useAddChatRoomMember,
-      useRemoveMember: chatRoomQueries.useRemoveChatRoomMember,
-
-      // Message reads methods
-      useMarkAsRead: chatRoomQueries.useMarkMessageAsRead,
-      useUnreadCount: chatRoomQueries.useUnreadMessageCount,
-
-      useUnraedCountBatch: chatRoomQueries.useUnreadMessageCountBatch,
-      useMarkRoomAsRead: chatRoomQueries.useMarkRoomAsRead,
-
-      useStartDirectChat: chatRoomQueries.useStartDirectChat,
-      // Mutations
-      useCreate: chatRoomQueries.useCreateChatRoom,
-      useUpdate: chatRoomQueries.useUpdateChatRoom,
-      useDelete: chatRoomQueries.useDeleteChatRoom,
-    },
-
-    chatMessages: {
-      useChatMessagesByRoom: chatMessagesQueries.useChatMessagesByRoom,
-      useCreateChatMessage: chatMessagesQueries.useCreateChatMessage,
     },
 
     organisationsInvitation: {

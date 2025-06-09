@@ -10,7 +10,7 @@ interface CreateChatRoomVariables {
 }
 
 export const useCreateChatRoom = () => {
-  const supabase = createClient();
+  
   const queryClient = useQueryClient();
 
   return useMutation({

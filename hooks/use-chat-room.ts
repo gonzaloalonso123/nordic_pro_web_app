@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, Tables } from "@/types/database.types";
+import type { Tables } from "@/types/database.types";
 import { supabase } from "@/utils/supabase/client";
 
 type Message = Tables<"messages"> & {
@@ -8,7 +7,6 @@ type Message = Tables<"messages"> & {
 };
 
 interface UseChatRoomMessagesProps {
-  supabase: SupabaseClient<Database>;
   roomId: string;
   currentUser: Tables<"users">;
 }
@@ -82,6 +80,7 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
         handleRealtimeInsert
       )
       .subscribe((status, err) => {
+        console.log("subscribing");
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           console.warn("Realtime subscription error:", status, err);
         }
@@ -90,9 +89,10 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
     channelRef.current = channel;
 
     return () => {
+      console.log("Unsubscribing from channel");
       supabase.removeChannel(channel);
     };
-  }, [supabase, roomId, handleRealtimeInsert]);
+  }, []);
 
   useEffect(() => {
     fetchMessages();

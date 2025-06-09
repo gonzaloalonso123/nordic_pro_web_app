@@ -10,12 +10,11 @@ import { PlusCircle, Search, MessageSquareText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/types/database.types";
 import CreateChatModal from "./create-chat-room-modal";
-import { createClient, supabase } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
 import { useHeader } from "@/hooks/useHeader";
 
 interface ChatRoomListProps {
-  supabase: SupabaseClient<any, "public", any>;
   onSelectRoom: (
     room: Tables<"chat_rooms"> & {
       other_participants: Tables<"users">[];
@@ -128,44 +127,45 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
   useEffect(() => {
     fetchChatRooms();
   }, [fetchChatRooms]);
+  // useEffect(() => {
+  //   if (!supabase || !currentUser?.id) return;
 
-  useEffect(() => {
-    if (!supabase || !currentUser?.id) return;
+  //   const handleNewMessage = (payload: any) => {
+  //     const isRelevant = chatRooms.some((room) => room.id === payload.new.room_id);
+  //     if (isRelevant) {
+  //       fetchChatRooms();
+  //     }
+  //   };
 
-    const roomParticipantChanges = supabase
-      .channel("public:chat_room_participants")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "chat_room_participants", filter: `user_id=eq.${currentUser.id}` },
-        (payload) => {
-          fetchChatRooms();
-        }
-      )
-      .subscribe();
+  //   const handleRoomOrParticipantChange = () => {
+  //     fetchChatRooms();
+  //   };
 
-    const messageChanges = supabase
-      .channel("public:messages")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, async (payload) => {
-        const roomParticipant = chatRooms.find((room) => room.id === payload.new.room_id);
-        if (roomParticipant) {
-          fetchChatRooms();
-        }
-      })
-      .subscribe();
+  //   const roomParticipantChanges = supabase
+  //     .channel("public:chat_room_participants")
+  //     .on(
+  //       "postgres_changes",
+  //       { event: "*", schema: "public", table: "chat_room_participants", filter: `user_id=eq.${currentUser.id}` },
+  //       handleRoomOrParticipantChange
+  //     )
+  //     .subscribe();
 
-    const roomChanges = supabase
-      .channel("public:chat_rooms")
-      .on("postgres_changes", { event: "*", schema: "public", table: "chat_rooms" }, (payload) => {
-        fetchChatRooms();
-      })
-      .subscribe();
+  //   const messageChanges = supabase
+  //     .channel("public:messages")
+  //     .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, handleNewMessage)
+  //     .subscribe();
 
-    return () => {
-      supabase.removeChannel(roomParticipantChanges);
-      supabase.removeChannel(messageChanges);
-      supabase.removeChannel(roomChanges);
-    };
-  }, [supabase, currentUser, fetchChatRooms, chatRooms]);
+  //   const roomChanges = supabase
+  //     .channel("public:chat_rooms")
+  //     .on("postgres_changes", { event: "*", schema: "public", table: "chat_rooms" }, handleRoomOrParticipantChange)
+  //     .subscribe();
+
+  //   return () => {
+  //     supabase.removeChannel(roomParticipantChanges);
+  //     supabase.removeChannel(messageChanges);
+  //     supabase.removeChannel(roomChanges);
+  //   };
+  // }, [supabase, currentUser, fetchChatRooms]);
 
   const filteredRooms = chatRooms.filter((room) => {
     const name =

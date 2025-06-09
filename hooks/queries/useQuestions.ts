@@ -5,13 +5,9 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import type {
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-} from "@/types/database.types";
-import { createClient } from "@/utils/supabase/client";
+import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
 import { questionsService } from "@/utils/supabase/services/questions";
+import { supabase } from "@/utils/supabase/client";
 
 type QuestionRow = Tables<"questions">;
 type QuestionInsert = TablesInsert<"questions">;
@@ -20,12 +16,8 @@ type QuestionOptionInsert = TablesInsert<"question_options">;
 
 // Get all questions
 export const useQuestions = <TData = QuestionRow[]>(
-  options?: Omit<
-    UseQueryOptions<QuestionRow[], Error, TData>,
-    "queryKey" | "queryFn"
-  >
+  options?: Omit<UseQueryOptions<QuestionRow[], Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<QuestionRow[], Error, TData>({
     queryKey: ["questions"],
     queryFn: () => questionsService.getAll(supabase),
@@ -36,16 +28,11 @@ export const useQuestions = <TData = QuestionRow[]>(
 // Get question by ID
 export const useQuestion = <TData = any>(
   questionId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<any | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<any | null, Error, TData>({
     queryKey: ["questions", questionId],
-    queryFn: () =>
-      questionId ? questionsService.getById(supabase, questionId) : null,
+    queryFn: () => (questionId ? questionsService.getById(supabase, questionId) : null),
     enabled: !!questionId,
     ...options,
   });
@@ -54,16 +41,11 @@ export const useQuestion = <TData = any>(
 // Get questions by category
 export const useQuestionsByCategory = <TData = QuestionRow[]>(
   categoryId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<QuestionRow[] | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<QuestionRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<QuestionRow[] | null, Error, TData>({
     queryKey: ["questions", "category", categoryId],
-    queryFn: () =>
-      categoryId ? questionsService.getByCategory(supabase, categoryId) : null,
+    queryFn: () => (categoryId ? questionsService.getByCategory(supabase, categoryId) : null),
     enabled: !!categoryId,
     ...options,
   });
@@ -72,16 +54,11 @@ export const useQuestionsByCategory = <TData = QuestionRow[]>(
 // Get questions by creator
 export const useQuestionsByCreator = <TData = QuestionRow[]>(
   userId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<QuestionRow[] | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<QuestionRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<QuestionRow[] | null, Error, TData>({
     queryKey: ["questions", "creator", userId],
-    queryFn: () =>
-      userId ? questionsService.getByCreator(supabase, userId) : null,
+    queryFn: () => (userId ? questionsService.getByCreator(supabase, userId) : null),
     enabled: !!userId,
     ...options,
   });
@@ -91,7 +68,6 @@ export const useQuestionsByCreator = <TData = QuestionRow[]>(
 export const useCategories = <TData = any[]>(
   options?: Omit<UseQueryOptions<any[], Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<any[], Error, TData>({
     queryKey: ["categories"],
     queryFn: () => questionsService.getCategories(supabase),
@@ -115,7 +91,6 @@ export const useCreateQuestion = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -128,8 +103,7 @@ export const useCreateQuestion = (
       };
     }
   >({
-    mutationFn: ({ question, options }) =>
-      questionsService.create(supabase, question, options),
+    mutationFn: ({ question, options }) => questionsService.create(supabase, question, options),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["questions"] });
       options?.onSuccess?.(data, variables, context);
@@ -155,7 +129,6 @@ export const useUpdateQuestion = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -169,8 +142,7 @@ export const useUpdateQuestion = (
       };
     }
   >({
-    mutationFn: ({ questionId, updates, options }) =>
-      questionsService.update(supabase, questionId, updates, options),
+    mutationFn: ({ questionId, updates, options }) => questionsService.update(supabase, questionId, updates, options),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["questions"] });
       queryClient.invalidateQueries({
@@ -183,15 +155,11 @@ export const useUpdateQuestion = (
 };
 
 // Delete question mutation
-export const useDeleteQuestion = (
-  options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">
-) => {
-  const supabase = createClient();
+export const useDeleteQuestion = (options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">) => {
   const queryClient = useQueryClient();
 
   return useMutation<boolean, Error, string>({
-    mutationFn: (questionId: string) =>
-      questionsService.delete(supabase, questionId),
+    mutationFn: (questionId: string) => questionsService.delete(supabase, questionId),
     onSuccess: (data, questionId, context) => {
       queryClient.invalidateQueries({ queryKey: ["questions"] });
       queryClient.invalidateQueries({ queryKey: ["questions", questionId] });
@@ -202,15 +170,11 @@ export const useDeleteQuestion = (
 };
 
 // Create category mutation
-export const useCreateCategory = (
-  options?: Omit<UseMutationOptions<any, Error, string>, "mutationFn">
-) => {
-  const supabase = createClient();
+export const useCreateCategory = (options?: Omit<UseMutationOptions<any, Error, string>, "mutationFn">) => {
   const queryClient = useQueryClient();
 
   return useMutation<any, Error, string>({
-    mutationFn: (name: string) =>
-      questionsService.createCategory(supabase, name),
+    mutationFn: (name: string) => questionsService.createCategory(supabase, name),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       options?.onSuccess?.(data, variables, context);

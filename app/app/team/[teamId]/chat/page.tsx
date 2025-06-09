@@ -2,11 +2,9 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Tables } from "@/types/database.types";
-import { createClient } from "@/utils/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import ChatRoomList from "@/components/chat/chat-room-list";
 import ChatMessageArea from "@/components/chat/chat-message-area";
-import { useClientData } from "@/utils/data/client";
 
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
@@ -23,7 +21,6 @@ export function useMediaQuery(query: string): boolean {
 }
 
 export default function ChatPage() {
-  const supabase = useMemo(() => createClient(), []);
   const [selectedRoom, setSelectedRoom] = useState<Tables<"chat_rooms"> | null>(null);
   const { user } = useCurrentUser();
 
@@ -52,14 +49,12 @@ export default function ChatPage() {
         <>
           {showRoomListMobile ? (
             <ChatRoomList
-              supabase={supabase}
               onSelectRoom={handleSelectRoom}
               selectedRoomId={selectedRoom?.id || null}
               currentUser={user}
             />
           ) : (
             <ChatMessageArea
-              supabase={supabase}
               selectedRoom={selectedRoom}
               currentUser={user}
               onBackToList={handleBackToListMobile}
@@ -69,19 +64,8 @@ export default function ChatPage() {
         </>
       ) : (
         <>
-          <ChatRoomList
-            supabase={supabase}
-            onSelectRoom={handleSelectRoom}
-            selectedRoomId={selectedRoom?.id || null}
-            currentUser={user}
-          />
-          <ChatMessageArea
-            supabase={supabase}
-            selectedRoom={selectedRoom}
-            currentUser={user}
-            onBackToList={() => {}}
-            isMobile={isMobile}
-          />
+          <ChatRoomList onSelectRoom={handleSelectRoom} selectedRoomId={selectedRoom?.id || null} currentUser={user} />
+          <ChatMessageArea selectedRoom={selectedRoom} currentUser={user} onBackToList={() => {}} isMobile={isMobile} />
         </>
       )}
       <div className="absolute top-4 right-4 z-20">

@@ -16,20 +16,13 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { useChatRoomMessages } from "@/hooks/use-chat-room";
 
 interface ChatMessageAreaProps {
-  supabase: SupabaseClient<Database>;
   selectedRoom: Tables<"chat_rooms"> | null;
   currentUser: Tables<"users"> | null | undefined;
   onBackToList: () => void;
   isMobile: boolean;
 }
 
-export default function ChatMessageArea({
-  supabase,
-  selectedRoom,
-  currentUser,
-  onBackToList,
-  isMobile,
-}: ChatMessageAreaProps) {
+export default function ChatMessageArea({ selectedRoom, currentUser, onBackToList, isMobile }: ChatMessageAreaProps) {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -51,7 +44,6 @@ export default function ChatMessageArea({
   }, [scrollToBottom]);
 
   const { messages, loading, sending, sendMessage } = useChatRoomMessages({
-    supabase,
     roomId: roomId!,
     currentUser: currentUser!,
   });

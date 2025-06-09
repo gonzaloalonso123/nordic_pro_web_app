@@ -6,12 +6,8 @@ import {
   type UseMutationOptions,
 } from "@tanstack/react-query";
 import { calendarsService } from "@/utils/supabase/services";
-import type {
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-} from "@/types/database.types";
-import { createClient } from "@/utils/supabase/client";
+import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import { createClient } from "@/utils/supabase/server";
 
 type CalendarRow = Tables<"calendars">;
 type CalendarInsert = TablesInsert<"calendars">;
@@ -19,12 +15,9 @@ type CalendarUpdate = TablesUpdate<"calendars">;
 
 // Get all calendars
 export const useCalendars = <TData = CalendarRow[]>(
-  options?: Omit<
-    UseQueryOptions<CalendarRow[], Error, TData>,
-    "queryKey" | "queryFn"
-  >
+  options?: Omit<UseQueryOptions<CalendarRow[], Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
+  
   return useQuery<CalendarRow[], Error, TData>({
     queryKey: ["calendars"],
     queryFn: () => calendarsService.getAll(supabase),
@@ -35,16 +28,12 @@ export const useCalendars = <TData = CalendarRow[]>(
 // Get calendar by ID
 export const useCalendar = <TData = CalendarRow>(
   calendarId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<CalendarRow | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<CalendarRow | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
+  
   return useQuery<CalendarRow | null, Error, TData>({
     queryKey: ["calendars", calendarId],
-    queryFn: () =>
-      calendarId ? calendarsService.getById(supabase, calendarId) : null,
+    queryFn: () => (calendarId ? calendarsService.getById(supabase, calendarId) : null),
     enabled: !!calendarId,
     ...options,
   });
@@ -53,16 +42,12 @@ export const useCalendar = <TData = CalendarRow>(
 // Get calendar by team
 export const useCalendarByTeam = <TData = CalendarRow>(
   teamId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<CalendarRow | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<CalendarRow | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
+  
   return useQuery<CalendarRow | null, Error, TData>({
     queryKey: ["calendars", "team", teamId],
-    queryFn: () =>
-      teamId ? calendarsService.getByTeam(supabase, teamId) : null,
+    queryFn: () => (teamId ? calendarsService.getByTeam(supabase, teamId) : null),
     enabled: !!teamId,
     ...options,
   });
@@ -71,18 +56,12 @@ export const useCalendarByTeam = <TData = CalendarRow>(
 // Get calendar by organisation
 export const useCalendarByOrganisation = <TData = CalendarRow>(
   organisationId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<CalendarRow | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<CalendarRow | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
+  
   return useQuery<CalendarRow | null, Error, TData>({
     queryKey: ["calendars", "organisation", organisationId],
-    queryFn: () =>
-      organisationId
-        ? calendarsService.getByOrganisation(supabase, organisationId)
-        : null,
+    queryFn: () => (organisationId ? calendarsService.getByOrganisation(supabase, organisationId) : null),
     enabled: !!organisationId,
     ...options,
   });
@@ -90,12 +69,9 @@ export const useCalendarByOrganisation = <TData = CalendarRow>(
 
 export const useCalendarByUser = <TData = CalendarRow>(
   userId: string,
-  options?: Omit<
-    UseQueryOptions<CalendarRow | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<CalendarRow | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
+  
   return useQuery<CalendarRow | null, Error, TData>({
     queryKey: ["calendars", "user", userId],
     queryFn: userId ? calendarsService.getByUser(supabase, userId) : null,
@@ -107,16 +83,12 @@ export const useCalendarByUser = <TData = CalendarRow>(
 // Get calendar with events
 export const useCalendarWithEvents = <TData = any>(
   calendarId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<any | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
+  
   return useQuery<any | null, Error, TData>({
     queryKey: ["calendars", calendarId, "events"],
-    queryFn: () =>
-      calendarId ? calendarsService.getWithEvents(supabase, calendarId) : null,
+    queryFn: () => (calendarId ? calendarsService.getWithEvents(supabase, calendarId) : null),
     enabled: !!calendarId,
     ...options,
   });
@@ -124,17 +96,13 @@ export const useCalendarWithEvents = <TData = any>(
 
 // Create calendar mutation
 export const useCreateCalendar = (
-  options?: Omit<
-    UseMutationOptions<CalendarRow, Error, CalendarInsert>,
-    "mutationFn"
-  >
+  options?: Omit<UseMutationOptions<CalendarRow, Error, CalendarInsert>, "mutationFn">
 ) => {
-  const supabase = createClient();
+  
   const queryClient = useQueryClient();
 
   return useMutation<CalendarRow, Error, CalendarInsert>({
-    mutationFn: (calendar: CalendarInsert) =>
-      calendarsService.create(supabase, calendar),
+    mutationFn: (calendar: CalendarInsert) => calendarsService.create(supabase, calendar),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["calendars"] });
       if (data.team_id) {
@@ -159,25 +127,13 @@ export const useCreateCalendar = (
 
 // Update calendar mutation
 export const useUpdateCalendar = (
-  options?: Omit<
-    UseMutationOptions<
-      CalendarRow,
-      Error,
-      { calendarId: string; updates: CalendarUpdate }
-    >,
-    "mutationFn"
-  >
+  options?: Omit<UseMutationOptions<CalendarRow, Error, { calendarId: string; updates: CalendarUpdate }>, "mutationFn">
 ) => {
-  const supabase = createClient();
+  
   const queryClient = useQueryClient();
 
-  return useMutation<
-    CalendarRow,
-    Error,
-    { calendarId: string; updates: CalendarUpdate }
-  >({
-    mutationFn: ({ calendarId, updates }) =>
-      calendarsService.update(supabase, calendarId, updates),
+  return useMutation<CalendarRow, Error, { calendarId: string; updates: CalendarUpdate }>({
+    mutationFn: ({ calendarId, updates }) => calendarsService.update(supabase, calendarId, updates),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["calendars"] });
       queryClient.invalidateQueries({
@@ -207,15 +163,12 @@ export const useUpdateCalendar = (
 };
 
 // Delete calendar mutation
-export const useDeleteCalendar = (
-  options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">
-) => {
-  const supabase = createClient();
+export const useDeleteCalendar = (options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">) => {
+  
   const queryClient = useQueryClient();
 
   return useMutation<boolean, Error, string>({
-    mutationFn: (calendarId: string) =>
-      calendarsService.delete(supabase, calendarId),
+    mutationFn: (calendarId: string) => calendarsService.delete(supabase, calendarId),
     onSuccess: (data, calendarId, context) => {
       queryClient.invalidateQueries({ queryKey: ["calendars"] });
       queryClient.invalidateQueries({ queryKey: ["calendars", calendarId] });
@@ -240,7 +193,7 @@ export const useSendEventsToCalendars = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
+  
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -253,8 +206,7 @@ export const useSendEventsToCalendars = (
       eventId: string;
     }
   >({
-    mutationFn: (params) =>
-      calendarsService.sendEventsToCalendars(supabase, params),
+    mutationFn: (params) => calendarsService.sendEventsToCalendars(supabase, params),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["calendars"] });
       options?.onSuccess?.(data, variables, context);

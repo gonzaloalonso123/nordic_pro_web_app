@@ -7,7 +7,7 @@ export function useRealtimeChat<T>(
   onNewMessage: (payload: T) => void
 ) {
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
+  
   const onNewMessageRef = useRef(onNewMessage);
 
   useEffect(() => {

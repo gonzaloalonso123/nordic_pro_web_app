@@ -35,7 +35,7 @@ export default function CreateChatModal({ isOpen, onOpenChange, onChatCreated }:
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useCurrentUser();
-  const supabase = createClient();
+  
   const { data: users } = useUsers();
 
   useEffect(() => {
