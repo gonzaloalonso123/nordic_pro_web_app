@@ -4,15 +4,28 @@ import { useMemo, useCallback, useState, useRef, useEffect } from "react";
 import { Tables, TablesInsert } from "@/types/database.types";
 import { useChatRoomWithUsers, useChatRoomMembers } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useFlattenedChatMessages } from "@/hooks/useChatMessagesPaginated";
 import { useClientData } from "@/utils/data/client";
-import { useRealtimeChat, ConnectionStatus } from "@/hooks/use-realtime-chat";
+import { useGlobalChatRealtime } from "@/hooks/useGlobalChatRealtime";
 
 export type ChatMessage = Tables<"messages"> & {
   author?: Tables<'users'> | null;
 };
 
 type ChatRoom = NonNullable<ReturnType<typeof useChatRoomWithUsers>['data']>;
-type ChatMember = NonNullable<ReturnType<typeof useChatRoomMembers>['data']>[0];
+type ChatMember = Tables<"chat_room_participants"> & {
+  users?: Tables<'users'> | null;
+};
+
+export const ConnectionStatus = {
+  DISCONNECTED: "DISCONNECTED",
+  CONNECTING: "CONNECTING",
+  CONNECTED: "SUBSCRIBED",
+  RECONNECTING: "RECONNECTING",
+  ERROR: "ERROR"
+} as const;
+
+export type ConnectionStatus = typeof ConnectionStatus[keyof typeof ConnectionStatus];
 export interface ChatRoomData {
   room: ChatRoom | null;
   members: ChatMember[];
@@ -24,6 +37,7 @@ export interface ChatRoomData {
   sendMessage: (content: string) => Promise<void>;
   hasMoreMessages: boolean;
   loadMoreMessages: () => void;
+  isLoadingMore: boolean;
 }
 
 export function useChatRoom(roomId: string): ChatRoomData {
@@ -35,24 +49,45 @@ export function useChatRoom(roomId: string): ChatRoomData {
   const realtimeMessagesRef = useRef<Map<string, Tables<"messages">>>(new Map());
   const [realtimeTrigger, setRealtimeTrigger] = useState(0);
 
-  const { users, chatMessages } = useClientData();
+  const { users } = useClientData();
 
   // Parallel data fetching - all coordinated with React Query cache
   const roomQuery = useChatRoomWithUsers(roomId);
   const membersQuery = useChatRoomMembers(roomId);
 
-  const messagesQuery = chatMessages.useChatMessagesByRoom(roomId);
+  // Use paginated messages
+  const {
+    messages: paginatedMessages,
+    isLoading: isLoadingMessages,
+    error: messagesError,
+    hasMoreMessages,
+    loadMoreMessages,
+    isLoadingMore,
+  } = useFlattenedChatMessages(roomId);
 
+  const { chatMessages } = useClientData();
   const { mutateAsync: createMessage } = chatMessages.useCreateChatMessage({
     onError: (err) => setError(`Failed to send message: ${err.message}`)
   });
 
   // Get all unique user IDs from messages (including realtime)
   const allMessages = useMemo(() => {
-    const dbMessages = messagesQuery.data || [];
+    const dbMessages = paginatedMessages || [];
     const realtimeMessages = Array.from(realtimeMessagesRef.current.values());
-    return [...dbMessages, ...realtimeMessages];
-  }, [messagesQuery.data, realtimeTrigger]);
+    
+    // Filter out realtime messages that already exist in paginated messages
+    const dbMessageIds = new Set(dbMessages.map(msg => msg.id));
+    const uniqueRealtimeMessages = realtimeMessages.filter(msg => !dbMessageIds.has(msg.id));
+    
+    // Clean up realtime messages that are now in the database
+    realtimeMessages.forEach(msg => {
+      if (dbMessageIds.has(msg.id)) {
+        realtimeMessagesRef.current.delete(msg.id);
+      }
+    });
+    
+    return [...dbMessages, ...uniqueRealtimeMessages];
+  }, [paginatedMessages, realtimeTrigger]);
 
   const userIds = useMemo(() => {
     return [...new Set(
@@ -74,7 +109,7 @@ export function useChatRoom(roomId: string): ChatRoomData {
 
   // Process messages with author data
   const processedMessages = useMemo(() => {
-    if (!messagesQuery.data && realtimeMessagesRef.current.size === 0) return [];
+    if (!paginatedMessages.length && realtimeMessagesRef.current.size === 0) return [];
 
     const combined = allMessages.map(msg => ({
       ...msg,
@@ -101,10 +136,22 @@ export function useChatRoom(roomId: string): ChatRoomData {
   }, [roomId]);
 
   // Setup realtime subscription
-  const { status: connectionStatus, error: realtimeError, isConnected } = useRealtimeChat(
+  const { status: realtimeStatus, isConnected } = useGlobalChatRealtime(
     roomId,
     handleRealtimeMessage
   );
+
+  // Map status to our enum
+  const connectionStatus = useMemo(() => {
+    switch (realtimeStatus) {
+      case "SUBSCRIBED": return ConnectionStatus.CONNECTED;
+      case "CONNECTING": return ConnectionStatus.CONNECTING;
+      case "CHANNEL_ERROR":
+      case "TIMED_OUT": return ConnectionStatus.ERROR;
+      case "CLOSED": return ConnectionStatus.DISCONNECTED;
+      default: return ConnectionStatus.DISCONNECTED;
+    }
+  }, [realtimeStatus]);
 
   // Clear realtime messages when room changes
   useEffect(() => {
@@ -120,42 +167,20 @@ export function useChatRoom(roomId: string): ChatRoomData {
     setIsSending(true);
     setError(null);
 
-    const tempId = `temp_${Date.now()}`;
 
     try {
-      const now = new Date().toISOString();
-      const optimisticMessage: Tables<"messages"> = {
-        id: tempId,
-        room_id: roomId,
-        sender_id: currentUser.id,
-        content: content.trim(),
-        created_at: now,
-        updated_at: now,
-      };
-
-      // Add optimistic message
-      realtimeMessagesRef.current.set(tempId, optimisticMessage);
-      setRealtimeTrigger(prev => prev + 1);
 
       const messageData: TablesInsert<"messages"> = {
         room_id: roomId,
         sender_id: currentUser.id,
         content: content.trim(),
       };
+      
       // Send to backend
       const result = await createMessage(messageData);
 
-      // Replace optimistic message with real one
-      realtimeMessagesRef.current.delete(tempId);
-      if (result) {
-        realtimeMessagesRef.current.set(result.id, result);
-      }
-      setRealtimeTrigger(prev => prev + 1);
 
     } catch (err: any) {
-      // Remove failed optimistic message
-      realtimeMessagesRef.current.delete(tempId);
-      setRealtimeTrigger(prev => prev + 1);
       setError(`Failed to send message: ${err.message || 'Unknown error'}`);
     } finally {
       setIsSending(false);
@@ -164,13 +189,13 @@ export function useChatRoom(roomId: string): ChatRoomData {
 
   // Combine loading states
   const isLoading = roomQuery.isLoading || membersQuery.isLoading ||
-                   messagesQuery.isLoading || usersQuery.isLoading;
+                   isLoadingMessages || usersQuery.isLoading;
 
   // Combine errors
-  const combinedError = error || realtimeError ||
+  const combinedError = error ||
                        roomQuery.error?.message ||
                        membersQuery.error?.message ||
-                       messagesQuery.error?.message ||
+                       messagesError?.message ||
                        usersQuery.error?.message;
 
   return {
@@ -182,7 +207,8 @@ export function useChatRoom(roomId: string): ChatRoomData {
     connectionStatus,
     isConnected,
     sendMessage,
-    hasMoreMessages: false, // Will implement virtual scrolling later
-    loadMoreMessages: () => {}, // Placeholder for virtual scrolling
+    hasMoreMessages,
+    loadMoreMessages,
+    isLoadingMore,
   };
 }

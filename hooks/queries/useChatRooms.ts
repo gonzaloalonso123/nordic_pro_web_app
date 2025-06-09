@@ -10,10 +10,10 @@ import type {
 type ChatRoomRow = Tables<"chat_rooms">;
 type ChatRoomInsert = TablesInsert<"chat_rooms">;
 type ChatRoomUpdate = TablesUpdate<"chat_rooms">;
-type ChatMessageRow = Tables<"chat_messages">;
-type ChatMessageInsert = TablesInsert<"chat_messages">;
-type ChatRoomMemberRow = Tables<"chat_room_members">;
-type ChatRoomMemberInsert = TablesInsert<"chat_room_members">;
+type ChatMessageRow = Tables<"messages">;
+type ChatMessageInsert = TablesInsert<"messages">;
+type ChatRoomMemberRow = Tables<"chat_room_participants">;
+type ChatRoomMemberInsert = TablesInsert<"chat_room_participants">;
 type MessageReadRow = Tables<"message_reads">;
 type MessageReadInsert = TablesInsert<"message_reads">;
 
@@ -51,15 +51,15 @@ export const useChatRoom = <TData = ChatRoomRow>(
 export const useChatRoomsByUser = <TData = ChatRoomWithDetails[]>(
   userId: string | undefined,
   options?: Omit<
-    UseQueryOptions<ChatRoomRow[] | null, Error, TData>,
+    UseQueryOptions<ChatRoomWithDetails[], Error, TData>,
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
   const supabase = createClient();
-  return useQuery<ChatRoomRow[] | null, Error, TData>({
+  return useQuery<ChatRoomWithDetails[], Error, TData>({
     queryKey: ["chatRooms", "user", userId],
     queryFn: () =>
-      userId ? chatRoomsService.getByUser(supabase, userId) : null,
+      userId ? chatRoomsService.getByUser(supabase, userId) : [],
     enabled: !!userId,
     ...options,
   });
@@ -407,14 +407,12 @@ export const useMarkRoomAsRead = (
     mutationFn: ({ roomId, userId }) =>
       chatRoomsService.markRoomAsRead(supabase, roomId, userId),
     onSuccess: (_, { roomId, userId }) => {
-      // Invalidate unread count queries
       queryClient.invalidateQueries({
         queryKey: ["unreadMessages", roomId, userId],
       });
       queryClient.invalidateQueries({
         queryKey: ["unreadMessages", "batch"],
       });
-      // Also invalidate the chat rooms list to update UI
       queryClient.invalidateQueries({
         queryKey: ["chatRooms", "user", userId],
       });
@@ -422,8 +420,6 @@ export const useMarkRoomAsRead = (
     ...options,
   });
 };
-
-// --- NEW: Logic and Hook for Starting a Direct Chat ---
 
 interface StartDirectChatVariables {
   currentUserId: string;
@@ -447,87 +443,29 @@ async function findOrCreateDirectChatRoomLogic(
     throw new Error("Cannot start a chat with yourself.");
   }
 
-  // 1. Get all rooms the current user is a member of
-  const { data: currentUserRoomsData, error: currentUserRoomsError } =
-    await supabaseClient
-      .from("chat_room_members")
-      .select("room_id")
-      .eq("user_id", currentUserId);
-
-  if (currentUserRoomsError) throw currentUserRoomsError;
-
-  if (currentUserRoomsData && currentUserRoomsData.length > 0) {
-    const currentUserRoomIds = currentUserRoomsData.map((r) => r.room_id);
-
-    // 2. Find rooms from this list where the selectedUser is also a member
-    const { data: commonRoomsData, error: commonRoomsError } =
-      await supabaseClient
-        .from("chat_room_members")
-        .select("room_id, user_id")
-        .in("room_id", currentUserRoomIds)
-        .in("user_id", [currentUserId, selectedUserId]);
-
-    if (commonRoomsError) throw commonRoomsError;
-
-    const roomMemberLists: Record<string, string[]> = {};
-    commonRoomsData?.forEach((member) => {
-      if (!member.room_id || !member.user_id) return; // Should not happen
-      if (!roomMemberLists[member.room_id]) {
-        roomMemberLists[member.room_id] = [];
-      }
-      if (!roomMemberLists[member.room_id].includes(member.user_id)) {
-        roomMemberLists[member.room_id].push(member.user_id);
-      }
+  const { data: existingRooms, error: findError } = await supabaseClient
+    .rpc('find_existing_onetoone_chat', {
+      user1_id: currentUserId,
+      user2_id: selectedUserId
     });
 
-    for (const roomId in roomMemberLists) {
-      // Check if this room (from the filtered list) contains both users
-      if (
-        roomMemberLists[roomId].length === 2 &&
-        roomMemberLists[roomId].includes(currentUserId) &&
-        roomMemberLists[roomId].includes(selectedUserId)
-      ) {
-        // Crucial Check: Ensure this room *only* has these 2 members (is a true 1-on-1 chat)
-        const { error: totalMembersError, count: totalMemberCountInRoom } =
-          await supabaseClient
-            .from("chat_room_members")
-            .select("*", { count: "exact", head: true }) // Get only the count
-            .eq("room_id", roomId);
-
-        if (totalMembersError) {
-          console.warn(
-            `Error checking total members for existing room ${roomId}:`,
-            totalMembersError.message
-          );
-          // If the count check errors, we might accidentally reuse a group chat.
-          // To be safe, we'll continue to the next room or eventually create a new one.
-          continue;
-        }
-
-        if (totalMemberCountInRoom === 2) {
-          console.log(
-            `Found existing direct chat room: ${roomId} with exactly 2 members.`
-          );
-          return roomId; // This is a confirmed 1-on-1 chat
-        }
-      }
-    }
+  if (findError) {
+    console.error('Error finding existing chat:', findError);
+  } else if (existingRooms && existingRooms.length > 0) {
+    console.log(`Found existing direct chat room: ${existingRooms[0].room_id}`);
+    return existingRooms[0].room_id;
   }
 
-  // If no existing *strictly 1-on-1* chat room found, create a new one
-  console.log(
-    `No existing 1-on-1 chat found. Creating new direct chat room...`
-  );
+  console.log('No existing 1-on-1 chat found. Creating new direct chat room...');
 
   const newRoomData: ChatRoomInsert = await createChatRoomMutationAsync({
-    // No name field - leave it null/undefined for direct chats
-    // any other fields required by ChatRoomInsert
+    name: null,
+    is_group_chat: false,
+    created_by: currentUserId,
   });
 
   if (!newRoomData || !newRoomData.id) {
-    throw new Error(
-      "Failed to create new room or room ID is missing from mutation response."
-    );
+    throw new Error("Failed to create new room or room ID is missing from mutation response.");
   }
   const newRoomId = newRoomData.id;
   console.log(`New room created: ${newRoomId}. Adding members...`);
@@ -574,7 +512,7 @@ async function findOrCreateDirectChatRoomLogic(
 }
 
 export function useStartDirectChat() {
-  const supabaseClient = createClient(); // Use the consistent client getter
+  const supabaseClient = createClient();
   const queryClient = useQueryClient();
 
   // Get the mutateAsync functions from your existing hooks

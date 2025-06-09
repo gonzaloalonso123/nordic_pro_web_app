@@ -1,72 +1,100 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import {
-  useChatRoomsByUser,
-  useUnreadMessageCountBatch,
-  useMarkRoomAsRead,
-} from "@/hooks/queries/useChatRooms";
-import { useChatRoomDisplayName } from "@/hooks/useChatRoomDisplayName";
-import { ChatAvatarInfo, useChatRoomAvatar } from "@/hooks/useChatRoomAvatar";
-import { ChatRoomWithDetails } from "@/utils/supabase/services";
+import { useRouter } from "next/navigation";
+import { useUrl } from "@/hooks/use-url";
+import { useChatRoomsByUser } from "@/hooks/queries/useChatRooms";
+import { useChatRoomAvatar } from "@/hooks/useChatRoomAvatar";
+import { useClientData } from "@/utils/data/client";
+import type { ChatRoomWithDetails } from "@/utils/supabase/services/chat-rooms";
 
-export type ProcessedChatRoom = ChatRoomWithDetails & {
+export interface ProcessedChatRoom {
+  id: string;
   displayName: string;
-  avatarInfo: ChatAvatarInfo
-};
+  avatarUrl?: string;
+  initials: string;
+  lastMessage?: {
+    content: string;
+    createdAt: string;
+    senderName: string;
+  };
+  memberCount: number;
+  updatedAt: string;
+}
 
 export function useChatListData(userId?: string) {
-  const { data: chatRooms = [], isLoading, error } = useChatRoomsByUser(userId);
-  const { getRoomDisplayName } = useChatRoomDisplayName();
+  const router = useRouter();
+  const currentPath = useUrl();
   const { getChatAvatarInfo } = useChatRoomAvatar();
-  const markRoomAsReadMutation = useMarkRoomAsRead();
+  const { chatRooms: chatRoomQueries } = useClientData();
 
-  const roomIds = useMemo(() => chatRooms.map((room) => room.id), [chatRooms]);
+  const {
+    data: rawChatRooms = [],
+    isLoading: isLoadingRooms,
+    error: roomsError
+  } = useChatRoomsByUser(userId || '');
 
-  const { data: unreadCounts = {} } = useUnreadMessageCountBatch(roomIds, userId);
+  const roomIds = rawChatRooms.map(room => room.id);
+  const {
+    data: unreadCounts = {},
+    isLoading: isLoadingCounts
+  } = chatRoomQueries.useUnreadCountBatch(roomIds, userId || '');
 
-  const processedRooms: ProcessedChatRoom[] = useMemo(() => {
-    return chatRooms.map((room) => ({
-      ...room,
-      displayName: getRoomDisplayName(room),
-      avatarInfo: getChatAvatarInfo(room),
-    }));
-  }, [chatRooms, getRoomDisplayName, getChatAvatarInfo]);
+  const chatRooms = useMemo((): ProcessedChatRoom[] => {
+    if (!rawChatRooms.length) return [];
 
-  const sortedRooms = useMemo(() => {
-    return [...processedRooms].sort((a, b) => {
-      const aLastMessage = a.last_message?.[0];
-      const bLastMessage = b.last_message?.[0];
-
-      if (aLastMessage && bLastMessage) {
-        return new Date(bLastMessage.created_at).getTime() - new Date(aLastMessage.created_at).getTime();
+    return rawChatRooms.map((room: ChatRoomWithDetails) => {
+      try {
+        const avatarInfo = getChatAvatarInfo(room);
+        const lastMessage = room.last_message?.[0];
+        return {
+          id: room.id,
+          displayName: avatarInfo.displayName,
+          avatarUrl: avatarInfo.avatarUrl,
+          initials: avatarInfo.initials,
+          lastMessage: lastMessage ? {
+            content: lastMessage.content,
+            createdAt: lastMessage.created_at,
+            senderName: lastMessage.sender_id === userId ? 'You' : (
+              lastMessage.users ?
+                `${lastMessage.users.first_name || ''} ${lastMessage.users.last_name || ''}`.trim() ||
+                'Unknown User' : 'Unknown User'
+            )
+          } : undefined,
+          memberCount: room.chat_room_participants?.length || 0,
+          updatedAt: room.updated_at || room.created_at || ''
+        };
+      } catch (error) {
+        console.error('Error processing chat room:', room.id, error);
+        return {
+          id: room.id,
+          displayName: room.name || 'Unknown Chat',
+          avatarUrl: undefined,
+          initials: '??',
+          lastMessage: undefined,
+          memberCount: room.chat_room_participants?.length || 0,
+          updatedAt: room.updated_at || room.created_at || ''
+        };
       }
-
-      if (aLastMessage && !bLastMessage) return -1;
-      if (!aLastMessage && bLastMessage) return 1;
-
-      const aTimestamp = a.updated_at || a.created_at;
-      const bTimestamp = b.updated_at || b.created_at;
-
-      if (!aTimestamp && !bTimestamp) return 0;
-      if (!aTimestamp) return 1;
-      if (!bTimestamp) return -1;
-
-      return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
+    }).sort((a, b) => {
+      const aTime = a.lastMessage?.createdAt || a.updatedAt;
+      const bTime = b.lastMessage?.createdAt || b.updatedAt;
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
     });
-  }, [processedRooms]);
+  }, [rawChatRooms, getChatAvatarInfo]);
 
   const handleRoomClick = useCallback((roomId: string) => {
-    if (userId) {
-      markRoomAsReadMutation.mutate({ roomId, userId });
-    }
-  }, [userId, markRoomAsReadMutation]);
+    router.push(`${currentPath}/${roomId}`);
+  }, [router, currentPath]);
+
+  const isLoading = isLoadingRooms || isLoadingCounts;
+  const error = roomsError?.message || null;
 
   return {
-    chatRooms: sortedRooms,
+    chatRooms,
     unreadCounts,
     isLoading,
-    error: error?.message || null,
+    error,
     handleRoomClick,
   };
 }

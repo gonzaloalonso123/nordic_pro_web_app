@@ -22,9 +22,8 @@ export const chatMessagesService = {
     const { data, error } = await supabase
       .from("messages")
       .select(`
-      *,
-      users ( id, first_name, last_name, avatar ),
-      message_reads (*)
+        *,
+        users!messages_sender_id_fkey1 ( id, first_name, last_name, avatar )
     `)
       .eq("room_id", roomId)
       .order("created_at", { ascending: true });
@@ -46,9 +45,8 @@ export const chatMessagesService = {
       .from("messages")
       .select(
         `
-        *,
-        users ( id, first_name, last_name, avatar ),
-        message_reads (*)
+          *,
+          users!messages_sender_id_fkey1 ( id, first_name, last_name, avatar )
       `
       )
       .eq("id", messageId)
@@ -68,9 +66,8 @@ export const chatMessagesService = {
       .insert(message)
       .select(
         `
-        *,
-        users ( id, first_name, last_name, avatar ),
-        message_reads (*)
+          *,
+          users!messages_sender_id_fkey1 ( id, first_name, last_name, avatar )
       `
       )
       .single();
@@ -104,9 +101,8 @@ export const chatMessagesService = {
       .eq("id", messageId)
       .select(
         `
-        *,
-        users ( id, first_name, last_name, avatar ),
-        message_reads (*)
+          *,
+          users!messages_sender_id_fkey1 ( id, first_name, last_name, avatar )
       `
       )
       .single();
@@ -135,53 +131,45 @@ export const chatMessagesService = {
     supabase: SupabaseClient<Database>,
     messageRead: MessageReadInsert
   ): Promise<MessageReadRow> {
-    // This assumes you might want to prevent duplicate read entries.
-    // If your table has a unique constraint on (message_id, user_id),
-    // you might use .upsert() or handle potential errors.
+    // Use upsert to handle duplicate read entries gracefully
     const { data, error } = await supabase
       .from("message_reads")
-      .insert(messageRead)
+      .upsert(
+        {
+          message_id: messageRead.message_id,
+          user_id: messageRead.user_id,
+          read_at: messageRead.read_at || new Date().toISOString()
+        },
+        {
+          onConflict: 'message_id,user_id',
+          ignoreDuplicates: false
+        }
+      )
       .select()
       .single();
 
     if (error) throw error;
-    // Notifications are typically not sent on message update, so the logic is removed from here.
     return data;
   },
 
-  // Get unread message count for a specific room and user
-  // This is similar to the one in chatRoomsService, but focused on messages.
-  async getUnreadCountByRoomForUser(
+  // Separate method to get message read status for a user
+  async getMessageReadsForUser(
     supabase: SupabaseClient<Database>,
-    roomId: string,
+    messageIds: string[],
     userId: string
-  ): Promise<number> {
-    const { count, error } = await supabase
-      .from("messages")
-      .select("*", { count: "exact", head: true })
-      .eq("room_id", roomId)
-      .is("sender_id", null) // Or filter by messages not from the current user: .not("user_id", "eq", userId)
-      .not(
-        "message_reads",
-        "cs",
-        `{"sender_id":"${userId}", "message_id": "id"}`
-      ); // This part might need adjustment based on how message_reads are linked
+  ): Promise<Omit<MessageReadRow, 'id'>[]> {
+    if (messageIds.length === 0) return [];
 
-    // A more robust way to count unread messages:
-    // Fetch messages in the room, then filter out those that have a read receipt for the user.
-    // This is more complex client-side or requires a more specific query/function.
-    // For simplicity, the above query attempts a direct count.
-    // A common pattern is to count messages where the user_id is NOT the current user,
-    // and for which no entry exists in message_reads for that message_id and user_id.
-
-    // Alternative approach using a subquery or RPC might be more accurate for unread counts.
-    // Example: Count messages in room_id where user_id != current_user_id
-    // AND id NOT IN (SELECT message_id FROM message_reads WHERE user_id = current_user_id)
+    const { data, error } = await supabase
+      .from("message_reads")
+      .select("message_id, read_at, user_id")
+      .in("message_id", messageIds)
+      .eq("user_id", userId);
 
     if (error) {
-      console.error("Error fetching unread message count:", error);
+      console.error("Error fetching message reads:", error);
       throw error;
     }
-    return count || 0;
+    return data || [];
   },
 };

@@ -11,17 +11,17 @@ interface MessageItemProps {
   currentUser: Tables<'users'>;
 }
 
-export const MessageItem = memo(function MessageItem({ 
-  message, 
-  currentUser 
+export const MessageItem = memo(function MessageItem({
+  message,
+  currentUser
 }: MessageItemProps) {
-  const isCurrentUserMessage = message.user_id === currentUser.id;
-  
+  const isCurrentUserMessage = message.sender_id === currentUser.id;
+
   const authorName = isCurrentUserMessage
     ? "You"
     : message.author?.first_name ||
       message.author?.email?.split("@")[0] ||
-      `User ${message.user_id ? message.user_id.substring(0, 6) : "..."}`;
+      `User ${message.sender_id ? message.sender_id.substring(0, 6) : "..."}`;
 
   return (
     <div
@@ -33,9 +33,9 @@ export const MessageItem = memo(function MessageItem({
             <Avatar className="h-8 w-8">
               <AvatarImage src={message.author?.avatar || undefined} />
               <AvatarFallback>
-                {getInitials({ 
-                  firstName: message.author?.first_name, 
-                  lastName: message.author?.last_name 
+                {getInitials({
+                  firstName: message.author?.first_name,
+                  lastName: message.author?.last_name
                 })}
               </AvatarFallback>
             </Avatar>
@@ -72,9 +72,9 @@ export const MessageItem = memo(function MessageItem({
             <Avatar className="h-8 w-8">
               <AvatarImage src={currentUser.avatar || undefined} />
               <AvatarFallback>
-                {getInitials({ 
-                  firstName: currentUser.first_name, 
-                  lastName: currentUser.last_name 
+                {getInitials({
+                  firstName: currentUser.first_name,
+                  lastName: currentUser.last_name
                 })}
               </AvatarFallback>
             </Avatar>

@@ -1,29 +1,28 @@
-import { useState, useEffect, useRef } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/utils/supabase/client";
 import type { Tables } from "@/types/database.types";
-if (process.env.NODE_ENV === 'development') {
-  console.log(`Realtime subscription status for room ${roomId}:`, subscriptionStatus);
-}
 
 // Connection status enum for better type safety
-export enum ConnectionStatus {
-  DISCONNECTED = "DISCONNECTED",
-  CONNECTING = "CONNECTING",
-  CONNECTED = "CONNECTED",
-  RECONNECTING = "RECONNECTING",
-  ERROR = "ERROR"
-}
+export const ConnectionStatus = {
+  DISCONNECTED: "DISCONNECTED",
+  CONNECTING: "CONNECTING",
+  CONNECTED: "CONNECTED",
+  RECONNECTING: "RECONNECTING",
+  ERROR: "ERROR"
+} as const;
+
+export type ConnectionStatusType = typeof ConnectionStatus[keyof typeof ConnectionStatus];
 
 export interface RealtimeState {
-  status: ConnectionStatus;
+  status: ConnectionStatusType;
   error: string | null;
   isConnected: boolean;
 }
 export function useRealtimeChat(
   roomId: string,
-  onNewMessage: (payload: Tables<"chat_messages">) => void
+  onNewMessage: (payload: Tables<"messages">) => void
 ): RealtimeState {
-  const [status, setStatus] = useState<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
+  const [status, setStatus] = useState<ConnectionStatusType>(ConnectionStatus.DISCONNECTED);
   const [error, setError] = useState<string | null>(null);
 
   const onNewMessageRef = useRef(onNewMessage);
@@ -63,8 +62,6 @@ export function useRealtimeChat(
       return;
     }
 
-    const supabase = createClient();
-
     const cleanupChannel = () => {
       if (channelRef.current) {
         try {
@@ -89,12 +86,12 @@ export function useRealtimeChat(
       try {
         const channel = supabase
           .channel(channelName)
-          .on<Tables<"chat_messages">>(
+          .on<Tables<"messages">>(
             "postgres_changes",
             {
               event: "INSERT",
               schema: "public",
-              table: "chat_messages",
+              table: "messages",
               filter: `room_id=eq.${roomId}`,
             },
             (payload) => {
@@ -112,6 +109,11 @@ export function useRealtimeChat(
 
         channel.subscribe((subscriptionStatus, err) => {
           if (!isMountedRef.current) return;
+
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Realtime subscription status for room ${roomId}:`, subscriptionStatus);
+          }
+
 
           switch (subscriptionStatus) {
             case "SUBSCRIBED":
