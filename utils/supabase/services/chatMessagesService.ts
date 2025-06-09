@@ -172,4 +172,56 @@ export const chatMessagesService = {
     }
     return data || [];
   },
+
+  // Paginated messages for infinite scroll
+  async getPaginatedByRoom(
+    supabase: SupabaseClient<Database>,
+    roomId: string,
+    limit: number = 50,
+    cursor?: string
+  ): Promise<{
+    messages: ChatMessageRow[];
+    nextCursor?: string;
+    hasMore: boolean;
+  }> {
+    if (!roomId) {
+      return { messages: [], hasMore: false };
+    }
+
+    let query = supabase
+      .from("messages")
+      .select(`
+        *,
+        users!messages_sender_id_fkey1 ( id, first_name, last_name, avatar )
+      `)
+      .eq("room_id", roomId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (cursor) {
+      query = query.lt("created_at", cursor);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Error fetching paginated messages for room:", roomId, error);
+      throw error;
+    }
+
+    const messages = data || [];
+    const hasMore = messages.length === limit;
+    const nextCursor = hasMore && messages.length > 0
+      ? messages[messages.length - 1].created_at || undefined
+      : undefined;
+
+    // Return in chronological order (oldest first)
+    const chronologicalMessages = messages.reverse();
+
+    return {
+      messages: chronologicalMessages,
+      nextCursor,
+      hasMore,
+    };
+  },
 };
