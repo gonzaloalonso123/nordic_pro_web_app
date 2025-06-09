@@ -166,7 +166,7 @@ export default function CreateChatModal({ isOpen, onOpenChange, onChatCreated }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md h-screen xl:max-h-[60vh]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <UserPlus className="mr-2 h-5 w-5" /> Create New Chat
@@ -195,8 +195,8 @@ export default function CreateChatModal({ isOpen, onOpenChange, onChatCreated }:
             onChange={(e) => setSearchTerm(e.target.value)}
             className="mb-2"
           />
-          <ScrollArea className="h-[70vh] border rounded-md">
-            <div className="p-2 space-y-1">
+          <ScrollArea className="border rounded-md">
+            <div className="p-2 space-y-1 max-h-[40vh]">
               {filteredUsers.map((user) => (
                 <div
                   key={user.id}
