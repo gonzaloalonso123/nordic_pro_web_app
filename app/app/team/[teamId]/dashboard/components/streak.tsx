@@ -77,7 +77,6 @@ export const Streak = ({ streak, title, description }: { streak: StreakData; tit
             </motion.div>
             {title}
           </CardTitle>
-          <CardDescription className="text-gray-600 font-medium">{description}</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
@@ -91,11 +90,6 @@ export const Streak = ({ streak, title, description }: { streak: StreakData; tit
               </motion.div>
               <div className="text-center sm:text-left">
                 <div className="font-bold text-lg text-gray-800">Current Streak</div>
-                <div className="text-sm text-gray-600 font-medium">
-                  {streak.current === 0
-                    ? "Complete your next form! 🚀"
-                    : `${streak.current} form${streak.current !== 1 ? "s" : ""} in a row! 🔥`}
-                </div>
               </div>
             </div>
             <Badge className="bg-gradient-to-r from-amber-100 to-orange-100 text-orange-700 border-orange-200 font-bold px-3 py-1 self-center sm:self-auto">

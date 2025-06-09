@@ -35,15 +35,6 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
   const isCoach = team.role === "COACH";
   const { useHeaderConfig } = useHeader();
 
-  useHeaderConfig({
-    centerContent: "Chat",
-    rightContent: isCoach ? (
-      <Button onClick={() => setIsCreateChatModalOpen(true)}>
-        <PlusCircle className="mr-2 h-4 w-4" />
-      </Button>
-    ) : null,
-  });
-
   const fetchChatRooms = useCallback(async () => {
     if (!currentUser?.id) return;
     setLoading(true);
@@ -127,45 +118,46 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
   useEffect(() => {
     fetchChatRooms();
   }, [fetchChatRooms]);
-  // useEffect(() => {
-  //   if (!supabase || !currentUser?.id) return;
 
-  //   const handleNewMessage = (payload: any) => {
-  //     const isRelevant = chatRooms.some((room) => room.id === payload.new.room_id);
-  //     if (isRelevant) {
-  //       fetchChatRooms();
-  //     }
-  //   };
+  useEffect(() => {
+    if (!supabase || !currentUser?.id) return;
 
-  //   const handleRoomOrParticipantChange = () => {
-  //     fetchChatRooms();
-  //   };
+    const handleNewMessage = (payload: any) => {
+      const isRelevant = chatRooms.some((room) => room.id === payload.new.room_id);
+      if (isRelevant) {
+        fetchChatRooms();
+      }
+    };
 
-  //   const roomParticipantChanges = supabase
-  //     .channel("public:chat_room_participants")
-  //     .on(
-  //       "postgres_changes",
-  //       { event: "*", schema: "public", table: "chat_room_participants", filter: `user_id=eq.${currentUser.id}` },
-  //       handleRoomOrParticipantChange
-  //     )
-  //     .subscribe();
+    const handleRoomOrParticipantChange = () => {
+      fetchChatRooms();
+    };
 
-  //   const messageChanges = supabase
-  //     .channel("public:messages")
-  //     .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, handleNewMessage)
-  //     .subscribe();
+    const roomParticipantChanges = supabase
+      .channel("public:chat_room_participants")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chat_room_participants", filter: `user_id=eq.${currentUser.id}` },
+        handleRoomOrParticipantChange
+      )
+      .subscribe();
 
-  //   const roomChanges = supabase
-  //     .channel("public:chat_rooms")
-  //     .on("postgres_changes", { event: "*", schema: "public", table: "chat_rooms" }, handleRoomOrParticipantChange)
-  //     .subscribe();
+    const messageChanges = supabase
+      .channel("public:messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, handleNewMessage)
+      .subscribe();
 
-  //   return () => {
-  //     supabase.removeChannel(roomParticipantChanges);
-  //     supabase.removeChannel(messageChanges);
-  //     supabase.removeChannel(roomChanges);
-  //   };
-  // }, [supabase, currentUser, fetchChatRooms]);
+    const roomChanges = supabase
+      .channel("public:chat_rooms")
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_rooms" }, handleRoomOrParticipantChange)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(roomParticipantChanges);
+      supabase.removeChannel(messageChanges);
+      supabase.removeChannel(roomChanges);
+    };
+  }, [supabase, currentUser, fetchChatRooms]);
 
   const filteredRooms = chatRooms.filter((room) => {
     const name =
@@ -178,6 +170,15 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
   const handleCreateNewChat = () => {
     setIsCreateChatModalOpen(true);
   };
+
+  useHeaderConfig({
+    centerContent: "Chat",
+    rightContent: isCoach ? (
+      <Button onClick={handleCreateNewChat}>
+        <PlusCircle className="mr-2 h-4 w-4" />
+      </Button>
+    ) : null,
+  });
 
   return (
     <div className="w-full md:w-80 lg:w-96 border-r flex flex-col bg-muted/20">
