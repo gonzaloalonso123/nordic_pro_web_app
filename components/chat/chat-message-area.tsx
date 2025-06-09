@@ -71,9 +71,9 @@ export default function ChatMessageArea({ selectedRoom, currentUser, onBackToLis
   }
 
   return (
-    <Content>
+    <div className="pb-[76px] px-0 w-full">
       <div className="flex-1 flex flex-col h-full bg-background">
-        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 px-2" ref={scrollAreaRef}>
           {loading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
@@ -85,18 +85,22 @@ export default function ChatMessageArea({ selectedRoom, currentUser, onBackToLis
               ))}
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-3">
               <MessageSquareText className="w-12 h-12 mb-2" />
               <p>No messages yet.</p>
               <p className="text-sm">Be the first to send a message!</p>
             </div>
           ) : (
-            messages.map((msg) => <ChatMessageItem key={msg.id} message={msg} currentUserId={currentUser.id} />)
+            <div className="space-y-3 p-3">
+              {messages.map((msg) => (
+                <ChatMessageItem key={msg.id} message={msg} currentUserId={currentUser.id} />
+              ))}
+            </div>
           )}
           <div ref={messagesEndRef} />
         </ScrollArea>
 
-        <div className="p-3 border-t sticky bottom-0 bg-background">
+        <div className="p-3 border-t sticky bottom-0 w-full bg-white border">
           <form onSubmit={handleSendMessage} className="flex items-center gap-2">
             <Input
               type="text"
@@ -112,7 +116,7 @@ export default function ChatMessageArea({ selectedRoom, currentUser, onBackToLis
           </form>
         </div>
       </div>
-    </Content>
+    </div>
   );
 }
 
