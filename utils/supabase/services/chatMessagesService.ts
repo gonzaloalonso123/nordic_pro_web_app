@@ -3,9 +3,9 @@ import type { Database } from "@/types/database.types";
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
 import { triggerNewChatMessageNotification } from "@/utils/notificationService";
 
-type ChatMessageRow = Tables<"chat_messages">;
-type ChatMessageInsert = TablesInsert<"chat_messages">;
-type ChatMessageUpdate = TablesUpdate<"chat_messages">;
+type ChatMessageRow = Tables<"messages">;
+type ChatMessageInsert = TablesInsert<"messages">;
+type ChatMessageUpdate = TablesUpdate<"messages">;
 
 type MessageReadRow = Tables<"message_reads">;
 type MessageReadInsert = TablesInsert<"message_reads">;
@@ -20,7 +20,7 @@ export const chatMessagesService = {
     }
 
     const { data, error } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .select(`
       *,
       users ( id, first_name, last_name, avatar ),
@@ -43,7 +43,7 @@ export const chatMessagesService = {
     messageId: string
   ): Promise<ChatMessageRow | null> {
     const { data, error } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .select(
         `
         *,
@@ -64,7 +64,7 @@ export const chatMessagesService = {
     message: ChatMessageInsert
   ): Promise<ChatMessageRow> {
     const { data, error } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .insert(message)
       .select(
         `
@@ -77,9 +77,9 @@ export const chatMessagesService = {
 
     if (error) throw error;
 
-    if (data && data.room_id && data.user_id && data.content) {
+    if (data && data.room_id && data.sender_id && data.content) {
       triggerNewChatMessageNotification({
-        actorUserId: data.user_id,
+        actorUserId: data.sender_id,
         roomId: data.room_id,
         messageContent: data.content,
       }).catch(err => {
@@ -99,7 +99,7 @@ export const chatMessagesService = {
     // Assuming 'updated_at' is handled by a DB trigger or you want to set it manually.
     // If manual, add: { ...updates, updated_at: new Date().toISOString() }
     const { data, error } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .update(updates)
       .eq("id", messageId)
       .select(
@@ -122,7 +122,7 @@ export const chatMessagesService = {
     messageId: string
   ): Promise<boolean> {
     const { error } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .delete()
       .eq("id", messageId);
 
@@ -157,14 +157,14 @@ export const chatMessagesService = {
     userId: string
   ): Promise<number> {
     const { count, error } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .select("*", { count: "exact", head: true })
       .eq("room_id", roomId)
-      .is("user_id", null) // Or filter by messages not from the current user: .not("user_id", "eq", userId)
+      .is("sender_id", null) // Or filter by messages not from the current user: .not("user_id", "eq", userId)
       .not(
         "message_reads",
         "cs",
-        `{"user_id":"${userId}", "message_id": "id"}`
+        `{"sender_id":"${userId}", "message_id": "id"}`
       ); // This part might need adjustment based on how message_reads are linked
 
     // A more robust way to count unread messages:
