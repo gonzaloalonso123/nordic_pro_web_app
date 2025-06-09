@@ -3,20 +3,19 @@
 import { useParams } from "next/navigation";
 
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useUrl } from "@/hooks/use-url";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useClientData } from "@/utils/data/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatInterface } from "@/components/chat/chat-interface";
+import { ChatErrorBoundary } from "@/components/chat/chat-error-boundary";
 import { useHeader } from "@/hooks/useHeader";
 import BackButton from "@/components/ui/back-button";
-import { useChatRoomAvatar } from "@/hooks/useChatRoomAvatar";
-import { ChatErrorBoundary } from "@/components/chat/chat-error-boundary";
-import { useChatRoom } from "@/hooks/useChatRoom";
+import { useUrl } from "@/hooks/use-url";
 
 export default function ChatRoomPage() {
   const params = useParams();
   const chatId = params.chatId as string;
+  const { useHeaderConfig } = useHeader();
+  const path = useUrl();
 
   // Early validation - avoid expensive hook calls if invalid
   if (!chatId || typeof chatId !== 'string') {
@@ -30,41 +29,17 @@ export default function ChatRoomPage() {
 
   // Now safe to call hooks
   const { user: currentUser, isLoading: isLoadingUser } = useCurrentUser();
-  const path = useUrl();
-  const { useHeaderConfig } = useHeader();
-  const { getChatAvatarInfo } = useChatRoomAvatar();
+  const { chatRooms } = useClientData();
 
-  // Use unified chat room hook - no more duplicate data fetching
-  const { room: chatRoom, members: roomMembers, isLoading: isLoadingRoom } = useChatRoom(chatId);
+  // Just check if room exists, don't subscribe to realtime
+  const { data: room, isLoading: isLoadingRoom } = chatRooms.useById(chatId);
 
-  const avatarInfo = chatRoom ? getChatAvatarInfo(chatRoom) : null;
 
+  // Simple header config
   useHeaderConfig({
     leftContent: <BackButton className="md:hidden" path={`${path}/chat`} />,
-    centerContent: (
-      !isLoadingRoom && avatarInfo ? (
-        <div className="flex gap-3 items-center justify-center">
-          <Avatar>
-            <AvatarImage
-              src={avatarInfo.avatarUrl || undefined}
-              alt={avatarInfo.displayName}
-            />
-            <AvatarFallback>
-              {avatarInfo.initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <h3>{avatarInfo.displayName}</h3>
-            <p className="text-xs text-muted-foreground">
-              {roomMembers.length > 2
-                ? `${roomMembers.length} member${roomMembers.length > 1 ? "s" : ""}`
-                : null}
-            </p>
-          </div>
-        </div>
-      ) : (<Skeleton className="h-6 w-32" />)
-    ),
-  }, [path, avatarInfo?.displayName, avatarInfo?.avatarUrl, avatarInfo?.initials, isLoadingRoom, roomMembers.length]);
+    centerContent: "Chat",
+  }, [path]);
 
   if (isLoadingUser || isLoadingRoom) {
     return (
@@ -75,7 +50,7 @@ export default function ChatRoomPage() {
     );
   }
 
-  if (!chatRoom) {
+  if (!room) {
     return (
       <div className="flex flex-col h-full items-center justify-center">
         <h2 className="text-lg font-semibold text-gray-900 mb-2">Chat room not found</h2>

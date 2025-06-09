@@ -5,7 +5,7 @@ import { Tables, TablesInsert } from "@/types/database.types";
 import { useChatRoomWithUsers, useChatRoomMembers } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useClientData } from "@/utils/data/client";
-import { useGlobalChatRealtime } from "@/hooks/useGlobalChatRealtime";
+import { useSimpleChatRealtime } from "@/hooks/useSimpleChatRealtime";
 
 export type ChatMessage = Tables<"messages"> & {
   author?: Tables<'users'> | null;
@@ -132,7 +132,7 @@ export function useChatRoom(roomId: string): ChatRoomData {
   }, [roomId]);
 
   // Setup realtime subscription
-  const { status: realtimeStatus, isConnected } = useGlobalChatRealtime(
+  const { status: realtimeStatus, isConnected } = useSimpleChatRealtime(
     roomId,
     handleRealtimeMessage
   );
