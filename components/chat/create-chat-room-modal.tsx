@@ -21,7 +21,7 @@ import { UserPlus, Users, Loader2 } from "lucide-react";
 import { useUsers } from "@/hooks/queries";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Tables } from "@/types/database.types";
-import { createClient } from "@/utils/supabase/client";
+import { createClient, supabase } from "@/utils/supabase/client";
 
 interface CreateChatModalProps {
   isOpen: boolean;
