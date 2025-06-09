@@ -1,29 +1,29 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/database.types";
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`Realtime subscription status for room ${roomId}:`, subscriptionStatus);
-          }
 
 // Connection status enum for better type safety
-export enum ConnectionStatus {
-  DISCONNECTED = "DISCONNECTED",
-  CONNECTING = "CONNECTING", 
-  CONNECTED = "CONNECTED",
-  RECONNECTING = "RECONNECTING",
-  ERROR = "ERROR"
-}
+export const ConnectionStatus = {
+  DISCONNECTED: "DISCONNECTED",
+  CONNECTING: "CONNECTING",
+  CONNECTED: "CONNECTED",
+  RECONNECTING: "RECONNECTING",
+  ERROR: "ERROR"
+} as const;
+
+export type ConnectionStatusType = typeof ConnectionStatus[keyof typeof ConnectionStatus];
 
 export interface RealtimeState {
-  status: ConnectionStatus;
+  status: ConnectionStatusType;
   error: string | null;
   isConnected: boolean;
 }
 export function useRealtimeChat(
   roomId: string,
-  onNewMessage: (payload: Tables<"chat_messages">) => void
+  onNewMessage: (payload: Tables<"messages">) => void
 ): RealtimeState {
-  const [status, setStatus] = useState<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
+  const [status, setStatus] = useState<ConnectionStatusType>(ConnectionStatus.DISCONNECTED);
+  const supabase = createClient();
   const [error, setError] = useState<string | null>(null);
   const onNewMessageRef = useRef(onNewMessage);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -62,8 +62,6 @@ export function useRealtimeChat(
       return;
     }
 
-    const supabase = createClient();
-
     const cleanupChannel = () => {
       if (channelRef.current) {
         try {
@@ -88,12 +86,12 @@ export function useRealtimeChat(
       try {
         const channel = supabase
           .channel(channelName)
-          .on<Tables<"chat_messages">>(
+          .on<Tables<"messages">>(
             "postgres_changes",
             {
               event: "INSERT",
               schema: "public",
-              table: "chat_messages",
+              table: "messages",
               filter: `room_id=eq.${roomId}`,
             },
             (payload) => {
@@ -112,6 +110,11 @@ export function useRealtimeChat(
         channel.subscribe((subscriptionStatus, err) => {
           if (!isMountedRef.current) return;
 
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Realtime subscription status for room ${roomId}:`, subscriptionStatus);
+          }
+
+
           switch (subscriptionStatus) {
             case "SUBSCRIBED":
               setStatus(ConnectionStatus.CONNECTED);
@@ -128,17 +131,17 @@ export function useRealtimeChat(
               const errorMessage = err?.message || `Connection ${subscriptionStatus.toLowerCase()}`;
               setStatus(ConnectionStatus.ERROR);
               setError(`Connection issue: ${errorMessage}`);
-              
+
               if (process.env.NODE_ENV === 'development') {
                 console.error(`Realtime error for room ${roomId}:`, errorMessage);
               }
-              
+
               // Retry with exponential backoff if under max attempts
               if (isMountedRef.current && reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
                 clearReconnectTimeout();
                 const delay = getReconnectDelay();
                 reconnectAttemptsRef.current += 1;
-                
+
                 reconnectTimeoutRef.current = setTimeout(() => {
                   if (isMountedRef.current) {
                     setupChannel();
@@ -152,13 +155,13 @@ export function useRealtimeChat(
               if (process.env.NODE_ENV === 'development') {
                 console.log(`Realtime connection closed for room ${roomId}`);
               }
-              
+
               // Attempt to reconnect if still mounted and under max attempts
               if (isMountedRef.current && reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
                 clearReconnectTimeout();
                 const delay = getReconnectDelay();
                 reconnectAttemptsRef.current += 1;
-                
+
                 reconnectTimeoutRef.current = setTimeout(() => {
                   if (isMountedRef.current) {
                     setupChannel();
@@ -190,7 +193,7 @@ export function useRealtimeChat(
 
       // Clean up channel
       cleanupChannel();
-      
+
       // Reset state
       setStatus(ConnectionStatus.DISCONNECTED);
       setError(null);
@@ -198,9 +201,9 @@ export function useRealtimeChat(
     };
   }, [roomId, getReconnectDelay, clearReconnectTimeout]);
 
-  return { 
+  return {
     status,
-    error, 
-    isConnected: status === ConnectionStatus.CONNECTED 
+    error,
+    isConnected: status === ConnectionStatus.CONNECTED
   };
 }

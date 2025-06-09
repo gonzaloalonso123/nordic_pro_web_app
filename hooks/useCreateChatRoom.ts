@@ -27,6 +27,8 @@ export const useCreateChatRoom = () => {
       // Create the room
       const roomData: TablesInsert<"chat_rooms"> = {
         name: name?.trim() || null, // Only set name if provided and not empty
+        is_group_chat: memberIds.length > 2, // Set based on member count
+        created_by: currentUserId,
       };
 
       const newRoom = await chatRoomsService.create(supabase, roomData);

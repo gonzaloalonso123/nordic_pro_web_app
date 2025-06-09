@@ -23,7 +23,7 @@ export const useChatRoomAvatar = () => {
     }
 
     // Check if this is a 1-1 chat (exactly 2 members)
-    const members = room.chat_room_members || [];
+    const members = room.chat_room_participants || [];
     if (members.length === 2) {
       // Find the other user (not the current user)
       const otherMember = members.find((member: any) => member.user_id !== user?.id);

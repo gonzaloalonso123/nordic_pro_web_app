@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, AlertCircle, Wifi, WifiOff } from "lucide-react";
 import { useChatRoom, type ChatMessage } from "@/hooks/useChatRoom";
-import { ConnectionStatus } from "@/hooks/use-realtime-chat";
+import { ConnectionStatus } from "@/hooks/useChatRoom";
 
 import { MessageItem } from "./message-item";
 
@@ -25,7 +25,6 @@ export function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Validate props
   if (!roomId || !currentUser) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -44,19 +43,17 @@ export function ChatInterface({
     sendMessage,
     hasMoreMessages,
     loadMoreMessages,
+    isLoadingMore,
     connectionStatus,
     isConnected
   } = useChatRoom(roomId);
 
-  // Initial scroll to bottom when component mounts or when switching to pagination
   useEffect(() => {
     if (messages.length > 0 && messagesEndRef.current) {
-      // For initial load, scroll to bottom immediately
       messagesEndRef.current.scrollIntoView({ behavior: "instant" });
     }
-  }, [messages.length > 0]); // Only trigger on initial load
+  }, [messages.length]);
 
-  // Auto-scroll to bottom only for new messages (when user is near bottom)
   useEffect(() => {
     if (shouldAutoScroll && messagesEndRef.current && messages.length > 0) {
       const scrollElement = scrollAreaRef.current;
@@ -78,7 +75,6 @@ export function ChatInterface({
     try {
       await sendMessage(newMessage);
       setNewMessage("");
-      // Always scroll to bottom after sending a message
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -87,7 +83,6 @@ export function ChatInterface({
     }
   };
 
-  // Smart scroll behavior - detect if user is near bottom
   useEffect(() => {
     const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
     if (!scrollContainer) return;
@@ -138,16 +133,15 @@ export function ChatInterface({
       )}
       <ScrollArea className="p-4 h-full">
         <div className="space-y-4">
-          {/* Load More Messages Button */}
           {hasMoreMessages && (
             <div className="flex justify-center py-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={loadMoreMessages}
-                disabled={isLoading}
+                disabled={isLoading || isLoadingMore}
               >
-                {isLoading ? "Loading..." : "Load Earlier Messages"}
+                {isLoadingMore ? "Loading..." : "Load Earlier Messages"}
               </Button>
             </div>
           )}

@@ -71,20 +71,32 @@ export const useCreateChatMessage = (
     mutationFn: (message: ChatMessageInsert) =>
       chatMessagesService.create(supabase, message),
     onSuccess: (data, variables, context) => {
-      // Invalidate queries for the room's messages
-      if (variables.room_id) {
-        queryClient.invalidateQueries({
-          queryKey: ["chatMessages", "room", variables.room_id],
-        });
-        // If chat rooms are fetched with messages, invalidate that too
-        queryClient.invalidateQueries({
-          queryKey: ["chatRooms", variables.room_id, "messages"],
-        });
-        // Potentially invalidate unread counts for the room
-        // queryClient.invalidateQueries({ queryKey: ["unreadMessages", variables.room_id] });
-      }
+      // Don't invalidate queries since we're using realtime subscriptions
+      // The message will appear via the realtime subscription
+      // Only invalidate if explicitly needed for other components
       options?.onSuccess?.(data, variables, context);
     },
+    ...options,
+  });
+};
+
+// Hook to get message read status for specific messages
+export const useMessageReadsForUser = <TData = MessageReadRow[]>(
+  messageIds: string[],
+  userId: string | undefined,
+  options?: Omit<
+    UseQueryOptions<MessageReadRow[], Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
+) => {
+  const supabase = createClient();
+  return useQuery<MessageReadRow[], Error, TData>({
+    queryKey: ["messageReads", "user", userId, "messages", messageIds],
+    queryFn: () =>
+      userId && messageIds.length > 0 
+        ? chatMessagesService.getMessageReadsForUser(supabase, messageIds, userId) 
+        : [],
+    enabled: !!userId && messageIds.length > 0,
     ...options,
   });
 };
@@ -118,10 +130,16 @@ export const useUpdateChatMessage = (
         queryClient.invalidateQueries({
           queryKey: ["chatMessages", "room", variables.roomId],
         });
+        queryClient.invalidateQueries({
+          queryKey: ["chatMessages", "paginated", variables.roomId],
+        });
       } else if (data?.room_id) {
         // Fallback to room_id from response if available
          queryClient.invalidateQueries({
           queryKey: ["chatMessages", "room", data.room_id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["chatMessages", "paginated", data.room_id],
         });
       }
       options?.onSuccess?.(data, variables, context);
@@ -160,6 +178,9 @@ export const useDeleteChatMessage = (
           queryClient.invalidateQueries({
             queryKey: ["chatMessages", "room", variables.roomId],
           });
+          queryClient.invalidateQueries({
+            queryKey: ["chatMessages", "paginated", variables.roomId],
+          });
         }
       }
       options?.onSuccess?.(data, variables, context);
@@ -187,12 +208,6 @@ export const useMarkMessageAsRead = (
       });
       queryClient.invalidateQueries({ queryKey: ["unreadMessages"] }); // General unread count
 
-      // To invalidate specific room unread count, you might need room_id.
-      // This could be fetched or passed if available.
-      // Example: if (variables.room_id) {
-      //   queryClient.invalidateQueries({ queryKey: ["unreadMessages", variables.room_id, variables.user_id] });
-      //   queryClient.invalidateQueries({ queryKey: ["chatRoomUnreadCount", variables.room_id, variables.user_id] });
-      // }
       options?.onSuccess?.(data, variables, context);
     },
     ...options,

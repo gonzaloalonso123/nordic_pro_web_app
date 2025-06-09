@@ -5,45 +5,45 @@ import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types"
 type ChatRoomRow = Tables<"chat_rooms">
 type ChatRoomInsert = TablesInsert<"chat_rooms">
 type ChatRoomUpdate = TablesUpdate<"chat_rooms">
-type ChatMessageRow = Tables<"chat_messages">
-type ChatMessageInsert = TablesInsert<"chat_messages">
-type ChatRoomMemberRow = Tables<"chat_room_members">
-type ChatRoomMemberInsert = TablesInsert<"chat_room_members">
+type ChatMessageRow = Tables<"messages">
+type ChatMessageInsert = TablesInsert<"messages">
+type ChatRoomMemberRow = Tables<"chat_room_participants">
+type ChatRoomMemberInsert = TablesInsert<"chat_room_participants">
 type MessageReadRow = Tables<"message_reads">
 type MessageReadInsert = TablesInsert<"message_reads">
 type UserProfile = Pick<Tables<"users">, "id" | "first_name" | "last_name">
 
-type LastMessageData = Pick<Tables<"chat_messages">, "id" | "content" | "created_at" | "user_id"> & {
+type LastMessageData = Pick<Tables<"messages">, "id" | "content" | "created_at" | "sender_id"> & {
   users: UserProfile | null
 }
 
-type ChatMessageWithDetails = Pick<Tables<"chat_messages">, "id" | "content" | "user_id" | "created_at"> & {
+type ChatMessageWithDetails = Pick<Tables<"messages">, "id" | "content" | "sender_id" | "created_at"> & {
   users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar"> | null
   message_reads: MessageReadRow[]
 }
 
-type ChatRoomMemberWithUser = Pick<Tables<"chat_room_members">, "user_id"> & {
+type ChatRoomMemberWithUser = Pick<Tables<"chat_room_participants">, "user_id"> & {
   users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar"> | null
 }
 
 export type ChatRoomWithMessagesAndMembers = Tables<"chat_rooms"> & {
-  chat_messages: ChatMessageWithDetails[]
-  chat_room_members: ChatRoomMemberWithUser[]
+  messages: ChatMessageWithDetails[]
+  chat_room_participants: ChatRoomMemberWithUser[]
 }
 
-type ChatRoomMemberWithBasicUser = Pick<Tables<"chat_room_members">, "user_id" | "last_read_at"> & {
+type ChatRoomMemberWithBasicUser = Pick<Tables<"chat_room_participants">, "user_id" | "last_read_at"> & {
   users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "email" | "avatar"> | null
 }
 export type ChatRoomWithDetails = Tables<"chat_rooms"> & {
-  chat_room_members: ChatRoomMemberWithBasicUser[]
+  chat_room_participants: ChatRoomMemberWithBasicUser[]
   last_message: LastMessageData[] | null
 }
-export type ChatRoomMemberWithFullUser = Pick<Tables<"chat_room_members">, "user_id"> & {
+export type ChatRoomMemberWithFullUser = Pick<Tables<"chat_room_participants">, "user_id"> & {
   users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "email" | "avatar"> | null
 }
 
 export type ChatRoomWithUsers = Tables<"chat_rooms"> & {
-  chat_room_members: ChatRoomMemberWithFullUser[]
+  chat_room_participants: ChatRoomMemberWithFullUser[]
 }
 
 
@@ -67,7 +67,7 @@ export const chatRoomsService = {
   async getByUser(supabase: SupabaseClient<Database>, userId: string): Promise<ChatRoomWithDetails[]> {
     // First, get all room IDs where the user is a member
     const { data: userRooms, error: userRoomsError } = await supabase
-      .from("chat_room_members")
+      .from("chat_room_participants")
       .select("room_id")
       .eq("user_id", userId);
 
@@ -81,7 +81,7 @@ export const chatRoomsService = {
       .from("chat_rooms")
       .select(`
         *,
-        chat_room_members(
+        chat_room_participants(
           user_id,
           last_read_at,
           users(
@@ -92,11 +92,11 @@ export const chatRoomsService = {
             avatar
           )
         ),
-        last_message:chat_messages(
+        last_message:messages(
           id,
           content,
           created_at,
-          user_id,
+          sender_id,
           users(
             id,
             first_name,
@@ -146,10 +146,10 @@ export const chatRoomsService = {
       .from("chat_rooms")
       .select(`
         *,
-        chat_messages(
+        messages(
           id,
           content,
-          user_id,
+          sender_id,
           created_at,
           users(
             id,
@@ -159,7 +159,7 @@ export const chatRoomsService = {
           ),
           message_reads(*)
         ),
-        chat_room_members(
+        chat_room_participants(
           user_id,
           users(
             id,
@@ -170,7 +170,7 @@ export const chatRoomsService = {
         )
       `)
       .eq("id", chatRoomId)
-      .order("created_at", { foreignTable: "chat_messages", ascending: true })
+      .order("created_at", { foreignTable: "messages", ascending: true })
       .single()
 
     if (error && error.code !== "PGRST116") throw error
@@ -183,7 +183,7 @@ export const chatRoomsService = {
       .from("chat_rooms")
       .select(`
         *,
-        chat_room_members(
+        chat_room_participants(
           user_id,
           users(
             id,
@@ -203,7 +203,7 @@ export const chatRoomsService = {
   // Add a new method to get messages by room
   async getMessagesByRoom(supabase: SupabaseClient<Database>, roomId: string): Promise<ChatMessageRow[]> {
     const { data, error } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .select(`
         *,
         users(
@@ -235,7 +235,7 @@ export const chatRoomsService = {
 
     // First get total count
     const { count: totalCount, error: countError } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .select("*", { count: "exact", head: true })
       .eq("room_id", roomId);
 
@@ -243,7 +243,7 @@ export const chatRoomsService = {
 
     // Build query for messages
     let query = supabase
-      .from("chat_messages")
+      .from("messages")
       .select(`
         *,
         users(
@@ -284,7 +284,7 @@ export const chatRoomsService = {
     message: ChatMessageInsert
   ): Promise<ChatMessageRow> {
     const { data, error } = await supabase
-      .from("chat_messages")
+      .from("messages")
       .insert(message)
       .select()
       .single()
@@ -296,7 +296,7 @@ export const chatRoomsService = {
   // Add methods for chat room members
   async getChatRoomMembers(supabase: SupabaseClient<Database>, roomId: string): Promise<ChatRoomMemberRow[]> {
     const { data, error } = await supabase
-      .from("chat_room_members")
+      .from("chat_room_participants")
       .select(`
         *,
         users(
@@ -317,7 +317,7 @@ export const chatRoomsService = {
     member: ChatRoomMemberInsert
   ): Promise<ChatRoomMemberRow> {
     const { data, error } = await supabase
-      .from("chat_room_members")
+      .from("chat_room_participants")
       .insert(member)
       .select()
       .single()
@@ -332,7 +332,7 @@ export const chatRoomsService = {
     userId: string
   ): Promise<void> {
     const { error } = await supabase
-      .from("chat_room_members")
+      .from("chat_room_participants")
       .delete()
       .eq("room_id", roomId)
       .eq("user_id", userId)
@@ -360,38 +360,18 @@ export const chatRoomsService = {
     roomId: string,
     userId: string
   ): Promise<number> {
-    // Get the user's last read timestamp for this room
-    const { data: memberData, error: memberError } = await supabase
-      .from("chat_room_members")
-      .select("last_read_at")
-      .eq("room_id", roomId)
-      .eq("user_id", userId)
-      .single();
+    // Use database function for optimized unread count
+    const { data, error } = await supabase.rpc('get_unread_message_count', {
+      p_room_id: roomId,
+      p_user_id: userId
+    });
 
-    if (memberError) throw memberError;
-
-    if (!memberData?.last_read_at) {
-      // If no last read timestamp, count all messages NOT sent by the user
-      const { count, error } = await supabase
-        .from("chat_messages")
-        .select('*', { count: 'exact', head: true })
-        .eq("room_id", roomId)
-        .neq("user_id", userId); // Exclude messages sent by the user
-
-      if (error) throw error;
-      return count || 0;
+    if (error) {
+      console.error("Error getting unread message count:", error);
+      throw error;
     }
 
-    // Count messages newer than the last read timestamp, excluding user's own messages
-    const { count, error } = await supabase
-      .from("chat_messages")
-      .select('*', { count: 'exact', head: true })
-      .eq("room_id", roomId)
-      .gt("created_at", memberData.last_read_at)
-      .neq("user_id", userId); // Exclude messages sent by the user
-
-    if (error) throw error;
-    return count || 0;
+    return data || 0;
   },
 
   // Mark all messages in a room as read for a user
@@ -401,7 +381,7 @@ export const chatRoomsService = {
     userId: string
   ): Promise<void> {
     const { error } = await supabase
-      .from("chat_room_members")
+      .from("chat_room_participants")
       .update({ last_read_at: new Date().toISOString() })
       .eq("room_id", roomId)
       .eq("user_id", userId);
@@ -425,53 +405,30 @@ export const chatRoomsService = {
   ): Promise<Record<string, number>> {
     if (!roomIds.length) return {};
 
-    // Get user's last read timestamps for all rooms
-    const { data: memberData, error: memberError } = await supabase
-      .from("chat_room_members")
-      .select("room_id, last_read_at")
-      .eq("user_id", userId)
-      .in("room_id", roomIds);
-
-    if (memberError) throw memberError;
-
+    // Use database function for each room - more efficient than complex queries
     const counts: Record<string, number> = {};
-
-    // Create a map of room_id to last_read_at
-    const lastReadMap = new Map(
-      memberData?.map(m => [m.room_id, m.last_read_at]) || []
-    );
-
-    // For each room, count unread messages (excluding user's own messages)
-    await Promise.all(
-      roomIds.map(async (roomId) => {
-        const lastRead = lastReadMap.get(roomId);
-
-        if (!lastRead) {
-          // No last read timestamp, count all messages NOT sent by the user
-          const { count, error } = await supabase
-            .from("chat_messages")
-            .select('*', { count: 'exact', head: true })
-            .eq("room_id", roomId)
-            .neq("user_id", userId); // Exclude messages sent by the user
-
-          if (!error) {
-            counts[roomId] = count || 0;
-          }
+    
+    // Process in parallel for better performance
+    const countPromises = roomIds.map(async (roomId) => {
+      try {
+        const { data, error } = await supabase.rpc('get_unread_message_count', {
+          p_room_id: roomId,
+          p_user_id: userId
+        });
+        
+        if (!error) {
+          counts[roomId] = data || 0;
         } else {
-          // Count messages newer than last read, excluding user's own messages
-          const { count, error } = await supabase
-            .from("chat_messages")
-            .select('*', { count: 'exact', head: true })
-            .eq("room_id", roomId)
-            .gt("created_at", lastRead)
-            .neq("user_id", userId); // Exclude messages sent by the user
-
-          if (!error) {
-            counts[roomId] = count || 0;
-          }
+          console.error(`Error getting unread count for room ${roomId}:`, error);
+          counts[roomId] = 0;
         }
-      })
-    );
+      } catch (err) {
+        console.error(`Exception getting unread count for room ${roomId}:`, err);
+        counts[roomId] = 0;
+      }
+    });
+
+    await Promise.all(countPromises);
 
     return counts;
   }

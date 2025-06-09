@@ -178,7 +178,7 @@ export const useClientData = () => {
       useMarkAsRead: chatRoomQueries.useMarkMessageAsRead,
       useUnreadCount: chatRoomQueries.useUnreadMessageCount,
 
-      useUnraedCountBatch: chatRoomQueries.useUnreadMessageCountBatch,
+      useUnreadCountBatch: chatRoomQueries.useUnreadMessageCountBatch,
       useMarkRoomAsRead: chatRoomQueries.useMarkRoomAsRead,
 
       useStartDirectChat: chatRoomQueries.useStartDirectChat,
@@ -191,6 +191,11 @@ export const useClientData = () => {
     chatMessages: {
       useChatMessagesByRoom: chatMessagesQueries.useChatMessagesByRoom,
       useCreateChatMessage: chatMessagesQueries.useCreateChatMessage,
+        useById: chatMessagesQueries.useChatMessageById,
+        useUpdate: chatMessagesQueries.useUpdateChatMessage,
+        useDelete: chatMessagesQueries.useDeleteChatMessage,
+        useMarkAsRead: chatMessagesQueries.useMarkMessageAsRead,
+        useMessageReadsForUser: chatMessagesQueries.useMessageReadsForUser,
     },
 
     organisationsInvitation: {

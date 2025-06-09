@@ -23,17 +23,12 @@ export const ChatListItem = memo(function ChatListItem({
 }: ChatListItemProps) {
   const path = useUrl();
   const hasUnread = unreadCount > 0;
-  const lastMessage = room.last_message?.[0];
-  const lastMessageTime = lastMessage?.created_at || room.updated_at;
+  const lastMessage = room.lastMessage;
+  const lastMessageTime = lastMessage?.createdAt || room.updatedAt;
 
   const messagePreview = lastMessage
-    ? formatMessagePreviewWithSender(
-        lastMessage.content,
-        lastMessage.users?.first_name || null,
-        lastMessage.users?.last_name || null,
-        currentUserId,
-        lastMessage.user_id
-      )
+    ? `${lastMessage.senderName}: ${lastMessage.content}`.slice(0, 50) +
+      (`${lastMessage.senderName}: ${lastMessage.content}`.length > 50 ? '...' : '')
     : "No recent messages";
 
   return (
@@ -51,15 +46,15 @@ export const ChatListItem = memo(function ChatListItem({
         <div className="relative">
           <Avatar>
             <AvatarImage
-              src={room.avatarInfo.avatarUrl || undefined}
+              src={room.avatarUrl || undefined}
               alt={room.displayName}
             />
             <AvatarFallback>
-              {room.avatarInfo.initials}
+              {room.initials}
             </AvatarFallback>
           </Avatar>
           {hasUnread && (
-            <span 
+            <span
               className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-blue-500 border-2 border-white"
               aria-hidden="true"
             />
