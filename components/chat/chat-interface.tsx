@@ -4,101 +4,49 @@ import { useState, useEffect, useRef, FormEvent } from "react";
 import type { Tables } from "@/types/database.types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send } from "lucide-react";
-import { useMessages, usePaginatedMessages } from "@/hooks/use-chat-room";
-import { useRealtimeChat } from "@/hooks/use-realtime-chat";
-import { getInitials } from "@/utils/get-initials";
-import { useMemo, useCallback } from "react";
+import { Send, AlertCircle, Wifi, WifiOff } from "lucide-react";
+import { useChatRoom, type ChatMessage } from "@/hooks/useChatRoom";
+import { ConnectionStatus } from "@/hooks/use-realtime-chat";
 
-export type UserProfileSnippet = Pick<
-  Tables<"users">,
-  "id" | "first_name" | "last_name" | "avatar" | "email"
->;
-
-export type DisplayMessage = Tables<"chat_messages"> & {
-  author?: UserProfileSnippet | null;
-};
+import { MessageItem } from "./message-item";
 
 interface ChatInterfaceProps {
   roomId: string;
   currentUser: Tables<'users'>;
-  initialMessages?: DisplayMessage[];
 }
 
 export function ChatInterface({
   roomId,
   currentUser,
-  initialMessages = [],
 }: ChatInterfaceProps) {
   const [newMessage, setNewMessage] = useState<string>("");
-  const [isSending, setIsSending] = useState(false);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // First, check if we should use pagination
-  const paginatedQuery = usePaginatedMessages(roomId);
-  const shouldUsePagination = paginatedQuery.data?.pages?.[0]?.total > 100;
+  // Validate props
+  if (!roomId || !currentUser) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        <div className="text-center">
+          <AlertCircle className="h-8 w-8 mx-auto mb-2 text-red-500" />
+          <p>Invalid chat configuration</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Use regular messages hook for small conversations
-  const regularMessages = useMessages(roomId, currentUser, initialMessages);
-
-  // Choose which data to use based on message count
   const {
     messages,
     isLoading,
-    error: chatError,
+    error,
     sendMessage,
-    handleNewRealtimeMessage
-  } = useMemo(() => {
-    if (shouldUsePagination) {
-      // For paginated messages, flatten all pages
-      const allMessages = paginatedQuery.data?.pages?.flatMap((page: any) => page.messages) || [];
-      
-      return {
-        messages: allMessages.map((msg: any) => ({ ...msg, author: null })) as DisplayMessage[], // We'll need to fetch user data separately
-        isLoading: paginatedQuery.isLoading,
-        error: paginatedQuery.error?.message || null,
-        sendMessage: regularMessages.sendMessage, // Use regular send for real-time updates
-        handleNewRealtimeMessage: regularMessages.handleNewRealtimeMessage
-      };
-    }
-    
-    return regularMessages;
-  }, [shouldUsePagination, paginatedQuery, regularMessages]);
-
-  const { error: realtimeError } = useRealtimeChat<Tables<"chat_messages">>(
-    roomId,
-    (newMessagePayload) => handleNewRealtimeMessage(newMessagePayload)
-  );
-
-  const error = chatError || realtimeError;
-
-  // Load more messages function for pagination
-  const loadMoreMessages = useCallback(() => {
-    if (shouldUsePagination && paginatedQuery.hasNextPage && !paginatedQuery.isFetchingNextPage) {
-      // Store current scroll position before loading more
-      const scrollElement = scrollAreaRef.current;
-      if (scrollElement) {
-        const currentScrollHeight = scrollElement.scrollHeight;
-        
-        paginatedQuery.fetchNextPage().then(() => {
-          // After loading, maintain scroll position relative to new content
-          setTimeout(() => {
-            if (scrollElement) {
-              const newScrollHeight = scrollElement.scrollHeight;
-              const heightDifference = newScrollHeight - currentScrollHeight;
-              scrollElement.scrollTop = heightDifference;
-            }
-          }, 50);
-        });
-      } else {
-        paginatedQuery.fetchNextPage();
-      }
-    }
-  }, [shouldUsePagination, paginatedQuery]);
+    hasMoreMessages,
+    loadMoreMessages,
+    connectionStatus,
+    isConnected
+  } = useChatRoom(roomId);
 
   // Initial scroll to bottom when component mounts or when switching to pagination
   useEffect(() => {
@@ -115,7 +63,7 @@ export function ChatInterface({
       if (scrollElement) {
         const { scrollTop, scrollHeight, clientHeight } = scrollElement;
         const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-        
+
         if (isNearBottom) {
           messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
@@ -125,9 +73,8 @@ export function ChatInterface({
 
   const handleSendMessageSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (newMessage.trim() === "" || isSending) return;
+    if (newMessage.trim() === "") return;
 
-    setIsSending(true);
     try {
       await sendMessage(newMessage);
       setNewMessage("");
@@ -137,8 +84,6 @@ export function ChatInterface({
       }, 100);
     } catch (err) {
       console.error("ChatInterface: Error sending message:", err);
-    } finally {
-      setIsSending(false);
     }
   };
 
@@ -167,6 +112,25 @@ export function ChatInterface({
 
   return (
     <div className="max-h-screen-without-header-mobile md:max-h-screen-without-header flex flex-col h-full bg-background">
+      {connectionStatus !== ConnectionStatus.CONNECTED && (
+        <div className={`p-2 text-center text-sm border-b flex items-center justify-center gap-2 ${connectionStatus === ConnectionStatus.ERROR
+          ? "text-red-600 bg-red-50 border-red-200"
+          : "text-yellow-600 bg-yellow-50 border-yellow-200"
+          }`}>
+          {isConnected ? (
+            <Wifi className="h-4 w-4" />
+          ) : (
+            <WifiOff className="h-4 w-4" />
+          )}
+          <span>
+            {connectionStatus === ConnectionStatus.CONNECTING && "Connecting..."}
+            {connectionStatus === ConnectionStatus.RECONNECTING && "Reconnecting..."}
+            {connectionStatus === ConnectionStatus.ERROR && "Connection issues"}
+            {connectionStatus === ConnectionStatus.DISCONNECTED && "Disconnected"}
+          </span>
+        </div>
+      )}
+
       {error && (
         <div className="p-2 text-center text-red-600 bg-red-100 border-b border-red-200">
           {error}
@@ -175,19 +139,19 @@ export function ChatInterface({
       <ScrollArea className="p-4 h-full">
         <div className="space-y-4">
           {/* Load More Messages Button */}
-          {shouldUsePagination && paginatedQuery.hasNextPage && (
+          {hasMoreMessages && (
             <div className="flex justify-center py-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={loadMoreMessages}
-                disabled={paginatedQuery.isFetchingNextPage}
+                disabled={isLoading}
               >
-                {paginatedQuery.isFetchingNextPage ? "Loading..." : "Load Earlier Messages"}
+                {isLoading ? "Loading..." : "Load Earlier Messages"}
               </Button>
             </div>
           )}
-          
+
           {isLoading ? (
             <div className="flex items-center justify-center h-20 text-muted-foreground">
               Loading messages...
@@ -197,66 +161,12 @@ export function ChatInterface({
               No messages yet. Start the conversation!
             </div>
           ) : (
-            messages.map((msg) => {
-              const isCurrentUserMessage = msg.user_id === currentUser.id;
-              const authorName = isCurrentUserMessage
-                ? "You"
-                : msg.author?.first_name ||
-                msg.author?.email?.split("@")[0] ||
-                `User ${msg.user_id ? msg.user_id.substring(0, 6) : "..."}`;
-
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex ${isCurrentUserMessage ? "justify-end" : "justify-start"}`}
-                >
-                  <div className="flex items-end gap-2 max-w-[75%]">
-                    {!isCurrentUserMessage && (
-                      <div>
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={msg.author?.avatar || undefined} />
-                          <AvatarFallback>
-                            {getInitials({ firstName: msg.author?.first_name, lastName: msg.author?.last_name })}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    )}
-                    <div
-                      className={`py-2 px-3 rounded-lg shadow-xs max-w-80 ${isCurrentUserMessage
-                        ? "bg-primary text-primary-foreground rounded-br-none"
-                        : "bg-slate-200 rounded-bl-none"}`}
-                    >
-                      {!isCurrentUserMessage && (
-                        <p className="text-xs font-semibold mb-1">
-                          {authorName}
-                        </p>
-                      )}
-                      <p className="text-sm whitespace-pre-wrap break-words">
-                        {msg.content}
-                      </p>
-                      <p className={`text-xs ${isCurrentUserMessage ? "text-muted/80" : "text-muted-foreground/80"} mt-1 text-right`}>
-                        {msg.created_at
-                          ? new Date(msg.created_at).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                          : "Sending..."}
-                      </p>
-                    </div>
-                    {isCurrentUserMessage && (
-                      <div>
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={currentUser.avatar || undefined} />
-                          <AvatarFallback>
-                            {getInitials({ firstName: currentUser.first_name, lastName: currentUser.last_name })}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })
+            messages.map((msg: ChatMessage) => <MessageItem
+              key={msg.id}
+              message={msg}
+              currentUser={currentUser}
+            />
+            )
           )}
           <div ref={messagesEndRef} />
         </div>

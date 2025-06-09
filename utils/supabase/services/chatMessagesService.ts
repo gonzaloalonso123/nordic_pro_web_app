@@ -15,19 +15,25 @@ export const chatMessagesService = {
     supabase: SupabaseClient<Database>,
     roomId: string
   ): Promise<ChatMessageRow[]> {
+    if (!roomId) {
+      return [];
+    }
+
     const { data, error } = await supabase
       .from("chat_messages")
-      .select(
-        `
-        *,
-        users ( id, first_name, last_name, avatar ),
-        message_reads (*)
-      `
-      )
+      .select(`
+      *,
+      users ( id, first_name, last_name, avatar ),
+      message_reads (*)
+    `)
       .eq("room_id", roomId)
       .order("created_at", { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching messages for room:", roomId, error);
+      throw error;
+    }
+
     return data || [];
   },
 

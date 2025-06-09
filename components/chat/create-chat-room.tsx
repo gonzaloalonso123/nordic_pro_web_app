@@ -12,7 +12,6 @@ import { useStartDirectChat } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUsersByTeam } from "@/hooks/queries/useUsers";
 import { getInitials } from "@/utils/get-initials";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/types/database.types";
 
@@ -31,7 +30,6 @@ export default function CreateChatRoom({
   const { user } = useCurrentUser();
   const createChatRoomMutation = useCreateChatRoom();
   const startDirectChatMutation = useStartDirectChat();
-  const isMobile = useIsMobile();
 
   const { data: teamUsers, isLoading: isLoadingUsers, error: usersError } = useUsersByTeam(teamId);
 
@@ -214,13 +212,13 @@ export default function CreateChatRoom({
   );
 
   return (
-    <div className={cn("w-full", isMobile && "h-full flex flex-col p-4")}>
-      <div className={cn("mb-6", isMobile && "border-b pb-4")}>
-        <h2 className={cn("text-lg font-semibold", isMobile && "text-xl")}>
+    <div className="w-full h-full flex flex-col p-4 md:p-0 md:h-auto">
+      <div className="mb-6 border-b pb-4 md:border-b-0 md:pb-0">
+        <h2 className="text-xl font-semibold md:text-lg">
           Create Chat Room
         </h2>
       </div>
-      <div className={cn(isMobile && "flex-1 overflow-y-auto")}>
+      <div className="flex-1 overflow-y-auto md:flex-initial md:overflow-visible">
         {content}
       </div>
     </div>

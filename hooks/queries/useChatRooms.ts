@@ -1,12 +1,6 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  type UseQueryOptions,
-  type UseMutationOptions,
-} from "@tanstack/react-query";
-import { chatRoomsService, ChatRoomWithDetails, type ChatRoomWithMessagesAndMembers } from "@/utils/supabase/services";
+import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
+import { chatRoomsService, ChatRoomWithDetails, type ChatRoomWithMessagesAndMembers } from "@/utils/supabase/services";
 import type {
   Tables,
   TablesInsert,
@@ -428,8 +422,6 @@ export const useMarkRoomAsRead = (
     ...options,
   });
 };
-
-// Remove this duplicate hook as it's redundant with useUnreadMessageCount
 
 // --- NEW: Logic and Hook for Starting a Direct Chat ---
 
