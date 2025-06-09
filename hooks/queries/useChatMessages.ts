@@ -15,14 +15,13 @@ import type {
   TablesUpdate,
 } from "@/types/database.types";
 
-type ChatMessageRow = Tables<"chat_messages">;
-type ChatMessageInsert = TablesInsert<"chat_messages">;
-type ChatMessageUpdate = TablesUpdate<"chat_messages">;
+type ChatMessageRow = Tables<"messages">;
+type ChatMessageInsert = TablesInsert<"messages">;
+type ChatMessageUpdate = TablesUpdate<"messages">;
 
 type MessageReadRow = Tables<"message_reads">;
 type MessageReadInsert = TablesInsert<"message_reads">;
 
-// Hook to get messages by room ID
 export const useChatMessagesByRoom = <TData = ChatMessageRow[]>(
   roomId: string | undefined,
   options?: Omit<
