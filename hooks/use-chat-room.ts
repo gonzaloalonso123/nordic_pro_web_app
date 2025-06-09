@@ -1,186 +1,141 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Tables } from "@/types/database.types";
-import type { DisplayMessage } from "@/components/chat/chat-interface";
-import { useClientData } from "@/utils/data/client";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { createClient } from "@/utils/supabase/client";
-import { chatRoomsService } from "@/utils/supabase/services";
+import type { Tables } from "@/types/database.types";
+import { supabase } from "@/utils/supabase/client";
 
-export function useMessages(
-  roomId: string,
-  currentUser: Tables<'users'>,
-  initialMessages: DisplayMessage[] = []
-) {
-  const [messages, setMessages] = useState<DisplayMessage[]>(initialMessages);
-  const [error, setError] = useState<string | null>(null);
-  const [realtimeTrigger, setRealtimeTrigger] = useState(0);
-  const previousMessagesRef = useRef<string[]>([]);
-  const pendingRealtimeMessagesRef = useRef<Map<string, Tables<"chat_messages">>>(new Map());
+type Message = Tables<"messages"> & {
+  users?: Tables<"users">;
+};
 
-  const { users, chatMessages } = useClientData();
+interface UseChatRoomMessagesProps {
+  roomId: string;
+  currentUser: Tables<"users">;
+}
 
-  const { data: roomMessages, isPending } = chatMessages.useChatMessagesByRoom(roomId, {
-    initialData: () => initialMessages.map(m => ({
-      id: m.id,
-      room_id: m.room_id,
-      user_id: m.user_id,
-      content: m.content,
-      created_at: m.created_at,
-    }))
-  });
+export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessagesProps) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  const { mutateAsync: createMessage } = chatMessages.useCreateChatMessage({
-    onError: (err) => setError(`Failed to send message: ${err.message}`)
-  });
+  const fetchMessages = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("messages")
+      .select("*, users:sender_id (id, first_name, avatar)")
+      .eq("room_id", roomId)
+      .order("created_at", { ascending: true });
 
-  const allMessages = [
-    ...(roomMessages || []),
-    ...Array.from(pendingRealtimeMessagesRef.current.values())
-  ];
-
-  const userIds = [...new Set(
-    allMessages
-      .filter(msg => msg.user_id)
-      .map(msg => msg.user_id as string)
-  )];
-
-  const { data: userDataList, isPending: usersLoading } = users.useByIds(userIds);
-
-  const userDataMap = userDataList
-    ? Object.fromEntries(userDataList.map(user => [user.id, user]))
-    : {};
-
-  useEffect(() => {
-    if (!roomMessages || usersLoading) {
-      return;
+    if (error) {
+      console.error("Error fetching messages:", error);
+    } else {
+      setMessages(data || []);
+      await supabase
+        .from("chat_room_participants")
+        .update({ last_read_at: new Date().toISOString() })
+        .eq("room_id", roomId)
+        .eq("user_id", currentUser.id);
     }
 
-    const messageIds = roomMessages.map(msg => msg.id);
-    const hasChanged = messageIds.length !== previousMessagesRef.current.length ||
-      messageIds.some((id, i) => id !== previousMessagesRef.current[i]);
+    setLoading(false);
+  }, [roomId, currentUser.id, supabase]);
 
-    if (!hasChanged && pendingRealtimeMessagesRef.current.size === 0) return;
+  const handleRealtimeInsert = useCallback(
+    async (payload: { new: Message }) => {
+      if (payload.new.room_id !== roomId) return;
 
-    previousMessagesRef.current = messageIds;
+      const { data: newMessageWithUser, error } = await supabase
+        .from("messages")
+        .select("*, users:sender_id (id, first_name, avatar)")
+        .eq("id", payload.new.id)
+        .single();
 
-    const combinedMessages = [
-      ...roomMessages,
-      ...Array.from(pendingRealtimeMessagesRef.current.values())
-    ];
+      if (error) {
+        console.error("Error loading realtime message:", error);
+        setMessages((prev) => [...prev.filter((m) => !m.id.includes("temp")), payload.new]);
+      } else {
+        setMessages((prev) => [...prev.filter((m) => !m.id.includes("temp")), newMessageWithUser!]);
+      }
 
-    const processedMessages = combinedMessages.map(msg => {
-      return {
-        ...msg,
-        author: msg.user_id ? userDataMap[msg.user_id] : undefined
-      };
-    });
+      if (payload.new.sender_id !== currentUser.id) {
+        await supabase
+          .from("chat_room_participants")
+          .update({ last_read_at: new Date().toISOString() })
+          .eq("room_id", roomId)
+          .eq("user_id", currentUser.id);
+      }
+    },
+    [roomId, supabase, currentUser.id]
+  );
 
-    processedMessages.sort((a, b) => {
-      return new Date(a.created_at!).getTime() - new Date(b.created_at!).getTime();
-    });
-
-    pendingRealtimeMessagesRef.current.clear();
-
-    setMessages(processedMessages);
-  }, [roomMessages, userDataList, usersLoading, userDataMap, realtimeTrigger]);
-
-  const handleNewRealtimeMessage = useCallback((newMessage: Tables<"chat_messages">) => {
-    const messageExists = pendingRealtimeMessagesRef.current.has(newMessage.id);
-
-    if (messageExists) {
-      return;
-    }
-
-    if (newMessage.user_id) {
-      pendingRealtimeMessagesRef.current.set(newMessage.id, newMessage);
-
-      setRealtimeTrigger(prev => prev + 1);
-    }
-  }, []);
-
-  const sendMessage = useCallback(async (content: string) => {
-    if (content.trim() === "" || !currentUser || !roomId) {
-      if (!currentUser) setError("You must be logged in to send messages.");
-      return;
-    }
-
-    try {
-      const tempId = `temp_${Date.now()}`;
-      const messageContent = content.trim();
-
-      const optimisticMessage = {
-        room_id: roomId,
-        user_id: currentUser.id,
-        content: messageContent,
-        id: tempId,
-        created_at: new Date().toISOString(),
-        author: currentUser
-      };
-
-      setMessages(prev => [...prev, optimisticMessage]);
-
-      const insertedData = await createMessage({
-        room_id: roomId,
-        user_id: currentUser.id,
-        content: messageContent,
+  const subscribeToRoom = useCallback(() => {
+    const channel = supabase
+      .channel(`room-${roomId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        handleRealtimeInsert
+      )
+      .subscribe((status, err) => {
+        console.log("subscribing");
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.warn("Realtime subscription error:", status, err);
+        }
       });
 
-      if (insertedData) {
-        setMessages(prev => prev.map(msg =>
-          msg.id === tempId ? { ...insertedData, author: currentUser } : msg
-        ));
+    channelRef.current = channel;
+
+    return () => {
+      console.log("Unsubscribing from channel");
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
+    fetchMessages();
+    const cleanup = subscribeToRoom();
+    return () => {
+      cleanup();
+    };
+  }, [fetchMessages, subscribeToRoom]);
+
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim()) return;
+
+      setSending(true);
+      const tempMessageId = `temp-${Date.now()}`;
+      const optimisticMessage: Message = {
+        id: tempMessageId,
+        room_id: roomId,
+        sender_id: currentUser.id,
+        content,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        users: currentUser,
+      };
+
+      setMessages((prev) => [...prev, optimisticMessage]);
+
+      const { error } = await supabase.from("messages").insert({ room_id: roomId, sender_id: currentUser.id, content });
+
+      if (error) {
+        console.error("Error sending message:", error);
+        setMessages((prev) => prev.filter((msg) => msg.id !== tempMessageId));
       }
-    } catch (err: any) {
-      console.error("Error sending message:", err);
-      setMessages(prev => prev.filter(msg => !msg.id.startsWith('temp_')));
-      if (!error) setError(`Failed to send message: ${err.message}`);
-    }
-  }, [roomId, currentUser, createMessage, error]);
+
+      setSending(false);
+    },
+    [supabase, roomId, currentUser]
+  );
 
   return {
     messages,
-    isLoading: isPending || usersLoading,
-    error,
+    loading,
+    sending,
     sendMessage,
-    handleNewRealtimeMessage
   };
-}
-
-// Types for paginated messages
-type PaginatedMessageResult = {
-  messages: Tables<"chat_messages">[];
-  hasMore: boolean;
-  total: number;
-  nextOffset?: number;
-};
-
-// New hook for paginated message loading
-export function usePaginatedMessages(roomId: string | undefined) {
-  const supabase = createClient();
-
-  return useInfiniteQuery<PaginatedMessageResult, Error, any, any[], number>({
-    queryKey: ["chatMessages", "paginated", roomId],
-    queryFn: async ({ pageParam }: { pageParam: number }) => {
-      if (!roomId) throw new Error("Room ID is required");
-      
-      const result = await chatRoomsService.getMessagesByRoomPaginated(
-        supabase,
-        roomId,
-        {
-          limit: 100,
-          offset: pageParam * 100
-        }
-      );
-      
-      return {
-        ...result,
-        nextOffset: result.hasMore ? pageParam + 1 : undefined
-      };
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage: PaginatedMessageResult) => lastPage.nextOffset,
-    enabled: !!roomId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
 }

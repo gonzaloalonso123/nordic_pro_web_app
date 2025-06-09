@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseQueryOptions, UseMutationOptions } from "@tanstack/react-query";
-import { createClient } from "@/utils/supabase/client";
+import { createClient, supabase } from "@/utils/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
 import { formInvitationsService } from "@/utils/supabase/services/form-invitations";
 
@@ -14,7 +14,6 @@ type FormInvitationUpdate = TablesUpdate<"form_invitations">;
 export const useFormInvitations = <TData = FormInvitationRow[]>(
   options?: Omit<UseQueryOptions<FormInvitationRow[], Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<FormInvitationRow[], Error, TData>({
     queryKey: ["form_invitations"],
     queryFn: () => formInvitationsService.getAll(supabase),
@@ -26,7 +25,6 @@ export const useFormInvitation = <TData = FormInvitationRow>(
   invitationId: string,
   options?: Omit<UseQueryOptions<FormInvitationRow | null, Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<FormInvitationRow | null, Error, TData>({
     queryKey: ["form_invitations", invitationId],
     queryFn: () => formInvitationsService.getById(supabase, invitationId),
@@ -38,7 +36,6 @@ export const useFormInvitationsByForm = <TData = FormInvitationRow[]>(
   formId: string,
   options?: Omit<UseQueryOptions<FormInvitationRow[], Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<FormInvitationRow[], Error, TData>({
     queryKey: ["form_invitations", "form", formId],
     queryFn: () => formInvitationsService.getByForm(supabase, formId),
@@ -50,7 +47,6 @@ export const useFormInvitationsByUser = <TData = FormInvitationRow[]>(
   userId: string,
   options?: Omit<UseQueryOptions<FormInvitationRow[], Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<FormInvitationRow[], Error, TData>({
     queryKey: ["form_invitations", "user", userId],
     enabled: !!userId,
@@ -63,7 +59,6 @@ export const useFormInvitationsByTeam = <TData = FormInvitationRow[]>(
   teamId: string,
   options?: Omit<UseQueryOptions<FormInvitationRow[], Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<FormInvitationRow[], Error, TData>({
     queryKey: ["form_invitations", "team", teamId],
     queryFn: () => formInvitationsService.getWithFormByTeam(supabase, teamId),
@@ -76,7 +71,6 @@ export const useFormInvitationByFormAndUser = <TData = FormInvitationRow | null>
   userId: string,
   options?: Omit<UseQueryOptions<FormInvitationRow | null, Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<FormInvitationRow | null, Error, TData>({
     queryKey: ["form_invitations", "form", formId, "user", userId],
     queryFn: () => formInvitationsService.getByFormAndUser(supabase, formId, userId),
@@ -88,7 +82,6 @@ export const useFormInvitationByFormAndUser = <TData = FormInvitationRow | null>
 export const useCreateFormInvitation = (
   options?: Omit<UseMutationOptions<FormInvitationRow, Error, FormInvitationInsert>, "mutationFn">
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<FormInvitationRow, Error, FormInvitationInsert>({
@@ -107,7 +100,6 @@ export const useUpdateFormInvitation = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<FormInvitationRow, Error, { id: string; updates: FormInvitationUpdate }>({
@@ -124,7 +116,6 @@ export const useUpdateFormInvitation = (
 };
 
 export const useDeleteFormInvitation = (options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<boolean, Error, string>({
@@ -143,7 +134,6 @@ export const useDeleteFormInvitation = (options?: Omit<UseMutationOptions<boolea
 export const useBulkCreateFormInvitations = (
   options?: Omit<UseMutationOptions<FormInvitationRow[], Error, FormInvitationInsert[]>, "mutationFn">
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<FormInvitationRow[], Error, FormInvitationInsert[]>({
@@ -159,7 +149,6 @@ export const useBulkCreateFormInvitations = (
 export const useSendInvitationsToTeam = (
   options?: Omit<UseMutationOptions<FormInvitationRow[], Error, { teamId: string; formId: string }>, "mutationFn">
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
   return useMutation<FormInvitationRow[], Error, { teamId: string; formId: string }>({
     mutationFn: ({ teamId, formId }) => formInvitationsService.sendToTeam(supabase, formId, teamId),
@@ -173,7 +162,6 @@ export const useSendInvitationsToTeam = (
 export const useSendInvitationsToUsers = (
   options?: Omit<UseMutationOptions<FormInvitationRow[], Error, { userIds: string[]; formId: string }>, "mutationFn">
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
   return useMutation<FormInvitationRow[], Error, { userIds: string[]; formId: string }>({
     mutationFn: ({ userIds, formId }) => formInvitationsService.sendToMembers(supabase, formId, userIds),

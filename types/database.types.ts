@@ -55,74 +55,34 @@ export type Database = {
           },
         ]
       }
-      chat_messages: {
+      chat_room_participants: {
         Row: {
-          content: string
-          created_at: string
           id: string
-          room_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          room_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          room_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_messages_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "chat_rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_messages_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chat_room_members: {
-        Row: {
+          joined_at: string | null
           last_read_at: string | null
           room_id: string
           user_id: string
         }
         Insert: {
+          id?: string
+          joined_at?: string | null
           last_read_at?: string | null
           room_id: string
           user_id: string
         }
         Update: {
+          id?: string
+          joined_at?: string | null
           last_read_at?: string | null
           room_id?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "chat_room_members_room_id_fkey"
+            foreignKeyName: "chat_room_participants_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "chat_rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chat_room_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -130,19 +90,25 @@ export type Database = {
       chat_rooms: {
         Row: {
           created_at: string | null
+          created_by: string | null
           id: string
+          is_group_chat: boolean | null
           name: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           id?: string
+          is_group_chat?: boolean | null
           name?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           id?: string
+          is_group_chat?: boolean | null
           name?: string | null
           updated_at?: string | null
         }
@@ -723,17 +689,45 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "message_reads_message_id_fkey"
-            columns: ["message_id"]
-            isOneToOne: false
-            referencedRelation: "chat_messages"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "message_reads_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          room_id: string
+          sender_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          room_id: string
+          sender_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          room_id?: string
+          sender_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
             referencedColumns: ["id"]
           },
         ]
@@ -1111,21 +1105,21 @@ export type Database = {
       users_teams: {
         Row: {
           id: string
-          position: string
+          position: string | null
           role: string
           team_id: string
           user_id: string
         }
         Insert: {
           id?: string
-          position: string
+          position?: string | null
           role: string
           team_id: string
           user_id: string
         }
         Update: {
           id?: string
-          position?: string
+          position?: string | null
           role?: string
           team_id?: string
           user_id?: string
@@ -1159,6 +1153,10 @@ export type Database = {
       create_default_emoji_scale: {
         Args: { question_uuid: string }
         Returns: undefined
+      }
+      get_unread_message_count: {
+        Args: { p_room_id: string; p_user_id: string }
+        Returns: number
       }
       is_admin: {
         Args: Record<PropertyKey, never>

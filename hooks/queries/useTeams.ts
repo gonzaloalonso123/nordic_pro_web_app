@@ -6,12 +6,8 @@ import {
   type UseMutationOptions,
 } from "@tanstack/react-query";
 import { teamsService } from "@/utils/supabase/services";
-import type {
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-} from "@/types/database.types";
-import { createClient } from "@/utils/supabase/client";
+import type { Tables, TablesInsert, TablesUpdate } from "@/types/database.types";
+import { supabase } from "@/utils/supabase/client";
 
 type TeamRow = Tables<"teams">;
 type TeamInsert = TablesInsert<"teams">;
@@ -19,12 +15,8 @@ type TeamUpdate = TablesUpdate<"teams">;
 
 // Get all teams
 export const useTeams = <TData = TeamRow[]>(
-  options?: Omit<
-    UseQueryOptions<TeamRow[], Error, TData>,
-    "queryKey" | "queryFn"
-  >
+  options?: Omit<UseQueryOptions<TeamRow[], Error, TData>, "queryKey" | "queryFn">
 ) => {
-  const supabase = createClient();
   return useQuery<TeamRow[], Error, TData>({
     queryKey: ["teams"],
     queryFn: () => teamsService.getAll(supabase),
@@ -35,12 +27,8 @@ export const useTeams = <TData = TeamRow[]>(
 // Get team by ID
 export const useTeam = <TData = TeamRow>(
   teamId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<TeamRow | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<TeamRow | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<TeamRow | null, Error, TData>({
     queryKey: ["teams", teamId],
     queryFn: () => (teamId ? teamsService.getById(supabase, teamId) : null),
@@ -52,12 +40,8 @@ export const useTeam = <TData = TeamRow>(
 // Get teams by user
 export const useTeamsByUser = <TData = TeamRow[]>(
   userId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<TeamRow[] | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<TeamRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<TeamRow[] | null, Error, TData>({
     queryKey: ["teams", "user", userId],
     queryFn: () => (userId ? teamsService.getByUser(supabase, userId) : null),
@@ -69,18 +53,11 @@ export const useTeamsByUser = <TData = TeamRow[]>(
 // Get teams by organisation
 export const useTeamsByOrganisation = <TData = TeamRow[]>(
   organisationId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<TeamRow[] | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<TeamRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<TeamRow[] | null, Error, TData>({
     queryKey: ["teams", "organisation", organisationId],
-    queryFn: () =>
-      organisationId
-        ? teamsService.getByOrganisation(supabase, organisationId)
-        : null,
+    queryFn: () => (organisationId ? teamsService.getByOrganisation(supabase, organisationId) : null),
     enabled: !!organisationId,
     ...options,
   });
@@ -89,16 +66,11 @@ export const useTeamsByOrganisation = <TData = TeamRow[]>(
 // Get team with users
 export const useTeamWithUsers = <TData = any>(
   teamId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<any | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<any | null, Error, TData>({
     queryKey: ["teams", teamId, "users"],
-    queryFn: () =>
-      teamId ? teamsService.getWithUsers(supabase, teamId) : null,
+    queryFn: () => (teamId ? teamsService.getWithUsers(supabase, teamId) : null),
     enabled: !!teamId,
     ...options,
   });
@@ -107,16 +79,11 @@ export const useTeamWithUsers = <TData = any>(
 // Get team with organisations
 export const useTeamWithOrganisations = <TData = any>(
   teamId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<any | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<any | null, Error, TData>({
     queryKey: ["teams", teamId, "organisations"],
-    queryFn: () =>
-      teamId ? teamsService.getWithOrganisations(supabase, teamId) : null,
+    queryFn: () => (teamId ? teamsService.getWithOrganisations(supabase, teamId) : null),
     enabled: !!teamId,
     ...options,
   });
@@ -125,26 +92,18 @@ export const useTeamWithOrganisations = <TData = any>(
 // Get team with calendar
 export const useTeamWithCalendar = <TData = any>(
   teamId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<any | null, Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+  options?: Omit<UseQueryOptions<any | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  const supabase = createClient();
   return useQuery<any | null, Error, TData>({
     queryKey: ["teams", teamId, "calendar"],
-    queryFn: () =>
-      teamId ? teamsService.getWithCalendar(supabase, teamId) : null,
+    queryFn: () => (teamId ? teamsService.getWithCalendar(supabase, teamId) : null),
     enabled: !!teamId,
     ...options,
   });
 };
 
 // Create team mutation
-export const useCreateTeam = (
-  options?: Omit<UseMutationOptions<TeamRow, Error, TeamInsert>, "mutationFn">
-) => {
-  const supabase = createClient();
+export const useCreateTeam = (options?: Omit<UseMutationOptions<TeamRow, Error, TeamInsert>, "mutationFn">) => {
   const queryClient = useQueryClient();
 
   return useMutation<TeamRow, Error, TeamInsert>({
@@ -159,17 +118,12 @@ export const useCreateTeam = (
 
 // Update team mutation
 export const useUpdateTeam = (
-  options?: Omit<
-    UseMutationOptions<TeamRow, Error, { teamId: string; updates: TeamUpdate }>,
-    "mutationFn"
-  >
+  options?: Omit<UseMutationOptions<TeamRow, Error, { teamId: string; updates: TeamUpdate }>, "mutationFn">
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<TeamRow, Error, { teamId: string; updates: TeamUpdate }>({
-    mutationFn: ({ teamId, updates }) =>
-      teamsService.update(supabase, teamId, updates),
+    mutationFn: ({ teamId, updates }) => teamsService.update(supabase, teamId, updates),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId] });
@@ -204,7 +158,6 @@ export const useUpdateUserInTeam = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
   return useMutation<
     TeamRow,
@@ -218,8 +171,7 @@ export const useUpdateUserInTeam = (
       };
     }
   >({
-    mutationFn: ({ teamId, userId, updates }) =>
-      teamsService.updateUserInTeam(supabase, teamId, userId, updates),
+    mutationFn: ({ teamId, userId, updates }) => teamsService.updateUserInTeam(supabase, teamId, userId, updates),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId] });
@@ -228,10 +180,7 @@ export const useUpdateUserInTeam = (
   });
 };
 
-export const useDeleteTeam = (
-  options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">
-) => {
-  const supabase = createClient();
+export const useDeleteTeam = (options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">) => {
   const queryClient = useQueryClient();
 
   return useMutation<boolean, Error, string>({
@@ -246,18 +195,10 @@ export const useDeleteTeam = (
 };
 
 export const useAddUserToTeam = (
-  options?: Omit<
-    UseMutationOptions<boolean, Error, { teamId: string; userId: string }>,
-    "mutationFn"
-  >
+  options?: Omit<UseMutationOptions<boolean, Error, { teamId: string; userId: string }>, "mutationFn">
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
-  return useMutation<
-    boolean,
-    Error,
-    { teamId: string; userId: string; role: string; position: string }
-  >({
+  return useMutation<boolean, Error, { teamId: string; userId: string; role: string; position: string }>({
     mutationFn: ({ teamId, userId, role, position }) =>
       teamsService.addUserToTeam(supabase, teamId, userId, role, position),
     onSuccess: (data, variables, context) => {
@@ -268,16 +209,11 @@ export const useAddUserToTeam = (
 };
 
 export const useRemoveUserFromTeam = (
-  options?: Omit<
-    UseMutationOptions<boolean, Error, { teamId: string; userId: string }>,
-    "mutationFn"
-  >
+  options?: Omit<UseMutationOptions<boolean, Error, { teamId: string; userId: string }>, "mutationFn">
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
   return useMutation<boolean, Error, { teamId: string; userId: string }>({
-    mutationFn: ({ teamId, userId }) =>
-      teamsService.removeUserFromTeam(supabase, teamId, userId),
+    mutationFn: ({ teamId, userId }) => teamsService.removeUserFromTeam(supabase, teamId, userId),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       queryClient.invalidateQueries({ queryKey: ["teams", variables.teamId] });

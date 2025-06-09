@@ -1,6 +1,6 @@
-import { useMutation, UseMutationOptions, UseMutationResult, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/utils/supabase/client';
-import { createAvatarsService, AvatarsService } from '@/utils/supabase/services';
+import { useMutation, UseMutationOptions, UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import { createAvatarsService, AvatarsService } from "@/utils/supabase/services";
+import { supabase } from "@/utils/supabase/client";
 
 export interface UploadAvatarVariables {
   file: File;
@@ -10,7 +10,6 @@ export interface UploadAvatarVariables {
 export const useUploadAvatar = (
   options?: UseMutationOptions<string, Error, UploadAvatarVariables, unknown>
 ): UseMutationResult<string, Error, UploadAvatarVariables, unknown> => {
-  const supabase = createClient();
   const avatarsService = createAvatarsService(supabase);
   const queryClient = useQueryClient();
 
@@ -19,8 +18,8 @@ export const useUploadAvatar = (
       return avatarsService.uploadAvatar(file, userId);
     },
     onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({ queryKey: ['users', variables.userId] });
-      queryClient.invalidateQueries({ queryKey: ['userProfile', variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["users", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile", variables.userId] });
       options?.onSuccess?.(data, variables, context);
     },
     ...options,
