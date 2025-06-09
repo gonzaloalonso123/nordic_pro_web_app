@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,7 +20,7 @@ import { UserPlus, Users, Loader2 } from "lucide-react";
 import { useUsers } from "@/hooks/queries";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Tables } from "@/types/database.types";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 
 interface CreateChatModalProps {
   isOpen: boolean;
@@ -35,7 +34,7 @@ export default function CreateChatModal({ isOpen, onOpenChange, onChatCreated }:
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useCurrentUser();
-  
+
   const { data: users } = useUsers();
 
   useEffect(() => {
