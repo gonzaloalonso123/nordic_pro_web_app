@@ -23,6 +23,7 @@ class ChatRealtimeManager {
   }
 
   subscribe(roomId: string, callback: (message: Tables<"messages">) => void): () => void {
+    console.log(`Subscribing to room ${roomId}`);
     if (!roomId) return () => {};
 
     let subscription = this.subscriptions.get(roomId);
@@ -44,6 +45,12 @@ class ChatRealtimeManager {
 
         // If no more subscribers, clean up the subscription
         if (sub.subscribers.size === 0) {
+          // Cancel any pending reconnections first
+          const timeout = this.reconnectTimeouts.get(roomId);
+          if (timeout) {
+            clearTimeout(timeout);
+            this.reconnectTimeouts.delete(roomId);
+          }
           this.cleanup(roomId);
         }
       }
@@ -80,36 +87,36 @@ class ChatRealtimeManager {
 
     channel.subscribe((status, err) => {
       const subscription = this.subscriptions.get(roomId);
-      if (subscription) {
+      if (subscription && subscribers.size > 0) {
         subscription.status = status;
-      }
 
-      switch (status) {
-        case "SUBSCRIBED":
-          // Clear any reconnect timeout
-          const timeout = this.reconnectTimeouts.get(roomId);
-          if (timeout) {
-            clearTimeout(timeout);
-            this.reconnectTimeouts.delete(roomId);
-          }
+        switch (status) {
+          case "SUBSCRIBED":
+            // Clear any reconnect timeout
+            const timeout = this.reconnectTimeouts.get(roomId);
+            if (timeout) {
+              clearTimeout(timeout);
+              this.reconnectTimeouts.delete(roomId);
+            }
 
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`✅ Realtime subscribed to room ${roomId}`);
-          }
-          break;
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`✅ Realtime subscribed to room ${roomId}`);
+            }
+            break;
 
-        case "CHANNEL_ERROR":
-        case "TIMED_OUT":
-        case "CLOSED":
-          if (process.env.NODE_ENV === 'development') {
-            console.warn(`⚠️ Realtime ${status} for room ${roomId}:`, err?.message);
-          }
+          case "CHANNEL_ERROR":
+          case "TIMED_OUT":
+          case "CLOSED":
+            if (process.env.NODE_ENV === 'development') {
+              console.warn(`⚠️ Realtime ${status} for room ${roomId}:`, err?.message);
+            }
 
-          // Attempt reconnection if there are still subscribers
-          if (subscribers.size > 0) {
-            this.scheduleReconnect(roomId);
-          }
-          break;
+            // Only attempt reconnection if there are still subscribers AND subscription still exists
+            if (subscribers.size > 0 && this.subscriptions.has(roomId)) {
+              this.scheduleReconnect(roomId);
+            }
+            break;
+        }
       }
     });
 
@@ -126,6 +133,11 @@ class ChatRealtimeManager {
     if (existingTimeout) {
       clearTimeout(existingTimeout);
     }
+    // Don't reconnect if subscription doesn't exist or has no subscribers
+    const subscription = this.subscriptions.get(roomId);
+    if (!subscription || subscription.subscribers.size === 0) {
+      return;
+    }
 
     // Schedule reconnection
     const timeout = setTimeout(() => {
@@ -135,14 +147,22 @@ class ChatRealtimeManager {
           console.log(`🔄 Reconnecting to room ${roomId}`);
         }
 
-        // Remove old subscription and create new one
-        this.cleanup(roomId, false);
-        const callbacks = Array.from(subscription.subscribers);
+        try {
+          // Store callbacks before cleanup
+          const callbacks = Array.from(subscription.subscribers);
 
-        // Recreate subscription
-        const newSubscription = this.createSubscription(roomId);
-        callbacks.forEach(callback => newSubscription.subscribers.add(callback));
-        this.subscriptions.set(roomId, newSubscription);
+          // Remove old subscription completely
+          this.cleanup(roomId, true);
+
+          // Only recreate if we still have callbacks
+          if (callbacks.length > 0) {
+            const newSubscription = this.createSubscription(roomId);
+            callbacks.forEach(callback => newSubscription.subscribers.add(callback));
+            this.subscriptions.set(roomId, newSubscription);
+          }
+        } catch (error) {
+          console.error('Error during reconnection:', error);
+        }
       }
       this.reconnectTimeouts.delete(roomId);
     }, 2000);
@@ -153,8 +173,15 @@ class ChatRealtimeManager {
   private cleanup(roomId: string, removeFromMap = true) {
     const subscription = this.subscriptions.get(roomId);
     if (subscription) {
+      // Clear subscribers first to prevent any callbacks during cleanup
+      subscription.subscribers.clear();
+
       try {
-        this.supabase.removeChannel(subscription.channel);
+        // Unsubscribe from the channel before removing it
+        subscription.channel.unsubscribe();
+        setTimeout(() => {
+          this.supabase.removeChannel(subscription.channel);
+        }, 100);
       } catch (error) {
         console.warn('Error removing channel:', error);
       }
@@ -178,6 +205,7 @@ class ChatRealtimeManager {
 
   // Cleanup all subscriptions (useful for app shutdown)
   cleanup() {
+    console.log('Cleaning up all chat subscriptions');
     this.subscriptions.forEach((_, roomId) => {
       this.cleanup(roomId);
     });
@@ -195,11 +223,16 @@ export function useGlobalChatRealtime(
   const [status, setStatus] = useState<string>("DISCONNECTED");
   const managerRef = useRef<ChatRealtimeManager>();
   const unsubscribeRef = useRef<(() => void) | null>(null);
+  const onNewMessageRef = useRef(onNewMessage);
 
   // Get manager instance
   if (!managerRef.current) {
     managerRef.current = ChatRealtimeManager.getInstance();
   }
+  // Update the callback ref without triggering re-subscription
+  useEffect(() => {
+    onNewMessageRef.current = onNewMessage;
+  }, [onNewMessage]);
 
   // Update status periodically
   useEffect(() => {
@@ -226,7 +259,9 @@ export function useGlobalChatRealtime(
     }
 
     // Subscribe to new room
-    unsubscribeRef.current = managerRef.current.subscribe(roomId, onNewMessage);
+    unsubscribeRef.current = managerRef.current.subscribe(roomId, (message) => {
+      onNewMessageRef.current(message);
+    });
 
     return () => {
       if (unsubscribeRef.current) {
@@ -234,7 +269,7 @@ export function useGlobalChatRealtime(
         unsubscribeRef.current = null;
       }
     };
-  }, [roomId, onNewMessage]);
+  }, [roomId]);
 
   return {
     status,

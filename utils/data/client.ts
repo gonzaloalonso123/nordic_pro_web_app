@@ -193,6 +193,8 @@ export const useClientData = () => {
         useDelete: chatMessagesQueries.useDeleteChatMessage,
         useMarkAsRead: chatMessagesQueries.useMarkMessageAsRead,
         useMessageReadsForUser: chatMessagesQueries.useMessageReadsForUser,
+        usePaginated: chatMessagesQueries.useChatMessagesPaginated,
+        useFlattened: chatMessagesQueries.useFlattenedChatMessages,
     },
 
     organisationsInvitation: {

@@ -4,7 +4,6 @@ import { useMemo, useCallback, useState, useRef, useEffect } from "react";
 import { Tables, TablesInsert } from "@/types/database.types";
 import { useChatRoomWithUsers, useChatRoomMembers } from "@/hooks/queries/useChatRooms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useFlattenedChatMessages } from "@/hooks/useChatMessagesPaginated";
 import { useClientData } from "@/utils/data/client";
 import { useGlobalChatRealtime } from "@/hooks/useGlobalChatRealtime";
 
@@ -49,7 +48,7 @@ export function useChatRoom(roomId: string): ChatRoomData {
   const realtimeMessagesRef = useRef<Map<string, Tables<"messages">>>(new Map());
   const [realtimeTrigger, setRealtimeTrigger] = useState(0);
 
-  const { users } = useClientData();
+  const { users, chatMessages } = useClientData();
 
   // Parallel data fetching - all coordinated with React Query cache
   const roomQuery = useChatRoomWithUsers(roomId);
@@ -63,9 +62,8 @@ export function useChatRoom(roomId: string): ChatRoomData {
     hasMoreMessages,
     loadMoreMessages,
     isLoadingMore,
-  } = useFlattenedChatMessages(roomId);
+  } = chatMessages.useFlattened(roomId);
 
-  const { chatMessages } = useClientData();
   const { mutateAsync: createMessage } = chatMessages.useCreateChatMessage({
     onError: (err) => setError(`Failed to send message: ${err.message}`)
   });
@@ -127,9 +125,7 @@ export function useChatRoom(roomId: string): ChatRoomData {
     if (newMessage.room_id !== roomId) return;
 
     // Check if message already exists
-    const exists = realtimeMessagesRef.current.has(newMessage.id);
-
-    if (!exists) {
+    if (!realtimeMessagesRef.current.has(newMessage.id)) {
       realtimeMessagesRef.current.set(newMessage.id, newMessage);
       setRealtimeTrigger(prev => prev + 1);
     }

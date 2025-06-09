@@ -4,6 +4,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  useInfiniteQuery,
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
@@ -21,6 +22,21 @@ type ChatMessageUpdate = TablesUpdate<"messages">;
 
 type MessageReadRow = Tables<"message_reads">;
 type MessageReadInsert = TablesInsert<"message_reads">;
+
+type ChatMessage = Tables<"messages"> & {
+  users?: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar"> | null;
+};
+
+interface MessagePage {
+  messages: ChatMessage[];
+  nextCursor?: string;
+  hasMore: boolean;
+}
+
+interface UseChatMessagesPaginatedOptions {
+  limit?: number;
+  enabled?: boolean;
+}
 
 export const useChatMessagesByRoom = <TData = ChatMessageRow[]>(
   roomId: string | undefined,
@@ -77,14 +93,12 @@ export const useCreateChatMessage = (
   });
 };
 
-// Hook to get message read status for specific messages
-export const useMessageReadsForUser = <TData = MessageReadRow[]>(
-  messageIds: string[],
-  userId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<MessageReadRow[], Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
+// Hook for paginated chat messages with infinite scroll
+export const useChatMessagesPaginated = (
+  roomId: string,
+  userId: string,
+  messageIds: string[] = [],
+  options: UseChatMessagesPaginatedOptions = {}
 ) => {
   return useQuery<MessageReadRow[], Error, TData>({
     queryKey: ["messageReads", "user", userId, "messages", messageIds],
@@ -95,6 +109,24 @@ export const useMessageReadsForUser = <TData = MessageReadRow[]>(
     enabled: !!userId && messageIds.length > 0,
     ...options,
   });
+};
+
+// Helper hook to get all messages in a flat array
+export const useFlattenedChatMessages = (
+  roomId: string,
+  options?: UseChatMessagesPaginatedOptions
+) => {
+  const query = useChatMessagesPaginated(roomId, options);
+
+  const allMessages = query.data?.pages.flatMap((page: MessagePage) => page.messages) ?? [];
+
+  return {
+    ...query,
+    messages: allMessages,
+    hasMoreMessages: query.hasNextPage,
+    loadMoreMessages: query.fetchNextPage,
+    isLoadingMore: query.isFetchingNextPage,
+  };
 };
 
 // Hook to update a chat message
@@ -130,7 +162,7 @@ export const useUpdateChatMessage = (
         });
       } else if (data?.room_id) {
         // Fallback to room_id from response if available
-         queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: ["chatMessages", "room", data.room_id],
         });
         queryClient.invalidateQueries({
@@ -168,7 +200,7 @@ export const useDeleteChatMessage = (
         queryClient.invalidateQueries({
           queryKey: ["chatMessages", variables.messageId],
         });
-         if (variables.roomId) {
+        if (variables.roomId) {
           queryClient.invalidateQueries({
             queryKey: ["chatMessages", "room", variables.roomId],
           });
@@ -203,6 +235,26 @@ export const useMarkMessageAsRead = (
 
       options?.onSuccess?.(data, variables, context);
     },
+    ...options,
+  });
+};
+
+// Hook to get message read status for specific messages
+export const useMessageReadsForUser = <TData = MessageReadRow[]>(
+  messageIds: string[],
+  userId: string | undefined,
+  options?: Omit<
+    UseQueryOptions<MessageReadRow[], Error, TData>,
+    "queryKey" | "queryFn" | "enabled"
+  >
+) => {
+  return useQuery<MessageReadRow[], Error, TData>({
+    queryKey: ["messageReads", "user", userId, "messages", messageIds],
+    queryFn: () =>
+      userId && messageIds.length > 0
+        ? chatMessagesService.getMessageReadsForUser(supabase, messageIds, userId)
+        : [],
+    enabled: !!userId && messageIds.length > 0,
     ...options,
   });
 };
