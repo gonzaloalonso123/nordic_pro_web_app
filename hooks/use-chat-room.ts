@@ -68,6 +68,10 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
   );
 
   const subscribeToRoom = useCallback(() => {
+    if (channelRef.current) {
+      console.log("Already subscribed to channel, skipping new subscription");
+      return () => {};
+    }
     const channel = supabase
       .channel(`room-${roomId}`)
       .on(
@@ -85,9 +89,7 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
           console.warn("Realtime subscription error:", status, err);
         }
       });
-
     channelRef.current = channel;
-
     return () => {
       console.log("Unsubscribing from channel");
       supabase.removeChannel(channel);
@@ -100,7 +102,7 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
     return () => {
       cleanup();
     };
-  }, [fetchMessages, subscribeToRoom]);
+  }, []);
 
   const sendMessage = useCallback(
     async (content: string) => {

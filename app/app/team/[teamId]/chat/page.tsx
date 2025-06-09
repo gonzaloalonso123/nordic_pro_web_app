@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Tables } from "@/types/database.types";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import ChatRoomList from "@/components/chat/chat-room-list";
