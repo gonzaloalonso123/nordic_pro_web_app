@@ -7,6 +7,7 @@ import PWAViewportManager from "@/components/pwa/PWAViewportManager";
 import { LoadingProvider } from "@/contexts/LoadingContext";
 import { GlobalLoadingIndicator } from "@/components/ui/loading-indicators";
 import SplashScreenProvider from "@/components/SplashScreenProvider";
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -130,6 +131,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <main className="grow safe-area">{children}</main>
             {/* </SplashScreenProvider> */}
           </LoadingProvider>
+
+          <Analytics />
         </body>
       </html>
     </ReactQueryProvider>
