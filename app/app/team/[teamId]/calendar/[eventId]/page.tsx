@@ -5,18 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/custom/tabs";
 import { format, parseISO } from "date-fns";
-import { MapPin, Clock, Calendar, Users, MessageSquare, Navigation, Map, UserPlus, ChevronLeft } from "lucide-react";
+import { MapPin, Clock, Calendar, Users, MessageSquare, Navigation, Map, UserPlus, Trash } from "lucide-react";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
 import { AddInvitationsModal } from "@/components/calendar/add-invitations-modal";
 import { EventInvitations } from "@/components/calendar/event-invitations";
 import { useClientData } from "@/utils/data/client";
 import { LocationMap } from "@/components/calendar/location-map";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useHeader } from "@/hooks/useHeader";
 import { Content } from "@/components/content";
 import { Card } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { InvitationResponse } from "../components/invitation-reponse";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface EventDetailsContentProps {
   event: any;
@@ -29,6 +39,7 @@ interface EventDetailsContentProps {
   time: string;
   timeTocome: string | null;
   openInMaps: () => void;
+  deleteEvent: () => void;
 }
 
 const EventDetailsContent = ({
@@ -42,6 +53,7 @@ const EventDetailsContent = ({
   time,
   timeTocome,
   openInMaps,
+  deleteEvent,
 }: EventDetailsContentProps) => (
   <div className="space-y-6">
     <div className="space-y-4">
@@ -127,6 +139,18 @@ const EventDetailsContent = ({
         <InvitationResponse invitation={invitation} updateInvitation={updateInvitation} />
       </>
     )}
+
+    {isCoach && (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={deleteEvent}
+        className="flex items-center gap-2 text-destructive hover:text-destructive"
+      >
+        <Trash className="h-4 w-4" />
+        Delete Event
+      </Button>
+    )}
   </div>
 );
 
@@ -136,18 +160,21 @@ export default function Page() {
   const { data: event, isPending, isError } = useClientData().events.useById(eventId);
   const [showMap, setShowMap] = useState(false);
   const [showAddInvitations, setShowAddInvitations] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const { user } = useCurrentUser();
   const { data: invitation } = useClientData().eventsInvitation.useByEventAndUser(eventId, user?.id);
   const updateInvitation = useClientData().eventsInvitation.useUpdate();
+  const deleteEvent = useClientData().events.useDelete();
   const { team } = useRole();
   const isCoach = team?.role === "COACH";
   const { useHeaderConfig } = useHeader();
+  const router = useRouter();
 
   useHeaderConfig({
     centerContent: event?.name || "Event Details",
     leftContent: (
       <Button variant="outline" size="sm" onClick={() => history.back()} className="flex items-center gap-2">
-        <ChevronLeft className="h-4 w-4" />
+        <Trash className="h-4 w-4" />
       </Button>
     ),
   });
@@ -192,6 +219,17 @@ export default function Page() {
   const handleInvitationsAdded = () => {
     setShowAddInvitations(false);
   };
+  const handleDeleteEvent = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = () => {
+    deleteEvent.mutate(event.id, {
+      onSuccess: () => {
+        router.back();
+      },
+    });
+  };
 
   const { date, time } = formatEventDateTime();
   const timeTocome = formatTimeTocome();
@@ -217,6 +255,7 @@ export default function Page() {
                 time={time}
                 timeTocome={timeTocome}
                 openInMaps={openInMaps}
+                deleteEvent={handleDeleteEvent}
               />
             </TabsContent>
             <TabsContent value="invitations" className="mt-6">
@@ -249,6 +288,7 @@ export default function Page() {
             time={time}
             timeTocome={timeTocome}
             openInMaps={openInMaps}
+            deleteEvent={handleDeleteEvent}
           />
         </Card>
       )}
@@ -261,6 +301,25 @@ export default function Page() {
         teamId={team.id}
         onInvitationsAdded={handleInvitationsAdded}
       />
+      <AlertDialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this event?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the event and remove all invitations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Content>
   );
 }
