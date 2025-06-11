@@ -40,7 +40,7 @@ export const eventsService = {
   async getByUserId(
     supabase: SupabaseClient<Database>,
     userId: string
-  ): Promise<EventRow[]> {
+  ): Promise<any[]> {
     const calendar = await supabase
       .from("calendars")
       .select("*")
@@ -55,7 +55,7 @@ export const eventsService = {
   async getByTeamId(
     supabase: SupabaseClient<Database>,
     teamId: string
-  ): Promise<EventRow[]> {
+  ): Promise<any[]> {
     const calendar = await supabase
       .from("calendars")
       .select("*")
@@ -83,7 +83,7 @@ export const eventsService = {
   async getByCalendar(
     supabase: SupabaseClient<Database>,
     calendarId: string
-  ): Promise<EventRow[]> {
+  ): Promise<any[]> {
     const { data: eventCalendars, error: ecError } = await supabase
       .from("events_calendars")
       .select("event_id")
@@ -106,7 +106,7 @@ export const eventsService = {
   async getByTeam(
     supabase: SupabaseClient<Database>,
     teamId: string
-  ): Promise<EventRow[]> {
+  ): Promise<any[]> {
     const calendar = await calendarsService.getByTeam(supabase, teamId);
     if (!calendar) return [];
     const events = await this.getByCalendar(supabase, calendar.id);
@@ -116,7 +116,7 @@ export const eventsService = {
   async getByOrganisation(
     supabase: SupabaseClient<Database>,
     organisationId: string
-  ): Promise<EventRow[]> {
+  ): Promise<any[]> {
     const { data, error } = await supabase
       .from("events")
       .select(

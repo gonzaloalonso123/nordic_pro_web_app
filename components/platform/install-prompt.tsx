@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { X } from "lucide-react" //
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 
@@ -99,4 +99,3 @@ export default function InstallPrompt() {
     </div>
   )
 }
-

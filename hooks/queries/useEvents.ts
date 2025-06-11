@@ -224,11 +224,11 @@ export const useEventsByTeamId = <TData = EventRow[]>(
   });
 };
 
-export const useEventsByUserId = <TData = EventRow[]>(
+export const useEventsByUserId = <TData = any[]>(
   userId: string | undefined,
-  options?: Omit<UseQueryOptions<EventRow[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
+  options?: Omit<UseQueryOptions<any[] | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  return useQuery<EventRow[] | null, Error, TData>({
+  return useQuery<any[] | null, Error, TData>({
     queryKey: ["events", "userId", userId],
     queryFn: () => (userId ? eventsService.getByUserId(supabase, userId) : null),
     enabled: !!userId,

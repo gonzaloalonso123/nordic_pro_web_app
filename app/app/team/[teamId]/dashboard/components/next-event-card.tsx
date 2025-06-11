@@ -148,7 +148,7 @@ export default function NextEventCard({ events }: NextEventCardProps) {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h3 className="text-md font-semibold text-gray-800 leading-tight">{nextEvent.name}</h3>
+            <h3 className="text-md font-semibold text-gray-800 leading-tight">{nextEvent?.name ?? ""}</h3>
             {/* <div className="flex items-center gap-2">
               <EventIcon className={`h-5 w-5 ${iconColor}`} />
             </div> */}
@@ -188,7 +188,7 @@ export default function NextEventCard({ events }: NextEventCardProps) {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <MapPin className={`h-5 w-5 ${iconColor}`} />
-              <span className="truncate">{nextEvent.locations.name}</span>
+              <span className="truncate">{nextEvent?.locations?.name ?? ""}</span>
             </motion.div>
           </motion.div>
         </CardContent>

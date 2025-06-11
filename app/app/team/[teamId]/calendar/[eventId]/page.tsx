@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/custom/tabs";
 import { format, parseISO } from "date-fns";
-import { MapPin, Clock, Calendar, Users, MessageSquare, Navigation, Map, UserPlus, ChevronLeft } from "lucide-react";
+import { MapPin, Clock, Calendar, Users, MessageSquare, Navigation, Map, UserPlus } from "lucide-react";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
 import { AddInvitationsModal } from "@/components/calendar/add-invitations-modal";
 import { EventInvitations } from "@/components/calendar/event-invitations";
@@ -145,11 +145,7 @@ export default function Page() {
 
   useHeaderConfig({
     centerContent: event?.name || "Event Details",
-    leftContent: (
-      <Button variant="outline" size="sm" onClick={() => history.back()} className="flex items-center gap-2">
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-    ),
+    leftContent: "back"
   });
 
   if (isPending || isError) return null;
@@ -257,7 +253,7 @@ export default function Page() {
         open={showAddInvitations}
         onOpenChange={setShowAddInvitations}
         eventId={event.id}
-        eventDescription={event.description}
+        eventDescription={event.description ?? ""}
         teamId={team.id}
         onInvitationsAdded={handleInvitationsAdded}
       />

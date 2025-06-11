@@ -111,7 +111,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <GlobalLoadingIndicator />
             <PWAViewportManager />
             <SplashScreenProvider>
-              <main className="grow">{children}</main>
+              <main className="grow safe-area">{children}</main>
             </SplashScreenProvider>
           </LoadingProvider>
         </body>

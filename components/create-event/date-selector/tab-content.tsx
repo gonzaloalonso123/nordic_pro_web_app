@@ -2,9 +2,9 @@
 
 import type React from "react";
 import { TimeSelector } from "./time-selector";
-import { DateRecurrenceForm } from "./date-recurrence-form";
 import { RecurrencePreview } from "./recurrence-preview";
 import type { RecurrencePattern } from "./hooks/use-recurrence-logic";
+import { DateRecurrenceForm } from "./date-recurrent-form";
 
 export interface TabContentProps {
   activeTab: "datetime" | "preview";

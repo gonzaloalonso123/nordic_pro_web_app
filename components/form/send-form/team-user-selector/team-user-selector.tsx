@@ -36,7 +36,6 @@ export const TeamUserSelectorPopup: React.FC<TeamUserSelectorProps> = ({
   setInviteFutureMembers,
 }) => {
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"list" | "field">("list");
   const isMobile = useIsMobile();
 
   const handleClose = () => {
@@ -88,8 +87,6 @@ export const TeamUserSelectorPopup: React.FC<TeamUserSelectorProps> = ({
             {isMobile ? (
               <MobileContent
                 {...contentProps}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
                 onSelectAll={onSelectAll}
               />
             ) : (

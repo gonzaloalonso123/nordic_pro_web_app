@@ -143,7 +143,7 @@ export default function TeamFormVisualization({ data }: { data: FormData }) {
       <CardContent className="px-4 py-2 space-y-3">
         <h3 className="text-sm font-medium">Team Members</h3>
 
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           {data.invitations.map((invitation) => {
             const isSelected = selectedUserId === invitation.user_id;
             const hasResponded = invitation.completed;
@@ -163,7 +163,7 @@ export default function TeamFormVisualization({ data }: { data: FormData }) {
                   onClick={() =>
                     toggleUserSelection(invitation.user_id, hasResponded)
                   }
-                  className="w-full bg-white"
+                  className="w-full bg-white sticky top-0"
                   disabled={!hasResponded}
                 >
                   <div className="flex items-center gap-2">

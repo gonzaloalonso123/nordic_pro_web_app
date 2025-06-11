@@ -17,7 +17,11 @@ export const FormInvitations = ({
     form: Tables<"forms">;
   })[];
 }) => {
-  const incompleteInvitations = formInvitations?.filter((inv) => !inv.completed) || [];
+  const today = new Date();
+  const incompleteInvitations = formInvitations?.filter((inv) => {
+    const isExpired = inv.expires_at ? new Date(inv.expires_at) < today : false;
+    return !isExpired && !inv.completed;
+  }) || [];
 
   if (incompleteInvitations.length === 0) {
     return (
@@ -72,17 +76,15 @@ const FormInvitation = ({
       className="relative"
     >
       <Card
-        className={`border-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
-          isFirst
-            ? "border-amber-300 bg-gradient-to-br from-amber-50 via-white to-orange-50"
-            : "border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-50"
-        }`}
+        className={`border-2 shadow-lg hover:shadow-xl transition-all duration-300 ${isFirst
+          ? "border-amber-300 bg-gradient-to-br from-amber-50 via-white to-orange-50"
+          : "border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-50"
+          }`}
       >
         <CardHeader className="pb-4 pt-6 relative overflow-hidden">
           <motion.div
-            className={`absolute -top-8 -right-8 w-24 h-24 ${
-              isFirst ? "bg-amber-400" : "bg-gray-300"
-            } rounded-full opacity-10`}
+            className={`absolute -top-8 -right-8 w-24 h-24 ${isFirst ? "bg-amber-400" : "bg-gray-300"
+              } rounded-full opacity-10`}
             animate={{ scale: [1, 1.1, 1], rotate: [0, 45, 90] }}
             transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, delay: index * 0.5 }}
           />
@@ -109,11 +111,10 @@ const FormInvitation = ({
               transition={{ duration: 0.3, delay: index * 0.1 + 0.3 }}
             >
               <Badge
-                className={`font-bold px-3 py-1 ${
-                  isFirst
-                    ? "bg-gradient-to-r from-amber-100 to-orange-100 text-orange-700 border-orange-200"
-                    : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-200"
-                }`}
+                className={`font-bold px-3 py-1 ${isFirst
+                  ? "bg-gradient-to-r from-amber-100 to-orange-100 text-orange-700 border-orange-200"
+                  : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border-gray-200"
+                  }`}
               >
                 +{invitation.form.total_experience || 500} XP ⚡
               </Badge>
@@ -122,20 +123,18 @@ const FormInvitation = ({
         </CardHeader>
 
         <CardFooter
-          className={`border-t-2 py-4 ${
-            isFirst
-              ? "bg-gradient-to-r from-amber-100/50 to-orange-100/50 border-amber-200"
-              : "bg-gradient-to-r from-gray-100/50 to-gray-200/50 border-gray-200"
-          }`}
+          className={`border-t-2 py-4 ${isFirst
+            ? "bg-gradient-to-r from-amber-100/50 to-orange-100/50 border-amber-200"
+            : "bg-gradient-to-r from-gray-100/50 to-gray-200/50 border-gray-200"
+            }`}
         >
           <motion.div className="w-full" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               size="lg"
-              className={`w-full font-bold shadow-lg ${
-                isFirst
-                  ? "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
-                  : "bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white"
-              }`}
+              className={`w-full font-bold shadow-lg ${isFirst
+                ? "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+                : "bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white"
+                }`}
               onClick={() => router.push(`${path}/dashboard/form/${invitation.id}`)}
             >
               Complete Form

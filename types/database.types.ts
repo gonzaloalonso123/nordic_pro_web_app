@@ -85,6 +85,13 @@ export type Database = {
             referencedRelation: "chat_rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_room_participants_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_rooms: {
@@ -360,6 +367,7 @@ export type Database = {
           common_invitation_id: string | null
           completed: boolean | null
           created_at: string
+          expires_at: string | null
           form_id: string | null
           id: string
           user_id: string | null
@@ -368,6 +376,7 @@ export type Database = {
           common_invitation_id?: string | null
           completed?: boolean | null
           created_at?: string
+          expires_at?: string | null
           form_id?: string | null
           id?: string
           user_id?: string | null
@@ -376,6 +385,7 @@ export type Database = {
           common_invitation_id?: string | null
           completed?: boolean | null
           created_at?: string
+          expires_at?: string | null
           form_id?: string | null
           id?: string
           user_id?: string | null
@@ -728,6 +738,13 @@ export type Database = {
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey1"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1153,6 +1170,12 @@ export type Database = {
       create_default_emoji_scale: {
         Args: { question_uuid: string }
         Returns: undefined
+      }
+      find_existing_onetoone_chat: {
+        Args: { user1_id: string; user2_id: string }
+        Returns: {
+          room_id: string
+        }[]
       }
       get_unread_message_count: {
         Args: { p_room_id: string; p_user_id: string }

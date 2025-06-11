@@ -20,11 +20,11 @@ interface MobileContentProps {
   selectedUsers: string[];
   onToggleUser: (userId: string) => void;
   onSelectAll: () => void;
-  onClose: () => void;
+  onClose?: () => void;
   activeTab: "list" | "field";
   setActiveTab: (tab: "list" | "field") => void;
-  inviteFutureMembers: boolean;
-  setInviteFutureMembers: React.Dispatch<React.SetStateAction<boolean>>;
+  inviteFutureMembers?: boolean;
+  setInviteFutureMembers?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const MobileContent: React.FC<MobileContentProps> = ({
@@ -62,21 +62,19 @@ export const MobileContent: React.FC<MobileContentProps> = ({
       <div className="px-6">
         <div className="grid grid-cols-2 gap-0 border rounded-md overflow-hidden">
           <button
-            className={`py-3 text-center ${
-              activeTab === "list"
+            className={`py-3 text-center ${activeTab === "list"
                 ? "bg-blue-100 text-blue-600 font-medium border-blue-500"
                 : "bg-gray-50 text-gray-600"
-            }`}
+              }`}
             onClick={() => setActiveTab("list")}
           >
             Players
           </button>
           <button
-            className={`py-3 text-center ${
-              activeTab === "field"
+            className={`py-3 text-center ${activeTab === "field"
                 ? "bg-blue-100 text-blue-600 font-medium border-blue-500"
                 : "bg-gray-50 text-gray-600"
-            }`}
+              }`}
             onClick={() => setActiveTab("field")}
           >
             Field
@@ -103,11 +101,10 @@ export const MobileContent: React.FC<MobileContentProps> = ({
                 <div className="flex items-center w-full">
                   <div className="shrink-0 mr-3">
                     <div
-                      className={`w-5 h-5 rounded border flex items-center justify-center ${
-                        selectedUsers.includes(teamUser.user.id)
+                      className={`w-5 h-5 rounded border flex items-center justify-center ${selectedUsers.includes(teamUser.user.id)
                           ? "bg-blue-500 border-blue-500"
                           : "border-gray-300"
-                      }`}
+                        }`}
                     >
                       {selectedUsers.includes(teamUser.user.id) && (
                         <svg

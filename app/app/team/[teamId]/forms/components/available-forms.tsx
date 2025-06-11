@@ -10,6 +10,7 @@ import { useHeader } from "@/hooks/useHeader";
 import { SendFormDialog } from "./send-form-dialog";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
+import Link from "next/link";
 
 type Form = {
   id: string;
@@ -81,10 +82,12 @@ export function AvailableForms() {
         const form = row.original;
         return (
           <div className="flex justify-end">
-            <Button onClick={() => handleSendClick(form.id)} size="sm">
-              <Send className="mr-2 h-4 w-4" />
-              Send
-            </Button>
+            <Link href={`/app/team/${teamId}/forms/send/${form.id}`}>
+              <Button size={"sm"}>
+                <Send className="mr-2 h-4 w-4" />
+                Send
+              </Button>
+            </Link>
           </div>
         );
       },
