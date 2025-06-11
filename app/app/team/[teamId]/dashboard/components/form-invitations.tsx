@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useUrl } from "@/hooks/use-url";
 import { useRouter } from "next/navigation";
 import type { Tables } from "@/types/database.types";
+import { useEffect, useState } from "react";
 
 export const FormInvitations = ({
   formInvitations,
@@ -24,24 +25,7 @@ export const FormInvitations = ({
   }) || [];
 
   if (incompleteInvitations.length === 0) {
-    return (
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="h-full"
-      >
-        <Card className="h-full border-2 border-green-200 bg-gradient-to-br from-green-50 via-white to-emerald-50 shadow-lg">
-          <div className="flex items-center justify-center h-full p-8">
-            <div className="text-center">
-              <div className="text-4xl mb-3">🎉</div>
-              <p className="text-gray-700 font-bold text-lg">All caught up!</p>
-              <p className="text-gray-600 font-medium">No pending forms to complete</p>
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-    );
+    return null;
   }
 
   return (
@@ -63,6 +47,42 @@ const FormInvitation = ({
   const path = useUrl();
   const router = useRouter();
   const isFirst = index === 0;
+
+  const [, setNow] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+
+  const getBadgeVariant = (expiresAt: string) => {
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diffMs = expires.getTime() - now.getTime();
+    if (diffMs <= 0) return "destructive";
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays > 0) return "outline";
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    if (diffMinutes <= 30) return "destructive";
+    return "default";
+  };
+
+  const getBadgeText = (expiresAt: string) => {
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diffMs = expires.getTime() - now.getTime();
+    if (diffMs <= 0) return "Expired";
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    if (diffMinutes > 60 * 24) {
+      const diffDays = Math.floor(diffMinutes / (60 * 24));
+      return `${diffDays} day${diffDays > 1 ? "s" : ""} left`;
+    }
+    if (diffMinutes > 60) {
+      const diffHours = Math.floor(diffMinutes / 60);
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} left`;
+    }
+    return `${diffMinutes} min left`;
+  };
 
   console.log(invitation);
 
@@ -88,8 +108,8 @@ const FormInvitation = ({
             animate={{ scale: [1, 1.1, 1], rotate: [0, 45, 90] }}
             transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, delay: index * 0.5 }}
           />
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex-1 items-center">
               <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 {isFirst && (
                   <motion.div
@@ -99,17 +119,27 @@ const FormInvitation = ({
                     <Zap className="h-5 w-5 text-amber-500" />
                   </motion.div>
                 )}
-                {invitation.form.title}
+                Check in
               </CardTitle>
               <CardDescription className="text-gray-600 font-medium mt-1">
                 {invitation.form.description}
+                {invitation.form.title}
               </CardDescription>
             </div>
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.3, delay: index * 0.1 + 0.3 }}
+              className="flex items-center gap-2"
             >
+              {invitation.expires_at && (
+                <Badge
+                  className="px-3 py-1"
+                  variant={getBadgeVariant(invitation.expires_at)}
+                >
+                  {getBadgeText(invitation.expires_at)}
+                </Badge>
+              )}
               <Badge
                 className={`font-bold px-3 py-1 ${isFirst
                   ? "bg-gradient-to-r from-amber-100 to-orange-100 text-orange-700 border-orange-200"

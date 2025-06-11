@@ -99,6 +99,7 @@ const SendFormPage = () => {
             if (formConfig.selectedUsers.length > 0) {
                 await createFormInvitationForUsers.mutateAsync({
                     formId,
+                    teamId,
                     userIds: formConfig.selectedUsers,
                     expiresAt: formConfig.expiresAt?.toISOString() || null,
                 });
@@ -106,12 +107,6 @@ const SendFormPage = () => {
                 toast({
                     title: "Success",
                     description: `Form sent to ${formConfig.selectedUsers.length} selected user${formConfig.selectedUsers.length !== 1 ? "s" : ""} successfully`,
-                });
-            } else {
-                await createFormInvitation.mutateAsync({
-                    formId,
-                    teamId,
-                    expiresAt: formConfig.expiresAt?.toISOString() || null,
                 });
 
                 toast({

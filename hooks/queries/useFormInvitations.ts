@@ -160,11 +160,11 @@ export const useSendInvitationsToTeam = (
 };
 
 export const useSendInvitationsToUsers = (
-  options?: Omit<UseMutationOptions<FormInvitationRow[], Error, { userIds: string[]; formId: string, expiresAt?: string | null }>, "mutationFn">
+  options?: Omit<UseMutationOptions<FormInvitationRow[], Error, { userIds: string[]; formId: string, teamId: string, expiresAt?: string | null }>, "mutationFn">
 ) => {
   const queryClient = useQueryClient();
-  return useMutation<FormInvitationRow[], Error, { userIds: string[]; formId: string, expiresAt?: string | null }>({
-    mutationFn: ({ userIds, formId, expiresAt }) => formInvitationsService.sendToMembers(supabase, formId, userIds, expiresAt),
+  return useMutation<FormInvitationRow[], Error, { userIds: string[]; formId: string, teamId: string, expiresAt?: string | null }>({
+    mutationFn: ({ userIds, formId, teamId, expiresAt }) => formInvitationsService.sendToMembers(supabase, formId, userIds, teamId, expiresAt),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["form_invitations"] });
       options?.onSuccess?.(data, variables, context);

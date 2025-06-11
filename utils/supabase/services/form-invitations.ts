@@ -187,40 +187,23 @@ export const formInvitationsService = {
     return data || [];
   },
 
-  async sendToTeam(supabase: SupabaseClient<Database>, formId: string, teamId: string, expiresAt?: string | null): Promise<FormInvitationRow[]> {
-    const teamUsers = await teamsService.getWithUsers(supabase, teamId);
-    if (!teamUsers || !teamUsers.users) {
-      throw new Error("Team not found or has no members");
-    }
-
-    const created_at = new Date().toISOString();
-    const invitations: FormInvitationInsert[] = teamUsers.users
-      .filter((user) => user.role === "PLAYER")
-      .map((userObj: any) => ({
-        form_id: formId,
-        user_id: userObj.user.id,
-        expires_at: expiresAt || null,
-        created_at: created_at,
-        common_invitation_id: `${teamId.split("-")[0]}-${formId.split("-")[0]}-${new Date().getTime()}`,
-      }));
-    return await this.bulkCreate(supabase, invitations);
-  },
-
   async sendToMembers(
     supabase: SupabaseClient<Database>,
     formId: string,
     userIds: string[],
+    teamId: string,
     expiresAt?: string | null
   ): Promise<FormInvitationRow[]> {
     if (!userIds || userIds.length === 0) {
       throw new Error("No user IDs provided for sending invitations");
     }
-    const created_at = new Date().toISOString();
+    const created_at = new Date();
     const invitations: FormInvitationInsert[] = userIds.map((userId) => ({
       form_id: formId,
       user_id: userId,
-      created_at: created_at,
-      common_invitation_id: `${userId.split("-")[0]}-${formId.split("-")[0]}-${new Date().getTime()}`,
+      team_id: teamId,
+      created_at: created_at.toISOString(),
+      common_invitation_id: `${teamId.split("-")[0]}-${formId.split("-")[0]}-${created_at.getTime()}`,
       expires_at: expiresAt || null,
     }));
     return await this.bulkCreate(supabase, invitations);
