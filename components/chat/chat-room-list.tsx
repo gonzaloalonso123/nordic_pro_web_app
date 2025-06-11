@@ -120,6 +120,7 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
   }, [fetchChatRooms]);
 
   useEffect(() => {
+    console.log("executing useffect");
     if (!supabase || !currentUser?.id) return;
 
     const handleNewMessage = (payload: any) => {
@@ -133,6 +134,13 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
       fetchChatRooms();
     };
 
+    console.log(
+      "Subscribing to chat room participant changes for user:",
+
+      supabase,
+      currentUser,
+      fetchChatRooms
+    );
     const roomParticipantChanges = supabase
       .channel("public:chat_room_participants")
       .on(
@@ -140,24 +148,30 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
         { event: "*", schema: "public", table: "chat_room_participants", filter: `user_id=eq.${currentUser.id}` },
         handleRoomOrParticipantChange
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        if (status === "SUBSCRIBED") {
+          console.log("Subscribed to chat room participant changes");
+        } else if (error) {
+          console.error("Error subscribing to chat room participant changes:", error);
+        }
+      });
 
-    const messageChanges = supabase
-      .channel("public:messages")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, handleNewMessage)
-      .subscribe();
+    // const messageChanges = supabase
+    //   .channel("public:messages")
+    //   .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, handleNewMessage)
+    //   .subscribe();
 
-    const roomChanges = supabase
-      .channel("public:chat_rooms")
-      .on("postgres_changes", { event: "*", schema: "public", table: "chat_rooms" }, handleRoomOrParticipantChange)
-      .subscribe();
+    // const roomChanges = supabase
+    //   .channel("public:chat_rooms")
+    //   .on("postgres_changes", { event: "*", schema: "public", table: "chat_rooms" }, handleRoomOrParticipantChange)
+    //   .subscribe();
 
     return () => {
       supabase.removeChannel(roomParticipantChanges);
-      supabase.removeChannel(messageChanges);
-      supabase.removeChannel(roomChanges);
+      // supabase.removeChannel(messageChanges);
+      // supabase.removeChannel(roomChanges);
     };
-  }, [supabase, currentUser, fetchChatRooms]);
+  }, []);
 
   const filteredRooms = chatRooms.filter((room) => {
     const name =

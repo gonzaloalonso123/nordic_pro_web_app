@@ -13,6 +13,7 @@ const nextConfig = {
     unoptimized: true,
     domains: ["rcuficvjsjdizfigkdfx.supabase.co"],
   },
+  reactStrictMode: false,
   async headers() {
     return [
       {
