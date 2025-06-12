@@ -7,14 +7,13 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MapPin, Search, Plus } from "lucide-react";
 import { MapComponent } from "./map-component";
-import type { Location } from "./types";
 import { useClientData } from "@/utils/data/client";
+import { Location } from "./types";
 
 interface MobileContentProps {
   selectedLocation?: Location | null;
   onLocationSelect: (location: Location) => void;
   organisationId: string;
-  recentLocations: Location[];
   onAddLocation?: (
     location: Omit<Location, "id" | "created_at" | "updated_at">
   ) => Promise<void>;
@@ -31,8 +30,8 @@ export const MobileContent: React.FC<MobileContentProps> = ({
   activeTab,
   setActiveTab,
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [newLocationName, setNewLocationName] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [newLocationName, setNewLocationName] = useState<string>("");
   const [selectedCoordinates, setSelectedCoordinates] = useState<
     [number, number] | null
   >(null);
@@ -44,11 +43,15 @@ export const MobileContent: React.FC<MobileContentProps> = ({
 
   const filteredLocations =
     organisationLocations?.filter((location) =>
-      location.name.toLowerCase().includes(searchQuery.toLowerCase())
+      location.name?.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
   const handleLocationSelect = (location: Location) => {
-    onLocationSelect(location);
+    onLocationSelect({
+      ...location,
+      name: location.name ?? "",
+    });
+
     onClose();
   };
 
@@ -74,10 +77,23 @@ export const MobileContent: React.FC<MobileContentProps> = ({
         organisation_id: organisationId,
       };
 
-      const location = await createLocation.mutateAsync({
+      const locationResponse = await createLocation.mutateAsync({
         ...newLocation,
+        name: newLocation.name !== null ? newLocation.name : "",
         coordinates: selectedCoordinates.join(" "),
       });
+
+      const location: Location = {
+        ...locationResponse,
+        name: locationResponse.name !== null ? locationResponse.name : "",
+        coordinates:
+          locationResponse.coordinates == null
+            ? [0, 0]
+            : typeof locationResponse.coordinates === "string"
+              ? locationResponse.coordinates.split(" ").map(Number) as [number, number]
+              : locationResponse.coordinates,
+        organisation_id: locationResponse.organisation_id ?? "",
+      };
 
       onLocationSelect(location);
 
@@ -104,21 +120,19 @@ export const MobileContent: React.FC<MobileContentProps> = ({
       <div className="px-6">
         <div className="grid grid-cols-2 gap-0 border rounded-md overflow-hidden">
           <button
-            className={`py-3 text-center ${
-              activeTab === "recent"
-                ? "bg-blue-100 text-blue-600 font-medium border-blue-500"
-                : "bg-gray-50 text-gray-600"
-            }`}
+            className={`py-3 text-center ${activeTab === "recent"
+              ? "bg-blue-100 text-blue-600 font-medium border-blue-500"
+              : "bg-gray-50 text-gray-600"
+              }`}
             onClick={() => setActiveTab("recent")}
           >
             Recent
           </button>
           <button
-            className={`py-3 text-center ${
-              activeTab === "map"
-                ? "bg-blue-100 text-blue-600 font-medium border-blue-500"
-                : "bg-gray-50 text-gray-600"
-            }`}
+            className={`py-3 text-center ${activeTab === "map"
+              ? "bg-blue-100 text-blue-600 font-medium border-blue-500"
+              : "bg-gray-50 text-gray-600"
+              }`}
             onClick={() => setActiveTab("map")}
           >
             Map
@@ -148,7 +162,19 @@ export const MobileContent: React.FC<MobileContentProps> = ({
                     <div
                       key={location.id}
                       className="flex items-center p-3 rounded-md bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
-                      onClick={() => handleLocationSelect(location)}
+                      onClick={() =>
+                        handleLocationSelect({
+                          ...location,
+                          name: location.name ?? "",
+                          coordinates:
+                            location.coordinates == null
+                              ? [0, 0]
+                              : typeof location.coordinates === "string"
+                                ? location.coordinates.split(" ").map(Number) as [number, number]
+                                : location.coordinates,
+                          organisation_id: location.organisation_id ?? "",
+                        })
+                      }
                     >
                       <MapPin className="h-5 w-5 text-blue-600 mr-3 shrink-0" />
                       <div className="flex-1 min-w-0">

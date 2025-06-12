@@ -1,9 +1,7 @@
-const CACHE_NAME = "nextjs-pwa-v1";
+const CACHE_NAME = "v1";
 const urlsToCache = [
   "/",
-  "/static/js/bundle.js",
-  "/static/css/main.css",
-  "/manifest.json",
+  "/icon-192x192.png",
 ];
 
 self.addEventListener('push', event => {
@@ -73,6 +71,7 @@ self.addEventListener("install", (event) => {
       return cache.addAll(urlsToCache);
     })
   );
+  self.skipWaiting(); 
 });
 
 self.addEventListener("fetch", (event) => {

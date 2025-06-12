@@ -9,11 +9,12 @@ import { DateRecurrenceForm } from "./date-recurrent-form";
 export interface TabContentProps {
   activeTab: "datetime" | "preview";
   dates: {
-    timeToCome: string | null;
     startTime: string;
     endTime: string;
+    timeToCome: string | null;
     dates: string[];
   };
+  setDates: (dates: { startTime: string; endTime: string; timeToCome: string | null; dates: string[] }) => void;
   handleTimeChange: (key: string, value: string) => void;
   recurrencePattern: RecurrencePattern;
   updateRecurrencePattern: (updates: Partial<RecurrencePattern>) => void;
@@ -28,11 +29,6 @@ export interface TabContentProps {
   deleteDate: (date: string) => void;
   restoreDate: (date: string) => void;
   deletedDates: Set<string>;
-  setDates: (dates: {
-    startTime: string;
-    endTime: string;
-    dates: string[];
-  }) => void;
 }
 
 export const TabContent: React.FC<TabContentProps> = ({

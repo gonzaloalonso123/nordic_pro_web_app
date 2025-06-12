@@ -34,7 +34,7 @@ export const Content: React.FC<DesktopContentProps> = ({
       <div className="p-4 border-b shrink-0">
         <div className="grid grid-cols-2 gap-4">
           <Button
-            variant={activeTab === "datetime" ? "default" : "outline-solid"}
+            variant={activeTab === "datetime" ? "default" : "outline"}
             className={cn(
               "justify-start",
               activeTab === "datetime"
@@ -47,7 +47,7 @@ export const Content: React.FC<DesktopContentProps> = ({
             Date/Time
           </Button>
           <Button
-            variant={activeTab === "preview" ? "default" : "outline-solid"}
+            variant={activeTab === "preview" ? "default" : "outline"}
             className={cn(
               "justify-start",
               activeTab === "preview"

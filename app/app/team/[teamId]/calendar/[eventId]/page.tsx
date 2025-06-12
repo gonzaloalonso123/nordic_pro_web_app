@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/custom/tabs";
 import { format, parseISO } from "date-fns";
-import { MapPin, Clock, Calendar, Users, MessageSquare, Navigation, Map, UserPlus } from "lucide-react";
+import { MapPin, Clock, Calendar, Users, MessageSquare, Navigation, Map, UserPlus, Trash } from "lucide-react";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
 import { AddInvitationsModal } from "@/components/calendar/add-invitations-modal";
 import { EventInvitations } from "@/components/calendar/event-invitations";

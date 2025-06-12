@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { useHeader } from "@/hooks/useHeader";
 import { ExpireSelector } from "@/components/form/send-form/expire-button";
 import { TeamUserSelectorPopup } from "@/components/form/send-form/team-user-selector/team-user-selector";
+import { triggerNotification } from "@/utils/notificationService";
 
 const SendFormPage = () => {
     const { t } = useTranslation();
@@ -40,7 +41,6 @@ const SendFormPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isExpire, setIsExpire] = useState<boolean>(false);
     const { data: team, isPending: isTeamPending } = useClientData().teams.useWithUsers(teamId);
-    const createFormInvitation = useClientData().formInvitations.useSendToTeam();
     const createFormInvitationForUsers = useClientData().formInvitations.useSendToUsers();
     const { user } = useCurrentUser();
     const teamUsersWithoutMe = team?.users.filter((u: any) => u.user.id !== user?.id).filter((user: any) => user.role !== "COACH");
@@ -113,6 +113,14 @@ const SendFormPage = () => {
                     title: "Success",
                     description: "Form sent to all team members successfully",
                 });
+
+                triggerNotification({
+                    recipientUserIds: formConfig.selectedUsers,
+                    title: "New Form Invitation",
+                    body: `You have been invited to complete a new form.`,
+                    tag: "form-invitation",
+                    url: `/app/team/${teamId}/dashboard`,
+                });
             }
             router.back();
 
@@ -126,7 +134,6 @@ const SendFormPage = () => {
             setIsSubmitting(false);
         }
     };
-
 
     if (isTeamPending) {
         return <div>Loading...</div>;
