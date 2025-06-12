@@ -43,9 +43,9 @@ export class ChatErrorBoundary extends React.Component<
       }
 
       return (
-        <DefaultChatErrorFallback 
-          error={this.state.error} 
-          resetError={this.resetError} 
+        <DefaultChatErrorFallback
+          error={this.state.error}
+          resetError={this.resetError}
         />
       );
     }
@@ -54,11 +54,11 @@ export class ChatErrorBoundary extends React.Component<
   }
 }
 
-function DefaultChatErrorFallback({ 
-  error, 
-  resetError 
-}: { 
-  error?: Error; 
+function DefaultChatErrorFallback({
+  error,
+  resetError
+}: {
+  error?: Error;
   resetError: () => void;
 }) {
   return (
@@ -71,7 +71,7 @@ function DefaultChatErrorFallback({
         {error?.message || "An unexpected error occurred. Please try refreshing the chat."}
       </p>
       <div className="flex gap-2">
-        <Button 
+        <Button
           onClick={resetError}
           variant="outline"
           size="sm"
@@ -80,7 +80,7 @@ function DefaultChatErrorFallback({
           <RefreshCw className="h-4 w-4" />
           Try Again
         </Button>
-        <Button 
+        <Button
           onClick={() => window.location.reload()}
           size="sm"
           variant="default"
@@ -94,7 +94,7 @@ function DefaultChatErrorFallback({
             Error Details (Dev Mode)
           </summary>
           <pre className="text-xs text-left bg-gray-100 p-2 rounded mt-2 overflow-auto">
-            {error.stack}
+            {error.message}
           </pre>
         </details>
       )}

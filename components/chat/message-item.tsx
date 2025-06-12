@@ -2,12 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/utils/get-initials";
-import { type ChatMessage } from "@/hooks/useChatRoom";
 import { type Tables } from "@/types/database.types";
 import { memo } from "react";
+import { ChatMessageWithDetails } from "@/utils/supabase/services";
 
 interface MessageItemProps {
-  message: ChatMessage;
+  message: ChatMessageWithDetails;
   currentUser: Tables<'users'>;
 }
 

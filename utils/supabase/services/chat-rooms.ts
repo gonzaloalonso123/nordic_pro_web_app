@@ -17,12 +17,12 @@ type LastMessageData = Pick<Tables<"messages">, "id" | "content" | "created_at" 
   users: UserProfile | null
 }
 
-type ChatMessageWithDetails = Pick<Tables<"messages">, "id" | "content" | "sender_id" | "created_at"> & {
-  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar"> | null
+export type ChatMessageWithDetails = Pick<Tables<"messages">, "id" | "content" | "sender_id" | "created_at"> & {
+  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar">
   message_reads: MessageReadRow[]
 }
 
-type ChatRoomMemberWithUser = Pick<Tables<"chat_room_participants">, "user_id"> & {
+export type ChatRoomMemberWithUser = Pick<Tables<"chat_room_participants">, "user_id"> & {
   users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar"> | null
 }
 
@@ -223,8 +223,8 @@ export const chatRoomsService = {
 
   // Add paginated message loading method
   async getMessagesByRoomPaginated(
-    supabase: SupabaseClient<Database>, 
-    roomId: string, 
+    supabase: SupabaseClient<Database>,
+    roomId: string,
     options: {
       limit?: number;
       offset?: number;
@@ -294,7 +294,7 @@ export const chatRoomsService = {
   },
 
   // Add methods for chat room members
-  async getChatRoomMembers(supabase: SupabaseClient<Database>, roomId: string): Promise<ChatRoomMemberRow[]> {
+  async getChatRoomMembers(supabase: SupabaseClient<Database>, roomId: string): Promise<ChatRoomMemberWithUser[]> {
     const { data, error } = await supabase
       .from("chat_room_participants")
       .select(`
@@ -407,7 +407,7 @@ export const chatRoomsService = {
 
     // Use database function for each room - more efficient than complex queries
     const counts: Record<string, number> = {};
-    
+
     // Process in parallel for better performance
     const countPromises = roomIds.map(async (roomId) => {
       try {
@@ -415,7 +415,7 @@ export const chatRoomsService = {
           p_room_id: roomId,
           p_user_id: userId
         });
-        
+
         if (!error) {
           counts[roomId] = data || 0;
         } else {
