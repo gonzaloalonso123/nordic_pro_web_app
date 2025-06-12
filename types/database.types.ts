@@ -367,24 +367,30 @@ export type Database = {
           common_invitation_id: string | null
           completed: boolean | null
           created_at: string
+          expires_at: string | null
           form_id: string | null
           id: string
+          team_id: string | null
           user_id: string | null
         }
         Insert: {
           common_invitation_id?: string | null
           completed?: boolean | null
           created_at?: string
+          expires_at?: string | null
           form_id?: string | null
           id?: string
+          team_id?: string | null
           user_id?: string | null
         }
         Update: {
           common_invitation_id?: string | null
           completed?: boolean | null
           created_at?: string
+          expires_at?: string | null
           form_id?: string | null
           id?: string
+          team_id?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -393,6 +399,13 @@ export type Database = {
             columns: ["form_id"]
             isOneToOne: false
             referencedRelation: "forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
           {
@@ -695,6 +708,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "message_reads_user_id_fkey"
             columns: ["user_id"]
