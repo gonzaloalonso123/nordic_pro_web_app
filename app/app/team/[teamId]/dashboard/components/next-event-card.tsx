@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +8,7 @@ import type { Tables } from "@/types/database.types";
 import { useUrl } from "@/hooks/use-url";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type EventWithLocation = Tables<"events"> & {
   locations: Tables<"locations">;
@@ -33,7 +32,7 @@ export default function NextEventCard({ events }: NextEventCardProps) {
   }, [events]);
 
   if (!nextEvent) {
-    return null
+    return null;
   }
 
   const formatDate = (dateString: string) => {
@@ -123,11 +122,7 @@ export default function NextEventCard({ events }: NextEventCardProps) {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <Badge
-                className="px-3 py-1"
-              >
-                {getTimeUntilEvent(nextEvent.start_date)}
-              </Badge>
+              <Badge className="px-3 py-1">{getTimeUntilEvent(nextEvent.start_date)}</Badge>
             </motion.span>
           </div>
 
@@ -181,10 +176,11 @@ export default function NextEventCard({ events }: NextEventCardProps) {
           </motion.div>
         </CardContent>
         <CardFooter
-          className={`${isTraining
-            ? "bg-gradient-to-r from-blue-100/50 to-sky-100/50 border-t-2 border-blue-200"
-            : "bg-gradient-to-r from-green-100/50 to-emerald-100/50 border-t-2 border-green-200"
-            } py-3`}
+          className={`${
+            isTraining
+              ? "bg-gradient-to-r from-blue-100/50 to-sky-100/50 border-t-2 border-blue-200"
+              : "bg-gradient-to-r from-green-100/50 to-emerald-100/50 border-t-2 border-green-200"
+          } py-3`}
         >
           <motion.div
             className="w-full"
@@ -207,7 +203,7 @@ export default function NextEventCard({ events }: NextEventCardProps) {
             </Link>
           </motion.div>
         </CardFooter>
-      </Card >
-    </motion.div >
+      </Card>
+    </motion.div>
   );
 }

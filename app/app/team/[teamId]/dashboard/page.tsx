@@ -9,6 +9,7 @@ import { useClientData } from "@/utils/data/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import NextEventCard from "./components/next-event-card";
 import { FormCompletionStreak } from "./components/form-completion-streak";
+import { DashboardSkeleton } from "@/components/ui/loading-skeletons";
 
 export default function DashboardPage() {
   const { useHeaderConfig } = useHeader();
@@ -53,8 +54,9 @@ export default function DashboardPage() {
 
   //   return () => clearInterval(interval);
   // }, []);
+
   if (eventsPending || invitationsPending) {
-    return <div className="container py-8">Loading...</div>;
+    return Array.from({ length: 4 }, (_, index) => <DashboardSkeleton key={index} />);
   }
 
   return (
