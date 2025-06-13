@@ -7,7 +7,7 @@ import { Tables } from "@/types/database.types";
 
 interface ChatMessageItemProps {
   message: Tables<"messages"> & {
-    users: Tables<"users"> | null;
+    users: Partial<Tables<"users">> | null;
   };
   currentUserId: string | undefined;
 }

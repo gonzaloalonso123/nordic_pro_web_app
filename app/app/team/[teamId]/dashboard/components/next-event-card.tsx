@@ -33,23 +33,7 @@ export default function NextEventCard({ events }: NextEventCardProps) {
   }, [events]);
 
   if (!nextEvent) {
-    return (
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="h-full"
-      >
-        <Card className="h-full border-2 border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-50 shadow-lg">
-          <CardContent className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="text-4xl mb-2">📅</div>
-              <p className="text-gray-600 font-medium">No upcoming events</p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    );
+    return null
   }
 
   const formatDate = (dateString: string) => {
@@ -76,10 +60,10 @@ export default function NextEventCard({ events }: NextEventCardProps) {
     const diffInHours = Math.ceil((eventDate.getTime() - now.getTime()) / (1000 * 60 * 60));
 
     if (diffInHours < 24) {
-      return `in ${diffInHours}h`;
+      return `${diffInHours} hours left`;
     } else {
       const diffInDays = Math.ceil(diffInHours / 24);
-      return `in ${diffInDays}d`;
+      return `${diffInDays} days left`;
     }
   };
 
@@ -115,31 +99,35 @@ export default function NextEventCard({ events }: NextEventCardProps) {
             transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY }}
           />
 
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-row items-start justify-between mb-3">
             <motion.div
-              className="flex items-center gap-3"
+              className="flex flex-col items-start gap-2"
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
-              >
-                <Sparkles className="h-6 w-6 text-purple-500" />
-              </motion.div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <motion.div
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
+                >
+                  <Sparkles className="h-6 w-6 text-purple-500" />
+                </motion.div>
                 <div className="text-xl font-bold text-gray-800">Next Event</div>
-                <Badge className={`${badgeClasses} px-3 py-1`}>{nextEvent.type}</Badge>
               </div>
+              <Badge className={`${badgeClasses} px-3 py-1`}>{nextEvent.type}</Badge>
             </motion.div>
             <motion.span
-              className="text-sm font-bold px-3 py-2 rounded-xl bg-white/80 shadow-md border-2 border-white"
+              className="flex items-center gap-2"
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              {getTimeUntilEvent(nextEvent.start_date)}
+              <Badge
+                className="px-3 py-1"
+              >
+                {getTimeUntilEvent(nextEvent.start_date)}
+              </Badge>
             </motion.span>
           </div>
 
@@ -193,11 +181,10 @@ export default function NextEventCard({ events }: NextEventCardProps) {
           </motion.div>
         </CardContent>
         <CardFooter
-          className={`${
-            isTraining
-              ? "bg-gradient-to-r from-blue-100/50 to-sky-100/50 border-t-2 border-blue-200"
-              : "bg-gradient-to-r from-green-100/50 to-emerald-100/50 border-t-2 border-green-200"
-          } py-3`}
+          className={`${isTraining
+            ? "bg-gradient-to-r from-blue-100/50 to-sky-100/50 border-t-2 border-blue-200"
+            : "bg-gradient-to-r from-green-100/50 to-emerald-100/50 border-t-2 border-green-200"
+            } py-3`}
         >
           <motion.div
             className="w-full"
@@ -220,7 +207,7 @@ export default function NextEventCard({ events }: NextEventCardProps) {
             </Link>
           </motion.div>
         </CardFooter>
-      </Card>
-    </motion.div>
+      </Card >
+    </motion.div >
   );
 }

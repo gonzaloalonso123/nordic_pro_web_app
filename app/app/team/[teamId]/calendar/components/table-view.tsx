@@ -56,7 +56,7 @@ type SessionStatus = {
 export function TrainingSessionsTable({ events, isLoading = false }: TrainingSessionsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("upcoming");
   const path = useUrl();
   const router = useRouter();
 
@@ -329,7 +329,7 @@ export function TrainingSessionsTable({ events, isLoading = false }: TrainingSes
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="upcoming" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>

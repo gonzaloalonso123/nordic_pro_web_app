@@ -26,7 +26,7 @@ export const eventsService = {
   async getById(
     supabase: SupabaseClient<Database>,
     eventId: string
-  ): Promise<EventRow | null> {
+  ): Promise<any | null> {
     const { data, error } = await supabase
       .from("events")
       .select("*, locations(*)")

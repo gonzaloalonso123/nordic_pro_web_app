@@ -19,6 +19,8 @@ import { LocationSelectorPopup } from "@/components/create-event/location-select
 import { TeamUserSelectorPopup } from "@/components/create-event/team-user-selector/team-user-selector";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { triggerNotification } from "@/utils/notificationService";
+import { Location } from "@/components/create-event/location-selector/types";
 
 const eventTypeOptions = [
   { value: "TRAINING", label: "Training" },
@@ -36,7 +38,7 @@ const AddTeamEventPage = () => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dates, setDates] = useState<{
-    timeToCome?: string;
+    timeToCome: string | null;
     startTime: string;
     endTime: string;
     dates: string[];
@@ -55,7 +57,7 @@ const AddTeamEventPage = () => {
   const sendEventsToCalendars = useClientData().calendars.useSendEventsToCalendars();
   const { user } = useCurrentUser();
   const { organisation } = useRole();
-  const teamUsersWithoutMe = team?.users.filter((u) => u.user.id !== user?.id).filter((user) => user.role !== "COACH");
+  const teamUsersWithoutMe = team?.users.filter((u: any) => u.user.id !== user?.id).filter((user: any) => user.role !== "COACH");
 
   const handleToggleUser = (userId: string) => {
     if (selectedUsers.includes(userId)) {
@@ -79,7 +81,7 @@ const AddTeamEventPage = () => {
     handleSelectAll();
   }, [team?.users]);
 
-  const onLocationSelect = (location: any) => {
+  const onLocationSelect = (location: Location) => {
     setSelectedLocation(location);
   };
 
@@ -89,9 +91,6 @@ const AddTeamEventPage = () => {
     type: string;
     invite_future_members: boolean;
   }) => {
-
-
-    console.log(calendar, dates);
     if (!calendar) {
       toast({
         title: "Error",
@@ -114,7 +113,9 @@ const AddTeamEventPage = () => {
       setIsSubmitting(true);
       const [startHours, startMinutes] = dates.startTime.split(":").map(Number);
       const [endHours, endMinutes] = dates.endTime.split(":").map(Number);
-      const [timeToComeHours, timeToComeMinutes] = dates.timeToCome?.split(":").map(Number) || [0, 0];
+      const [timeToComeHours, timeToComeMinutes] = dates.timeToCome ? dates.timeToCome.split(":").map(Number) : [0, 0];
+
+      const createdEventIds: string[] = [];
 
       for (const date of dates.dates) {
         let cleanDate = date.split("T")[0];
@@ -122,41 +123,65 @@ const AddTeamEventPage = () => {
         timeToCome.setHours(timeToComeHours, timeToComeMinutes);
         const startDate = addMinutes(addHours(new Date(cleanDate), startHours), startMinutes);
         const endDate = addMinutes(addHours(new Date(cleanDate), endHours), endMinutes);
-        createEvent
-          .mutateAsync({
-            name: values.name,
-            description: values.description,
-            start_date: startDate.toISOString(),
-            end_date: endDate.toISOString(),
-            time_to_come: dates.timeToCome ? timeToCome.toISOString() : null,
-            location_id: selectedLocation?.id,
-            type: values.type,
-            calendar_id: calendar.id,
-            invite_future_members: inviteFutureMembers,
-          })
-          .then((event) => {
-            if (event) {
-              if (selectedUsers.length > 0) {
-                selectedUsers.map((userId) =>
-                  createInvitation.mutateAsync({
-                    event_id: event.id,
-                    user_id: userId,
-                    description: values.description,
-                  })
-                );
-              }
-              sendEventsToCalendars.mutateAsync({
-                usersIds: selectedUsers,
-                eventId: event.id,
-                teamIds: [teamId],
-              });
-            }
+
+        const event = await createEvent.mutateAsync({
+          name: values.name,
+          description: values.description,
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          time_to_come: dates.timeToCome ? timeToCome.toISOString() : null,
+          location_id: selectedLocation?.id,
+          type: values.type,
+          calendar_id: calendar.id,
+          invite_future_members: inviteFutureMembers,
+        });
+
+        if (event) {
+          createdEventIds.push(event.id);
+
+          if (selectedUsers.length > 0) {
+            await Promise.all(
+              selectedUsers.map((userId) =>
+                createInvitation.mutateAsync({
+                  event_id: event.id,
+                  user_id: userId,
+                  description: values.description,
+                })
+              )
+            );
+          }
+
+          await sendEventsToCalendars.mutateAsync({
+            usersIds: selectedUsers,
+            eventId: event.id,
+            teamIds: [teamId],
           });
+        }
       }
-      router.push(`${path}/calendar`);
+
+      // Notificación solo si hay usuarios seleccionados
+      if (selectedUsers.length > 0) {
+        await triggerNotification({
+          recipientUserIds: selectedUsers.filter((id) => id !== user?.id),
+          title: "New Event Invitation",
+          body: `You have been invited to the event "${values.name}".`,
+          tag: "event-invitation",
+          url: `/app/team/${teamId}/dashboard`,
+        });
+      }
+
       toast({
         title: "Success",
         description: "Creation was successful",
+      });
+
+      router.push(`${path}/calendar`);
+    } catch (err: any) {
+      console.error("Error triggering new event invitation notification:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to create event",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);

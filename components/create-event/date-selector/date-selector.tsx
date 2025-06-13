@@ -20,7 +20,7 @@ interface DateSelectorProps {
   setDates: (dates: {
     startTime: string;
     endTime: string;
-    timeToCome?: string;
+    timeToCome: string | null;
     dates: string[];
   }) => void;
 }

@@ -26,8 +26,14 @@ interface ChatRoomListProps {
   currentUser: Tables<"users"> | null | undefined;
 }
 
+type ChatRoomWithExtras = Tables<"chat_rooms"> & {
+  other_participants: Tables<"users">[];
+  unread_count?: number;
+  messages?: Tables<"messages">[];
+};
+
 export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser }: ChatRoomListProps) {
-  const [chatRooms, setChatRooms] = useState<Tables<"chat_rooms">[]>([]);
+  const [chatRooms, setChatRooms] = useState<ChatRoomWithExtras[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateChatModalOpen, setIsCreateChatModalOpen] = useState(false);
@@ -78,8 +84,8 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
       console.error("Error fetching chat rooms:", roomsError);
       setChatRooms([]);
     } else {
-      const processedRooms = await Promise.all(
-        roomsData.map(async (room) => {
+      const processedRooms: ChatRoomWithExtras[] = await Promise.all(
+        roomsData.map(async (room: any) => {
           const { data: unreadData, error: unreadError } = await supabase.rpc("get_unread_message_count", {
             p_room_id: room.id,
             p_user_id: currentUser.id,
@@ -88,12 +94,12 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
           let otherParticipants: Tables<"users">[] = [];
           if (!room.is_group_chat) {
             otherParticipants = room.chat_room_participants
-              .filter((p) => p.user_id !== currentUser.id && p.users)
-              .map((p) => p.users as Tables<"users">);
+              .filter((p: any) => p.user_id !== currentUser.id && p.users)
+              .map((p: any) => p.users as Tables<"users">);
           }
           const lastMessage =
             room.messages && room.messages.length > 0
-              ? room.messages.sort((a, b) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())[0]
+              ? room.messages.sort((a: any, b: any) => new Date(b.created_at!).getTime() - new Date(a.created_at!).getTime())[0]
               : null;
 
           return {
@@ -101,7 +107,7 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
             unread_count: unreadData || 0,
             other_participants: otherParticipants,
             messages: lastMessage ? [lastMessage] : [],
-          } as Tables<"chat_rooms">;
+          } as ChatRoomWithExtras;
         })
       );
       setChatRooms(
@@ -176,7 +182,7 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
   const filteredRooms = chatRooms.filter((room) => {
     const name =
       !room.is_group_chat && room.other_participants && room.other_participants.length > 0
-        ? room.other_participants.map((p) => p.username).join(", ")
+        ? room.other_participants.map((p) => `${p.first_name} ${p.last_name}`).join(", ")
         : room.name;
     return name?.toLowerCase().includes(searchTerm.toLowerCase());
   });
@@ -249,7 +255,12 @@ export default function ChatRoomList({ onSelectRoom, selectedRoomId, currentUser
           onOpenChange={setIsCreateChatModalOpen}
           onChatCreated={(newRoom) => {
             fetchChatRooms();
-            onSelectRoom(newRoom);
+            onSelectRoom({
+              ...newRoom,
+              other_participants: [],
+              unread_count: 0,
+              messages: [],
+            });
             setIsCreateChatModalOpen(false);
           }}
         />

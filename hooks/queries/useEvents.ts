@@ -26,11 +26,11 @@ export const useEvents = <TData = EventRow[]>(
 };
 
 // Get event by ID
-export const useEvent = <TData = EventRow>(
+export const useEvent = <TData = any>(
   eventId: string | undefined,
   options?: Omit<UseQueryOptions<EventRow | null, Error, TData>, "queryKey" | "queryFn" | "enabled">
 ) => {
-  return useQuery<EventRow | null, Error, TData>({
+  return useQuery<any | null, Error, TData>({
     queryKey: ["events", eventId],
     queryFn: () => (eventId ? eventsService.getById(supabase, eventId) : null),
     enabled: !!eventId,

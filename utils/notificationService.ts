@@ -239,3 +239,51 @@ export async function clearChatNotificationsForUser(roomId: string, userId: stri
     console.error(`Error clearing chat notifications for room ${roomId} and user ${userId}:`, error);
   }
 }
+
+export interface GenericNotificationParams {
+  recipientUserIds: string[];
+  title: string;
+  body: string;
+  tag?: string;
+  url?: string;
+  icon?: string;
+  type?: NotificationType;
+  data?: Record<string, any>;
+}
+
+export async function triggerNotification(params: GenericNotificationParams) {
+  const {
+    recipientUserIds,
+    title,
+    body,
+    tag = "nordic-pro-notification",
+    url = "/",
+    icon = "/icon-192x192.png",
+    type = NotificationType.GENERIC,
+    data = {},
+  } = params;
+
+  if (!recipientUserIds || recipientUserIds.length === 0) {
+    console.log("No recipients for nordic pro notification. Skipping.");
+    return;
+  }
+
+  try {
+    const notificationOptions: SendNotificationOptions = {
+      ...defaultNotificationOptions(),
+      type,
+      title,
+      body,
+      icon,
+      tag,
+      data: {
+        url,
+        ...data,
+      },
+    };
+
+    await sendPreparedNotification(recipientUserIds, notificationOptions);
+  } catch (error) {
+    console.error(`Error sending generic notification:`, error);
+  }
+}

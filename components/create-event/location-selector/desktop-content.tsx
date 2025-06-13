@@ -35,11 +35,15 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
 
   const filteredLocations =
     organisationLocations?.filter((location) =>
-      location.name.toLowerCase().includes(searchQuery.toLowerCase())
+      location.name?.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
   const handleLocationSelect = (location: Location) => {
-    onLocationSelect(location);
+    onLocationSelect({
+      ...location,
+      name: location.name ?? "",
+    });
+
     onClose();
   };
 
@@ -65,12 +69,26 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
         organisation_id: organisationId,
       };
 
-      const location = await createLocation.mutateAsync({
+      const locationResponse = await createLocation.mutateAsync({
         ...newLocation,
+        name: newLocation.name !== null ? newLocation.name : "",
         coordinates: selectedCoordinates.join(" "),
       });
 
+      const location: Location = {
+        ...locationResponse,
+        name: locationResponse.name !== null ? locationResponse.name : "",
+        coordinates:
+          locationResponse.coordinates == null
+            ? [0, 0]
+            : typeof locationResponse.coordinates === "string"
+              ? locationResponse.coordinates.split(" ").map(Number) as [number, number]
+              : locationResponse.coordinates,
+        organisation_id: locationResponse.organisation_id ?? "",
+      };
+
       onLocationSelect(location);
+
       onClose();
     } catch (error) {
       console.error("Failed to add location:", error);
@@ -103,7 +121,6 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
-                size="sm"
               />
             </div>
           </div>
@@ -115,7 +132,17 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
                   <div
                     key={location.id}
                     className="flex items-center p-2 rounded-md bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors"
-                    onClick={() => handleLocationSelect(location)}
+                    onClick={() => handleLocationSelect({
+                      ...location,
+                      name: location.name ?? "",
+                      coordinates:
+                        location.coordinates == null
+                          ? [0, 0]
+                          : typeof location.coordinates === "string"
+                            ? location.coordinates.split(" ").map(Number) as [number, number]
+                            : location.coordinates,
+                      organisation_id: location.organisation_id ?? "",
+                    })}
                   >
                     <MapPin className="h-4 w-4 text-blue-600 mr-2 shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -146,7 +173,6 @@ export const DesktopContent: React.FC<DesktopContentProps> = ({
                 value={newLocationName}
                 onChange={(e) => setNewLocationName(e.target.value)}
                 className="mb-3"
-                size="sm"
               />
               <div className="flex gap-2">
                 <Button

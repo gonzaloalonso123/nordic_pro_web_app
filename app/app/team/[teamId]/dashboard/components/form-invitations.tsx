@@ -18,19 +18,14 @@ export const FormInvitations = ({
     form: Tables<"forms">;
   })[];
 }) => {
-  const today = new Date();
-  const incompleteInvitations = formInvitations?.filter((inv) => {
-    const isExpired = inv.expires_at ? new Date(inv.expires_at) < today : false;
-    return !isExpired && !inv.completed;
-  }) || [];
-
-  if (incompleteInvitations.length === 0) {
-    return null;
-  }
+  const now = new Date();
+  const incompleteInvitations = formInvitations?.filter((inv) =>
+    inv.expires_at && new Date(inv.expires_at) > now
+  ).filter((inv) => !inv.completed);
 
   return (
     <div className="flex flex-col gap-4">
-      {incompleteInvitations.map((invitation, index) => (
+      {incompleteInvitations.length > 0 && incompleteInvitations.map((invitation, index) => (
         <FormInvitation key={invitation.id} invitation={invitation} index={index} />
       ))}
     </div>
@@ -48,17 +43,19 @@ const FormInvitation = ({
   const router = useRouter();
   const isFirst = index === 0;
 
-  const [, setNow] = useState(Date.now());
+  const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(interval);
   }, []);
 
+  if (invitation.expires_at && new Date(invitation?.expires_at).getTime() < now) {
+    return null;
+  }
 
   const getBadgeVariant = (expiresAt: string) => {
-    const now = new Date();
     const expires = new Date(expiresAt);
-    const diffMs = expires.getTime() - now.getTime();
+    const diffMs = expires.getTime() - now;
     if (diffMs <= 0) return "destructive";
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     if (diffDays > 0) return "outline";
@@ -68,9 +65,8 @@ const FormInvitation = ({
   };
 
   const getBadgeText = (expiresAt: string) => {
-    const now = new Date();
     const expires = new Date(expiresAt);
-    const diffMs = expires.getTime() - now.getTime();
+    const diffMs = expires.getTime() - now;
     if (diffMs <= 0) return "Expired";
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     if (diffMinutes > 60 * 24) {
@@ -83,8 +79,6 @@ const FormInvitation = ({
     }
     return `${diffMinutes} min left`;
   };
-
-  console.log(invitation);
 
   return (
     <motion.div

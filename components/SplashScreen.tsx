@@ -16,7 +16,6 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 
   }, [onFinish]);
 
-
   return (
     <div 
       className={`fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-blue-700 to-slate-900 transition-opacity duration-500 ${

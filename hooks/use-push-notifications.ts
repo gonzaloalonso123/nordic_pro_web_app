@@ -56,9 +56,9 @@ export function usePushNotifications() {
       const sub = await registration.pushManager.getSubscription()
       setSubscription(sub)
       if (sub) {
-        console.log('Existing subscription found:', sub);
+        // console.log('Existing subscription found:', sub);
       } else {
-        console.log('No existing subscription found.');
+        // console.log('No existing subscription found.');
       }
     } catch (error) {
       console.error('Service Worker registration failed:', error);
@@ -79,11 +79,11 @@ export function usePushNotifications() {
       });
 
       setSubscription(sub);
-      console.log('User automatically subscribed:', sub);
+      // console.log('User automatically subscribed:', sub);
 
       const serializedSub = sub.toJSON();
       await subscribeUser(serializedSub, user.id);
-      console.log('Push subscription saved to database');
+      // console.log('Push subscription saved to database');
     } catch (error) {
       console.error('Failed to automatically subscribe user:', error);
     }

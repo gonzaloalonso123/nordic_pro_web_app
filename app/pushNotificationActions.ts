@@ -10,12 +10,12 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 )
 
-export async function subscribeUser(sub: any, userId?: string) {
+export async function subscribeUser(sub: any, userId: string) {
   try {
     await serverData.pushSubscriptions.upsert({
       endpoint: sub.endpoint,
       keys: sub.keys!,
-      user_id: userId || null
+      user_id: userId
     });
 
     return { success: true }

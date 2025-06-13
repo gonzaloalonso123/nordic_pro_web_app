@@ -93,14 +93,6 @@ export const eventsInvitationService = {
       .single();
 
     if (error) throw error;
-
-    triggerNewEventCreatedNotification({
-      recipientUserIds: [invitation.user_id],
-      eventId: invitation.event_id,
-    }).catch((err) => {
-      console.error("Error triggering new event invitation notification:", err);
-    });
-
     return data;
   },
 
