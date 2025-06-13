@@ -33,8 +33,6 @@ export function Disclaimer({
     }
   };
 
-  console.log(description);
-
   const { bg, text } = getVariantStyles();
 
   return (

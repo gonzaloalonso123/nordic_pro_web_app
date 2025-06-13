@@ -10,6 +10,7 @@ import { Content } from '@/components/content';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { getInitials } from '@/utils/get-initials';
 import { useHeader } from '@/hooks/useHeader';
+import { NotificationSwitch } from './components/notification-switch';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -80,7 +81,7 @@ export default function UserProfilePage() {
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="space-y-6">
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-500">Date of Birth</span>
@@ -107,6 +108,7 @@ export default function UserProfilePage() {
               </span>
             </div>
           </div>
+          {/* <NotificationSwitch /> */}
         </CardContent>
 
         <CardFooter>

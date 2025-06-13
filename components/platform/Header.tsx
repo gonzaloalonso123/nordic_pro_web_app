@@ -23,7 +23,7 @@ const Header = () => {
               leftContent
             )
           ) : (
-            <Link href="/app" className="mr-8">
+            <Link href="/" className="mr-8">
               <Image
                 src="/icon.png"
                 alt="NordicPro Logo"
