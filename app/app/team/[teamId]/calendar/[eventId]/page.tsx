@@ -292,7 +292,7 @@ export default function Page() {
       <AddInvitationsModal
         open={showAddInvitations}
         onOpenChange={setShowAddInvitations}
-        eventId={event.id}
+        event={event}
         eventDescription={event.description ?? ""}
         teamId={team.id}
         onInvitationsAdded={handleInvitationsAdded}

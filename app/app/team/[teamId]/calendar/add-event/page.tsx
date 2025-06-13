@@ -159,17 +159,6 @@ const AddTeamEventPage = () => {
         }
       }
 
-      // Notificación solo si hay usuarios seleccionados
-      if (selectedUsers.length > 0) {
-        await triggerNotification({
-          recipientUserIds: selectedUsers.filter((id) => id !== user?.id),
-          title: "New Event Invitation",
-          body: `You have been invited to the event "${values.name}".`,
-          tag: "event-invitation",
-          url: `/app/team/${teamId}/dashboard`,
-        });
-      }
-
       toast({
         title: "Success",
         description: "Creation was successful",

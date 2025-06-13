@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useClientData } from "@/utils/data/client";
 import { Users, UserPlus } from "lucide-react";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
+import { triggerNotification } from "@/utils/notificationService";
 
 interface TeamUser {
   user: {
@@ -30,7 +31,7 @@ interface TeamUser {
 interface AddInvitationsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  eventId: string;
+  event: any;
   eventDescription?: string;
   teamId?: string;
   onInvitationsAdded: () => void;
@@ -39,7 +40,7 @@ interface AddInvitationsModalProps {
 export function AddInvitationsModal({
   open,
   onOpenChange,
-  eventId,
+  event,
   eventDescription,
   onInvitationsAdded,
 }: AddInvitationsModalProps) {
@@ -54,13 +55,13 @@ export function AddInvitationsModal({
   const sendEventsToCalendars =
     useClientData().calendars.useSendEventsToCalendars();
   const { data: existingInvitations } =
-    useClientData().eventsInvitation.useByEvent(eventId);
+    useClientData().eventsInvitation.useByEvent(event.id);
 
   const existingUserIds =
     existingInvitations?.map((inv: any) => inv.user_id) || [];
   const availableUsers = teamUsers
-    .filter((teamUser) => !existingUserIds.includes(teamUser.user.id))
-    .filter((user) => user.role !== "COACH");
+    .filter((teamUser: any) => !existingUserIds.includes(teamUser.user.id))
+    .filter((user: any) => user.role !== "COACH");
 
   const handleToggleUser = (userId: string) => {
     if (selectedUsers.includes(userId)) {
@@ -74,7 +75,7 @@ export function AddInvitationsModal({
     if (selectedUsers.length === availableUsers.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(availableUsers.map((user) => user.user.id));
+      setSelectedUsers(availableUsers.map((user: any) => user.user.id));
     }
   };
 
@@ -93,7 +94,7 @@ export function AddInvitationsModal({
       await Promise.all(
         selectedUsers.map((userId) =>
           createInvitation.mutateAsync({
-            event_id: eventId,
+            event_id: event.id,
             user_id: userId,
             description: eventDescription || "",
           })
@@ -101,7 +102,15 @@ export function AddInvitationsModal({
       );
       await sendEventsToCalendars.mutateAsync({
         usersIds: selectedUsers,
-        eventId: eventId,
+        eventId: event.id,
+      });
+
+      triggerNotification({
+        recipientUserIds: selectedUsers,
+        title: "New Event Invitation",
+        body: `You have been invited to the event "${event.name}".`,
+        tag: "event-invitation",
+        url: `/app/team/${team.id}/dashboard`,
       });
 
       setSelectedUsers([]);
@@ -161,7 +170,7 @@ export function AddInvitationsModal({
               <Separator />
 
               <div className="space-y-3">
-                {availableUsers.map((teamUser) => (
+                {availableUsers.map((teamUser: any) => (
                   <Card key={teamUser.user.id} className="p-3">
                     <div className="flex items-center gap-3">
                       <Checkbox

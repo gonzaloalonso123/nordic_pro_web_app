@@ -98,15 +98,17 @@ const SendFormPage = () => {
                     expiresAt: formConfig.expiresAt?.toISOString() || null,
                 });
 
-                toast({
-                    title: "Success",
-                    description: `Form sent to ${formConfig.selectedUsers.length} selected user${formConfig.selectedUsers.length !== 1 ? "s" : ""} successfully`,
-                });
-
-                toast({
-                    title: "Success",
-                    description: "Form sent to all team members successfully",
-                });
+                if (formConfig.selectedUsers.length === teamUsersWithoutMe.length) {
+                    toast({
+                        title: "Success",
+                        description: "Form sent to all team members successfully",
+                    });
+                } else {
+                    toast({
+                        title: "Success",
+                        description: `Form sent to ${formConfig.selectedUsers.length} selected user${formConfig.selectedUsers.length !== 1 ? "s" : ""} successfully`,
+                    });
+                }
 
                 triggerNotification({
                     recipientUserIds: formConfig.selectedUsers,

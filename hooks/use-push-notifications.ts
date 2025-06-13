@@ -159,6 +159,7 @@ export function usePushNotifications() {
   }
 
   return {
+    subscribeToPush,
     isSupported,
     subscription,
     isSubscribed: !!subscription,
