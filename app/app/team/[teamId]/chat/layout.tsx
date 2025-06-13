@@ -11,20 +11,13 @@ import { useUrl } from "@/hooks/use-url";
 import { useRole } from "@/app/app/(role-provider)/role-provider";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import ChatList from "@/components/chat/chat-list";
-import { ComingSoonScreen } from "@/components/ui/coming-soon-screen";
 import { ChatEmptyState } from "@/components/chat/chat-empty-state";
-
-const IS_PRODUCTION = process.env.NODE_ENV !== 'development';
 
 export default function ChatLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  if (IS_PRODUCTION) {
-    return <ComingSoonScreen />;
-  }
-
   const { useHeaderConfig } = useHeader();
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
   const { team: { id: teamId } } = useRole();
