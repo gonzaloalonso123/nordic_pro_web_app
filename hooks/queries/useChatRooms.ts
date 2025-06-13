@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from "@tanstack/react-query";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import { chatRoomsService, ChatRoomWithDetails, type ChatRoomWithMessagesAndMembers } from "@/utils/supabase/services";
 import type {
   Tables,
@@ -23,7 +23,6 @@ export const useChatRooms = <TData = ChatRoomRow[]>(
     "queryKey" | "queryFn"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<ChatRoomRow[], Error, TData>({
     queryKey: ["chatRooms"],
     queryFn: () => chatRoomsService.getAll(supabase),
@@ -38,7 +37,6 @@ export const useChatRoom = <TData = ChatRoomRow>(
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<ChatRoomRow | null, Error, TData>({
     queryKey: ["chatRooms", chatRoomId],
     queryFn: () =>
@@ -55,7 +53,6 @@ export const useChatRoomsByUser = <TData = ChatRoomWithDetails[]>(
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<ChatRoomWithDetails[], Error, TData>({
     queryKey: ["chatRooms", "user", userId],
     queryFn: () =>
@@ -72,7 +69,6 @@ export const useChatRoomWithMessages = <TData = ChatRoomWithMessagesAndMembers>(
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<any | null, Error, TData>({
     queryKey: ["chatRooms", chatRoomId, "messages"],
     queryFn: () =>
@@ -91,7 +87,6 @@ export const useChatRoomWithUsers = <TData = any>(
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<any | null, Error, TData>({
     queryKey: ["chatRooms", chatRoomId, "users"],
     queryFn: () =>
@@ -108,7 +103,6 @@ export const useCreateChatRoom = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<ChatRoomRow, Error, ChatRoomInsert>({
@@ -133,7 +127,6 @@ export const useUpdateChatRoom = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -164,7 +157,6 @@ export const useUpdateChatRoom = (
 export const useDeleteChatRoom = (
   options?: Omit<UseMutationOptions<boolean, Error, string>, "mutationFn">
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<boolean, Error, string>({
@@ -187,7 +179,6 @@ export const useChatMessagesByRoom = <TData = ChatMessageRow[]>(
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<ChatMessageRow[], Error, TData>({
     queryKey: ["chatMessages", "room", roomId],
     queryFn: () =>
@@ -209,7 +200,6 @@ export const useSendChatMessage = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<ChatMessageRow, Error, ChatMessageInsert, unknown>({
@@ -235,7 +225,6 @@ export const useChatRoomMembers = <TData = ChatRoomMemberRow[]>(
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<ChatRoomMemberRow[], Error, TData>({
     queryKey: ["chatRoomMembers", roomId],
     queryFn: () =>
@@ -257,41 +246,6 @@ export const useAddChatRoomMember = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
-  const queryClient = useQueryClient();
-
-  return useMutation<ChatRoomMemberRow, Error, ChatRoomMemberInsert, unknown>({
-    mutationFn: (member) =>
-      chatRoomsService.addChatRoomMember(supabase, member),
-    onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({
-        queryKey: ["chatRoomMembers", variables.room_id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["chatRooms", variables.room_id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["chatRooms", variables.room_id, "users"],
-      }); // If room details include users
-      options?.onSuccess?.(data, variables, context);
-    },
-    ...options,
-  });
-};
-
-// Remove chat room member mutation
-export const useRemoveChatRoomMember = (
-  options?: Omit<
-    UseMutationOptions<
-      void, // Assuming your service.remove returns void or similar
-      Error,
-      { roomId: string; userId: string },
-      unknown // Context type
-    >,
-    "mutationFn"
-  >
-) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, { roomId: string; userId: string }, unknown>({
@@ -325,7 +279,6 @@ export const useMarkMessageAsRead = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<MessageReadRow, Error, MessageReadInsert, unknown>({
@@ -354,7 +307,6 @@ export const useUnreadMessageCount = (
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<number, Error, number>({
     queryKey: ["unreadMessages", roomId, userId],
     queryFn: () =>
@@ -375,7 +327,6 @@ export const useUnreadMessageCountBatch = (
     "queryKey" | "queryFn" | "enabled"
   >
 ) => {
-  const supabase = createClient();
   return useQuery<Record<string, number>, Error, Record<string, number>>({
     queryKey: ["unreadMessages", "batch", roomIds, userId],
     queryFn: async () => {
@@ -400,7 +351,6 @@ export const useMarkRoomAsRead = (
     "mutationFn"
   >
 ) => {
-  const supabase = createClient();
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, { roomId: string; userId: string }>({
@@ -512,7 +462,6 @@ async function findOrCreateDirectChatRoomLogic(
 }
 
 export function useStartDirectChat() {
-  const supabaseClient = createClient();
   const queryClient = useQueryClient();
 
   // Get the mutateAsync functions from your existing hooks
@@ -522,7 +471,7 @@ export function useStartDirectChat() {
   return useMutation<string, Error, StartDirectChatVariables>({
     mutationFn: (variables) =>
       findOrCreateDirectChatRoomLogic(
-        supabaseClient,
+        supabase,
         createChatRoomMutateAsync,
         addChatRoomMemberMutateAsync,
         variables

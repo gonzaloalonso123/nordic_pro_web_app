@@ -7,6 +7,7 @@ import { useUrl } from "@/hooks/use-url";
 import { formatChatTime, formatMessagePreviewWithSender } from "@/utils/format-time";
 import { cn } from "@/lib/utils";
 import { memo } from "react";
+import { useParams } from "next/navigation";
 
 interface ChatListItemProps {
   room: any;
@@ -17,9 +18,12 @@ interface ChatListItemProps {
 export const ChatListItem = memo(function ChatListItem({
   room,
   unreadCount,
-  currentUserId,
 }: ChatListItemProps) {
   const path = useUrl();
+  const params = useParams();
+  const activeChatId = params.chatId as string | undefined;
+  const isActive = activeChatId === room.id;
+
   const hasUnread = unreadCount > 0;
   const lastMessage = room.lastMessage;
   const lastMessageTime = lastMessage?.createdAt || room.updatedAt;
@@ -37,8 +41,10 @@ export const ChatListItem = memo(function ChatListItem({
       role="listitem"
     >
       <div className={cn(
-        "flex w-full items-center gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors",
-        hasUnread && "bg-blue-50/30 hover:bg-blue-50/50"
+        "flex w-full items-center gap-3 p-4 cursor-pointer transition-colors",
+        isActive && "bg-blue-100 border-r-2 border-blue-500",
+        !isActive && hasUnread && "bg-blue-50/30 hover:bg-blue-50/50",
+        !isActive && "hover:bg-gray-50"
       )}>
         <div className="relative">
           <Avatar>

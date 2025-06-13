@@ -169,7 +169,6 @@ export const useClientData = () => {
       // Chat room members methods
       useMembers: chatRoomQueries.useChatRoomMembers,
       useAddMember: chatRoomQueries.useAddChatRoomMember,
-      useRemoveMember: chatRoomQueries.useRemoveChatRoomMember,
 
       // Message reads methods
       useMarkAsRead: chatRoomQueries.useMarkMessageAsRead,

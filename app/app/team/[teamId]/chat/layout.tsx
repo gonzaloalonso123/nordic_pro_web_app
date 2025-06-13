@@ -12,6 +12,7 @@ import { useRole } from "@/app/app/(role-provider)/role-provider";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import ChatList from "@/components/chat/chat-list";
 import { ChatEmptyState } from "@/components/chat/chat-empty-state";
+import { cn } from "@/lib/utils";
 
 export default function ChatLayout({
   children,
@@ -44,20 +45,23 @@ export default function ChatLayout({
     ),
   }, [openModal]);
 
-
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="md:hidden h-full">
-        {isChatRoom ? children : <ChatList />}
+    <div className="flex h-full w-full">
+      <div
+        className={cn(
+          "h-full",
+          "md:flex md:flex-col md:border-r md:basis-[320px] md:shrink-0",
+          isChatRoom ? "hidden" : "w-full md:w-auto"
+        )}
+      >
+        <ChatList />
       </div>
 
-      <div className="hidden md:flex h-full">
-        <div className="w-1/3 border-r">
-          <ChatList />
-        </div>
-        <div className="flex-1">
-          {isChatRoom ? children : <ChatEmptyState />}
-        </div>
+      <div className={cn(
+        "h-full flex-1",
+        isChatRoom ? "block" : "hidden md:block"
+      )}>
+        {isChatRoom ? children : <ChatEmptyState />}
       </div>
 
       <Dialog open={isNewChatModalOpen} onOpenChange={setIsNewChatModalOpen}>
