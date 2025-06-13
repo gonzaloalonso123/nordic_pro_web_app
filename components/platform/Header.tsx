@@ -13,7 +13,7 @@ const Header = () => {
   const { leftContent, centerContent, rightContent } = headerConfig;
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
+    <header className="sticky z-30 bg-white border-b border-gray-200 top-safe">
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex flex-1 flex-shrink justify-start">
           {leftContent ? (

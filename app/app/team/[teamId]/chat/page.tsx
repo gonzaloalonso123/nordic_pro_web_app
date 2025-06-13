@@ -45,7 +45,6 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden antialiased text-foreground bg-background">
-      {isMobile ? (
         <>
           {showRoomListMobile ? (
             <ChatRoomList
@@ -62,12 +61,6 @@ export default function ChatPage() {
             />
           )}
         </>
-      ) : (
-        <>
-          <ChatRoomList onSelectRoom={handleSelectRoom} selectedRoomId={selectedRoom?.id || null} currentUser={user} />
-          <ChatMessageArea selectedRoom={selectedRoom} currentUser={user} onBackToList={() => {}} isMobile={isMobile} />
-        </>
-      )}
       <div className="absolute top-4 right-4 z-20">
         {user && <span className="text-sm mr-3 text-muted-foreground">Hi, {user.first_name || "User"}!</span>}
       </div>

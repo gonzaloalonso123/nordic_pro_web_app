@@ -370,6 +370,7 @@ export type Database = {
           expires_at: string | null
           form_id: string | null
           id: string
+          team_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -379,6 +380,7 @@ export type Database = {
           expires_at?: string | null
           form_id?: string | null
           id?: string
+          team_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -388,6 +390,7 @@ export type Database = {
           expires_at?: string | null
           form_id?: string | null
           id?: string
+          team_id?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -396,6 +399,13 @@ export type Database = {
             columns: ["form_id"]
             isOneToOne: false
             referencedRelation: "forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
           {
@@ -699,6 +709,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "message_reads_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -713,7 +730,7 @@ export type Database = {
           created_at: string | null
           id: string
           room_id: string
-          sender_id: string | null
+          sender_id: string
           updated_at: string | null
         }
         Insert: {
@@ -721,7 +738,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           room_id: string
-          sender_id?: string | null
+          sender_id: string
           updated_at?: string | null
         }
         Update: {
@@ -729,7 +746,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           room_id?: string
-          sender_id?: string | null
+          sender_id?: string
           updated_at?: string | null
         }
         Relationships: [

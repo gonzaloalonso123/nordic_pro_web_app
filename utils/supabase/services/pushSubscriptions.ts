@@ -130,20 +130,26 @@ export const pushSubscriptionsService = {
     return true;
   },
 
-  // Create or update push subscription
   async upsert(
     supabase: SupabaseClient<Database>,
     subscription: PushSubscriptionInsert
   ): Promise<PushSubscriptionRow> {
-    // Check if subscription with this endpoint already exists
-    const existing = await this.getByEndpoint(supabase, subscription.endpoint);
+    const timestamp = new Date().toISOString();
 
-    if (existing) {
-      // Update existing subscription
-      return await this.update(supabase, existing.id, subscription);
-    } else {
-      // Create new subscription
-      return await this.create(supabase, subscription);
-    }
+    const { data, error } = await supabase
+      .from("push_subscriptions")
+      .upsert(
+        {
+          ...subscription,
+          created_at: timestamp,
+          updated_at: timestamp,
+        },
+        { onConflict: "user_id" }
+      )
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 };

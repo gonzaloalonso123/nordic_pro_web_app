@@ -3,7 +3,11 @@ import type { Tables } from "@/types/database.types";
 import { supabase } from "@/utils/supabase/client";
 
 type Message = Tables<"messages"> & {
-  users?: Tables<"users">;
+  users: {
+    id: string;
+    first_name: string;
+    avatar: string | null;
+  }
 };
 
 interface UseChatRoomMessagesProps {
@@ -12,11 +16,20 @@ interface UseChatRoomMessagesProps {
 }
 
 export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessagesProps) {
+  if (!roomId || !currentUser) {
+    return {
+      messages: [],
+      loading: false,
+      sending: false,
+      sendMessage: async () => { },
+    };
+  }
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
+  // Fetch messages and update last_read_at
   const fetchMessages = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -28,17 +41,27 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
     if (error) {
       console.error("Error fetching messages:", error);
     } else {
-      setMessages(data || []);
+      setMessages(
+        (data || []).map((msg) => ({
+          ...msg,
+          id: msg.id || `temp-${Date.now()}`,
+          users: {
+            id: msg.users?.id || "",
+            first_name: msg.users?.first_name || "",
+            avatar: msg.users?.avatar || null,
+          },
+        }))
+      );
       await supabase
         .from("chat_room_participants")
         .update({ last_read_at: new Date().toISOString() })
         .eq("room_id", roomId)
         .eq("user_id", currentUser.id);
     }
-
     setLoading(false);
-  }, [roomId, currentUser.id, supabase]);
+  }, [roomId, currentUser.id]);
 
+  // Handle new realtime message
   const handleRealtimeInsert = useCallback(
     async (payload: { new: Message }) => {
       if (payload.new.room_id !== roomId) return;
@@ -49,11 +72,16 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
         .eq("id", payload.new.id)
         .single();
 
-      if (error) {
-        console.error("Error loading realtime message:", error);
-        setMessages((prev) => [...prev.filter((m) => !m.id.includes("temp")), payload.new]);
+      if (newMessageWithUser) {
+        setMessages((prev) => [
+          ...prev.filter((m) => !m.id.includes("temp")),
+          newMessageWithUser as Message,
+        ]);
       } else {
-        setMessages((prev) => [...prev.filter((m) => !m.id.includes("temp")), newMessageWithUser!]);
+        // fallback: do not add if not a valid Message
+        setMessages((prev) => [
+          ...prev.filter((m) => !m.id.includes("temp")),
+        ]);
       }
 
       if (payload.new.sender_id !== currentUser.id) {
@@ -64,14 +92,19 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
           .eq("user_id", currentUser.id);
       }
     },
-    [roomId, supabase, currentUser.id]
+    [roomId, currentUser.id]
   );
 
-  const subscribeToRoom = useCallback(() => {
+  // Subscribe to realtime changes for this room
+  useEffect(() => {
+    fetchMessages();
+
+    // Clean up previous channel if exists
     if (channelRef.current) {
-      console.log("Already subscribed to channel, skipping new subscription");
-      return () => {};
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
     }
+
     const channel = supabase
       .channel(`room-${roomId}`)
       .on(
@@ -84,26 +117,26 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
         handleRealtimeInsert
       )
       .subscribe((status, err) => {
-        console.log("subscribing");
+        console.log("Supabase channel status:", status, "error:", err);
+        if (status === "SUBSCRIBED") {
+          console.log("Realtime suscripción exitosa");
+        }
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          console.warn("Realtime subscription error:", status, err);
+          console.warn("Realtime subscription error:", status, "error:", err);
         }
       });
+
     channelRef.current = channel;
-    return () => {
-      console.log("Unsubscribing from channel");
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
-  useEffect(() => {
-    fetchMessages();
-    const cleanup = subscribeToRoom();
     return () => {
-      cleanup();
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
-  }, []);
+  }, [roomId, fetchMessages, handleRealtimeInsert]);
 
+  // Send a message (optimistic update)
   const sendMessage = useCallback(
     async (content: string) => {
       if (!content.trim()) return;
@@ -122,7 +155,11 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
 
       setMessages((prev) => [...prev, optimisticMessage]);
 
-      const { error } = await supabase.from("messages").insert({ room_id: roomId, sender_id: currentUser.id, content });
+      const { error } = await supabase.from("messages").insert({
+        room_id: roomId,
+        sender_id: currentUser.id,
+        content,
+      });
 
       if (error) {
         console.error("Error sending message:", error);
@@ -131,7 +168,7 @@ export function useChatRoomMessages({ roomId, currentUser }: UseChatRoomMessages
 
       setSending(false);
     },
-    [supabase, roomId, currentUser]
+    [roomId, currentUser]
   );
 
   return {

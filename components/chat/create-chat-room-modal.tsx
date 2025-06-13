@@ -64,7 +64,9 @@ export default function CreateChatModal({ isOpen, onOpenChange, onChatCreated }:
     }
     setIsCreatingChat(true);
 
-    const participantIds = Array.from(selectedUsers).concat(user?.id);
+    const participantIds = user?.id
+      ? Array.from(selectedUsers).concat(user.id)
+      : Array.from(selectedUsers);
     const isGroup = selectedUsers.size > 1;
 
     if (isGroup && !groupName.trim()) {
@@ -75,8 +77,13 @@ export default function CreateChatModal({ isOpen, onOpenChange, onChatCreated }:
 
     if (!isGroup && selectedUsers.size === 1) {
       const otherUserId = Array.from(selectedUsers)[0];
+      if (!user?.id) {
+        alert("Current user is not available.");
+        setIsCreatingChat(false);
+        return;
+      }
       const { data: existingRooms, error: existingRoomError } = await supabase.rpc("find_existing_onetoone_chat", {
-        user1_id: user?.id,
+        user1_id: user.id,
         user2_id: otherUserId,
       });
 

@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button";
 import { SendHorizonal, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Database, Tables } from "@/types/database.types";
+import { Tables } from "@/types/database.types";
 import ChatMessageItem from "./chat-message-item";
-import { Content } from "../content";
 import { useHeader } from "@/hooks/useHeader";
 import BackButton from "../ui/back-button";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { useChatRoomMessages } from "@/hooks/use-chat-room";
 
 interface ChatMessageAreaProps {
@@ -22,44 +20,13 @@ interface ChatMessageAreaProps {
   isMobile: boolean;
 }
 
-export default function ChatMessageArea({ selectedRoom, currentUser, onBackToList, isMobile }: ChatMessageAreaProps) {
-  const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { useHeaderConfig } = useHeader();
-
-  const roomId = selectedRoom?.id ?? null;
-
-  useHeaderConfig({
-    centerContent: selectedRoom?.name || "Chat",
-    leftContent: isMobile ? <BackButton onClick={onBackToList} /> : null,
-  });
-
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
-    messagesEndRef.current?.scrollIntoView({ behavior });
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => scrollToBottom("auto"), 0);
-  }, [scrollToBottom]);
-
-  const { messages, loading, sending, sendMessage } = useChatRoomMessages({
-    roomId: roomId!,
-    currentUser: currentUser!,
-  });
-
-  useEffect(() => {
-    scrollToBottom("auto");
-  }, [messages, scrollToBottom]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-
-    await sendMessage(newMessage);
-    setNewMessage("");
-  };
-
+export default function ChatMessageArea({
+  selectedRoom,
+  currentUser,
+  onBackToList,
+  isMobile,
+}: ChatMessageAreaProps) {
+  // Solo renderiza el placeholder si no hay sala o usuario
   if (!selectedRoom || !currentUser) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-full bg-muted/30 p-4 text-center">
@@ -69,6 +36,45 @@ export default function ChatMessageArea({ selectedRoom, currentUser, onBackToLis
       </div>
     );
   }
+
+  const [newMessage, setNewMessage] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { useHeaderConfig } = useHeader();
+
+  const roomId = selectedRoom.id;
+
+  // Configura el header solo cuando hay sala y usuario
+  useHeaderConfig({
+    centerContent: selectedRoom.name || "Chat",
+    leftContent: isMobile ? <BackButton onClick={onBackToList} /> : null,
+  });
+
+  // Scroll automático al fondo
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => scrollToBottom("auto"), 0);
+  }, [scrollToBottom]);
+
+  // Hook de mensajes solo cuando hay sala y usuario
+  const { messages, loading, sending, sendMessage } = useChatRoomMessages({
+    roomId,
+    currentUser,
+  });
+
+  useEffect(() => {
+    scrollToBottom("auto");
+  }, [messages, scrollToBottom]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+    await sendMessage(newMessage);
+    setNewMessage("");
+  };
 
   return (
     <div className="pb-[76px] px-0 w-full">
@@ -109,6 +115,7 @@ export default function ChatMessageArea({ selectedRoom, currentUser, onBackToLis
               onChange={(e) => setNewMessage(e.target.value)}
               className="flex-1"
               disabled={sending || loading}
+              autoComplete="off"
             />
             <Button type="submit" size="icon" disabled={!newMessage.trim() || sending || loading}>
               <SendHorizonal className="w-5 h-5" />
