@@ -4,7 +4,6 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
-  useInfiniteQuery,
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
@@ -78,8 +77,6 @@ export const useCreateChatMessage = (
     "mutationFn"
   >
 ) => {
-  const queryClient = useQueryClient();
-
   return useMutation<ChatMessageRow, Error, ChatMessageInsert>({
     mutationFn: (message: ChatMessageInsert) =>
       chatMessagesService.create(supabase, message),
@@ -93,49 +90,12 @@ export const useCreateChatMessage = (
   });
 };
 
-// Hook for paginated chat messages with infinite scroll
-export const useChatMessagesPaginated = (
-  roomId: string,
-  userId: string,
-  messageIds: string[] = [],
-  options: UseChatMessagesPaginatedOptions = {}
-) => {
-  return useQuery<MessageReadRow[], Error, TData>({
-    queryKey: ["messageReads", "user", userId, "messages", messageIds],
-    queryFn: () =>
-      userId && messageIds.length > 0
-        ? chatMessagesService.getMessageReadsForUser(supabase, messageIds, userId)
-        : [],
-    enabled: !!userId && messageIds.length > 0,
-    ...options,
-  });
-};
-
-// Helper hook to get all messages in a flat array
-export const useFlattenedChatMessages = (
-  roomId: string,
-  options?: UseChatMessagesPaginatedOptions
-) => {
-  const query = useChatMessagesPaginated(roomId, options);
-
-  const allMessages = query.data?.pages.flatMap((page: MessagePage) => page.messages) ?? [];
-
-  return {
-    ...query,
-    messages: allMessages,
-    hasMoreMessages: query.hasNextPage,
-    loadMoreMessages: query.fetchNextPage,
-    isLoadingMore: query.isFetchingNextPage,
-  };
-};
-
-// Hook to update a chat message
 export const useUpdateChatMessage = (
   options?: Omit<
     UseMutationOptions<
       ChatMessageRow,
       Error,
-      { messageId: string; updates: ChatMessageUpdate; roomId?: string } // roomId for invalidation
+      { messageId: string; updates: ChatMessageUpdate; roomId?: string }
     >,
     "mutationFn"
   >
@@ -235,26 +195,6 @@ export const useMarkMessageAsRead = (
 
       options?.onSuccess?.(data, variables, context);
     },
-    ...options,
-  });
-};
-
-// Hook to get message read status for specific messages
-export const useMessageReadsForUser = <TData = MessageReadRow[]>(
-  messageIds: string[],
-  userId: string | undefined,
-  options?: Omit<
-    UseQueryOptions<MessageReadRow[], Error, TData>,
-    "queryKey" | "queryFn" | "enabled"
-  >
-) => {
-  return useQuery<MessageReadRow[], Error, TData>({
-    queryKey: ["messageReads", "user", userId, "messages", messageIds],
-    queryFn: () =>
-      userId && messageIds.length > 0
-        ? chatMessagesService.getMessageReadsForUser(supabase, messageIds, userId)
-        : [],
-    enabled: !!userId && messageIds.length > 0,
     ...options,
   });
 };
