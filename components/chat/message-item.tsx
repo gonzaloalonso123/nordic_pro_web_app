@@ -19,8 +19,8 @@ export const MessageItem = memo(function MessageItem({
 
   const authorName = isCurrentUserMessage
     ? "You"
-    : message.author?.first_name ||
-      message.author?.email?.split("@")[0] ||
+    : message.users?.first_name ||
+      message.users?.email?.split("@")[0] ||
       `User ${message.sender_id ? message.sender_id.substring(0, 6) : "..."}`;
 
   return (
@@ -31,11 +31,11 @@ export const MessageItem = memo(function MessageItem({
         {!isCurrentUserMessage && (
           <div>
             <Avatar className="h-8 w-8">
-              <AvatarImage src={message.author?.avatar || undefined} />
+              <AvatarImage src={message.users?.avatar || undefined} />
               <AvatarFallback>
                 {getInitials({
-                  firstName: message.author?.first_name,
-                  lastName: message.author?.last_name
+                  firstName: message.users?.first_name,
+                  lastName: message.users?.last_name
                 })}
               </AvatarFallback>
             </Avatar>

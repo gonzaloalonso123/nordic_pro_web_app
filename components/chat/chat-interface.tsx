@@ -26,7 +26,7 @@ export function ChatInterface({
 }: ChatInterfaceProps) {
   const [newMessage, setNewMessage] = useState<string>("");
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
-  const [messages, setMessages] = useState<(ChatMessageWithDetails | Tables<'messages'>)[]>(initialMessages);
+  const [messages, setMessages] = useState<(ChatMessageWithDetails)[]>(initialMessages);
   const [userCache, setUserCache] = useState<Map<string, ChatMessageWithDetails['users']>>(new Map());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -72,13 +72,15 @@ export function ChatInterface({
       }
 
       // Look up user from cache
-      const user = newMessage.sender_id ? userCache.get(newMessage.sender_id) || null : null;
+      const user = userCache.get(newMessage.sender_id);
 
-      return [...prev, {
+      const messageWithDetails: ChatMessageWithDetails = {
         ...newMessage,
-        users: user,
+        users: user!,
         message_reads: []
-      }];
+      };
+
+      return [...prev, messageWithDetails];
     });
   }, [userCache]);
 
@@ -152,7 +154,7 @@ export function ChatInterface({
               No messages yet. Start the conversation!
             </div>
           ) : (
-            messages.map((msg: ChatMessageWithDetails) => (
+            messages.map((msg) => (
               <MessageItem
                 key={msg.id}
                 message={msg}
@@ -187,5 +189,4 @@ export function ChatInterface({
       </form>
     </div>
   );
-}
 }

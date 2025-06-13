@@ -18,12 +18,12 @@ type LastMessageData = Pick<Tables<"messages">, "id" | "content" | "created_at" 
 }
 
 export type ChatMessageWithDetails = Pick<Tables<"messages">, "id" | "content" | "sender_id" | "created_at"> & {
-  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar">
+  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar" | "email">
   message_reads: MessageReadRow[]
 }
 
 export type ChatRoomMemberWithUser = Pick<Tables<"chat_room_participants">, "user_id"> & {
-  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar"> | null
+  users: Pick<Tables<"users">, "id" | "first_name" | "last_name" | "avatar" | "email"> | null
 }
 
 export type ChatRoomWithMessagesAndMembers = Tables<"chat_rooms"> & {
@@ -155,7 +155,8 @@ export const chatRoomsService = {
             id,
             first_name,
             last_name,
-            avatar
+            avatar,
+            email
           ),
           message_reads(*)
         ),
@@ -303,7 +304,8 @@ export const chatRoomsService = {
           id,
           first_name,
           last_name,
-          avatar
+          avatar,
+          email
         )
       `)
       .eq("room_id", roomId)
