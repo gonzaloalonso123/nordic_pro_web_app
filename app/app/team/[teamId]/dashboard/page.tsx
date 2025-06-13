@@ -56,7 +56,7 @@ export default function DashboardPage() {
   // }, []);
 
   if (eventsPending || invitationsPending) {
-    return Array.from({ length: 4 }, (_, index) => <DashboardSkeleton key={index} />);
+    return <DashboardSkeleton />;
   }
 
   return (

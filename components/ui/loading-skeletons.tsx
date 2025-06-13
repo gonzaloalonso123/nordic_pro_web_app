@@ -3,16 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function DashboardSkeleton() {
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-96" />
-      </div>
-
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="space-y-3 p-4 border rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 py-6">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="space-y-3 p-4 shadow-sm rounded-lg py-20">
             <Skeleton className="h-4 w-24" />
             <div className="flex items-center justify-between">
               <Skeleton className="h-8 w-16" />
@@ -20,40 +13,6 @@ export function DashboardSkeleton() {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <Skeleton className="h-6 w-32" />
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center space-x-4 p-4 border rounded-lg"
-              >
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-48" />
-                </div>
-                <Skeleton className="h-8 w-20" />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="space-y-4">
-          <Skeleton className="h-6 w-32" />
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="p-4 border rounded-lg space-y-2">
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-24" />
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -65,8 +24,8 @@ export function TeamRosterSkeleton() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="space-y-2">
-          <Skeleton className="h-7 w-32" />
-          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-7 w-22" />
+          <Skeleton className="h-4 w-24" />
         </div>
         <div className="flex gap-2">
           <Skeleton className="h-10 w-20" />
@@ -75,9 +34,7 @@ export function TeamRosterSkeleton() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="border rounded-lg overflow-hidden">
-        {/* Table Header */}
         <div className="border-b bg-muted/50 p-4">
           <div className="grid grid-cols-7 gap-4">
             {Array.from({ length: 7 }).map((_, i) => (
@@ -86,7 +43,6 @@ export function TeamRosterSkeleton() {
           </div>
         </div>
 
-        {/* Table Rows */}
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="border-b p-4">
             <div className="grid grid-cols-7 gap-4 items-center">
@@ -117,7 +73,7 @@ export function CalendarSkeleton() {
       <div className="flex justify-between items-center">
         <div className="space-y-2">
           <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-4 w-20" />
         </div>
         <Skeleton className="h-10 w-32" />
       </div>
@@ -163,17 +119,10 @@ export function ChatSkeleton() {
 
       <div className="flex-1 p-4 space-y-4 overflow-hidden">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className={`flex ${i % 3 === 0 ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-xs space-y-2 ${i % 3 === 0 ? "items-end" : "items-start"} flex flex-col`}
-            >
+          <div key={i} className={`flex ${i % 3 === 0 ? "justify-end" : "justify-start"}`}>
+            <div className={`max-w-xs space-y-2 ${i % 3 === 0 ? "items-end" : "items-start"} flex flex-col`}>
               {i % 3 !== 0 && <Skeleton className="h-6 w-6 rounded-full" />}
-              <div
-                className={`p-3 rounded-lg space-y-1 ${i % 3 === 0 ? "bg-primary/10" : "bg-muted"}`}
-              >
+              <div className={`p-3 rounded-lg space-y-1 ${i % 3 === 0 ? "bg-primary/10" : "bg-muted"}`}>
                 <Skeleton className="h-4 w-32" />
                 {Math.random() > 0.5 && <Skeleton className="h-4 w-24" />}
               </div>
