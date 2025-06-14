@@ -1,85 +1,79 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials } from "@/utils/get-initials";
-import { type Tables } from "@/types/database.types";
+import { format, isToday, isYesterday } from "date-fns";
+import { cn } from "@/lib/utils";
+import type { Tables } from "@/types/database.types";
 import { memo } from "react";
-import { ChatMessageWithDetails } from "@/utils/supabase/services";
+import { getInitials } from "@/utils/get-initials";
 
 interface MessageItemProps {
-  message: ChatMessageWithDetails;
-  currentUser: Tables<'users'>;
+  message: Tables<"messages"> & {
+    users: Partial<Tables<"users">> | null;
+  };
+  currentUserId: string | undefined;
 }
 
 export const MessageItem = memo(function MessageItem({
   message,
-  currentUser
+  currentUserId
 }: MessageItemProps) {
-  const isCurrentUserMessage = message.sender_id === currentUser.id;
+  const isCurrentUserMessage = message.sender_id === currentUserId;
+  const senderProfile = message.users;
 
-  const authorName = isCurrentUserMessage
-    ? "You"
-    : message.users?.first_name ||
-      message.users?.email?.split("@")[0] ||
-      `User ${message.sender_id ? message.sender_id.substring(0, 6) : "..."}`;
+  const formatTimestamp = (timestamp: string | null) => {
+    if (!timestamp) return "Sending...";
+    const date = new Date(timestamp);
+    if (isToday(date)) {
+      return format(date, "p");
+    }
+    if (isYesterday(date)) {
+      return `Yesterday ${format(date, "p")}`;
+    }
+    return format(date, "MMM d, yyyy p");
+  };
 
   return (
     <div
-      className={`flex ${isCurrentUserMessage ? "justify-end" : "justify-start"}`}
+      className={cn("flex mb-3", isCurrentUserMessage ? "justify-end" : "justify-start")}
     >
-      <div className="flex items-end gap-2 max-w-[75%]">
+      <div className={cn("flex items-end gap-2 max-w-[75%]", isCurrentUserMessage ? "flex-row-reverse" : "flex-row")}>
         {!isCurrentUserMessage && (
-          <div>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={message.users?.avatar || undefined} />
-              <AvatarFallback>
-                {getInitials({
-                  firstName: message.users?.first_name,
-                  lastName: message.users?.last_name
-                })}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          <Avatar className="h-8 w-8">
+            <AvatarImage
+              src={senderProfile?.avatar || undefined}
+              alt={senderProfile?.first_name || "User avatar"}
+            />
+            <AvatarFallback>
+              {getInitials({ firstName: senderProfile?.first_name, lastName: senderProfile?.last_name })}
+            </AvatarFallback>
+          </Avatar>
         )}
         <div
-          className={`py-2 px-3 rounded-lg shadow-xs max-w-80 ${
+          className={cn(
+            "p-3 rounded-lg break-words max-w-80",
             isCurrentUserMessage
               ? "bg-primary text-primary-foreground rounded-br-none"
-              : "bg-slate-200 rounded-bl-none"
-          }`}
+              : "bg-muted rounded-bl-none"
+          )}
         >
-          {!isCurrentUserMessage && (
-            <p className="text-xs font-semibold mb-1">
-              {authorName}
+          {!isCurrentUserMessage && senderProfile?.first_name && (
+            <p className="text-xs font-semibold mb-1 text-muted-foreground">
+              {senderProfile.first_name}
             </p>
           )}
-          <p className="text-sm whitespace-pre-wrap break-words">
+          <p className="text-sm whitespace-pre-wrap">
             {message.content}
           </p>
-          <p className={`text-xs ${
-            isCurrentUserMessage ? "text-muted/80" : "text-muted-foreground/80"
-          } mt-1 text-right`}>
-            {message.created_at
-              ? new Date(message.created_at).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "Sending..."}
+          <p className={cn(
+            "text-xs mt-1",
+            isCurrentUserMessage
+              ? "text-primary-foreground/70"
+              : "text-muted-foreground/70"
+          )}>
+            {formatTimestamp(message.created_at)}
           </p>
         </div>
-        {isCurrentUserMessage && (
-          <div>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={currentUser.avatar || undefined} />
-              <AvatarFallback>
-                {getInitials({
-                  firstName: currentUser.first_name,
-                  lastName: currentUser.last_name
-                })}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        )}
       </div>
     </div>
   );

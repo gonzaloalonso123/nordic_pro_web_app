@@ -21,7 +21,8 @@ export default function ChatLayout({
 }) {
   const { useHeaderConfig } = useHeader();
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
-  const { team: { id: teamId } } = useRole();
+  const { team: { id: teamId, role } } = useRole();
+  const isCoach = role === "COACH";
 
   const openModal = useCallback(() => setIsNewChatModalOpen(true), []);
   const closeModal = useCallback(() => setIsNewChatModalOpen(false), []);
@@ -32,7 +33,7 @@ export default function ChatLayout({
 
   useHeaderConfig({
     centerContent: "Chat",
-    rightContent: (
+    rightContent: isCoach ? (
       <Button
         variant="ghost"
         size="icon"
@@ -42,8 +43,8 @@ export default function ChatLayout({
       >
         <PlusSquare className="h-5 w-5" />
       </Button>
-    ),
-  }, [openModal]);
+    ) : null,
+  }, [openModal, isCoach]);
 
   return (
     <div className="flex h-full w-full">
