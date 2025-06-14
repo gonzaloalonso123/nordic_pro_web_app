@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 
 export default function BackButton({
   path,
-  classNames,
+  className,
   onClick,
 }: {
   path?: string;
-  classNames?: string;
+  className?: string;
   onClick?: () => void;
 }) {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function BackButton({
       <Button
         variant="ghost"
         aria-label="Back"
-        className={classNames}
+        className={className}
         onClick={onClick ? () => onClick() : () => router.back()}
       >
         {backButton}
@@ -30,7 +30,13 @@ export default function BackButton({
   }
 
   return (
-    <LoadingLink aria-label="Back" variant="ghost" size="icon" href={path} className={classNames}>
+    <LoadingLink
+      aria-label="Back"
+      variant="ghost"
+      size="icon"
+      href={path}
+      className={className}
+    >
       {backButton}
     </LoadingLink>
   );

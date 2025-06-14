@@ -1,16 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import { chatRoomsService } from "@/utils/supabase/services";
 import type { TablesInsert } from "@/types/database.types";
 
 interface CreateChatRoomVariables {
-  name?: string | null; // Optional name - if not provided, will show member names
-  memberIds: string[]; // Array of user IDs to add to the room
+  name?: string | null;
+  memberIds: string[];
   currentUserId: string;
 }
 
 export const useCreateChatRoom = () => {
-  
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -27,6 +26,8 @@ export const useCreateChatRoom = () => {
       // Create the room
       const roomData: TablesInsert<"chat_rooms"> = {
         name: name?.trim() || null, // Only set name if provided and not empty
+        is_group_chat: memberIds.length > 2, // Set based on member count
+        created_by: currentUserId,
       };
 
       const newRoom = await chatRoomsService.create(supabase, roomData);

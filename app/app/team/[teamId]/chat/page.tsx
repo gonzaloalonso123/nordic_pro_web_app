@@ -1,68 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Tables } from "@/types/database.types";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import ChatRoomList from "@/components/chat/chat-room-list";
-import ChatMessageArea from "@/components/chat/chat-message-area";
-
-export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
-  useEffect(() => {
-    const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-    const listener = () => setMatches(media.matches);
-    window.addEventListener("resize", listener);
-    return () => window.removeEventListener("resize", listener);
-  }, [matches, query]);
-  return matches;
-}
+import { MessageCircleMore } from "lucide-react";
 
 export default function ChatPage() {
-  const [selectedRoom, setSelectedRoom] = useState<Tables<"chat_rooms"> | null>(null);
-  const { user } = useCurrentUser();
-
-  const isMobile = useMediaQuery("(max-width: 767px)");
-  const [showRoomListMobile, setShowRoomListMobile] = useState(true);
-
-  const handleSelectRoom = (room: Tables<"chat_rooms">) => {
-    setSelectedRoom(room);
-    if (isMobile) {
-      setShowRoomListMobile(false);
-    }
-  };
-
-  const handleBackToListMobile = () => {
-    setShowRoomListMobile(true);
-    setSelectedRoom(null);
-  };
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden antialiased text-foreground bg-background">
-        <>
-          {showRoomListMobile ? (
-            <ChatRoomList
-              onSelectRoom={handleSelectRoom}
-              selectedRoomId={selectedRoom?.id || null}
-              currentUser={user}
-            />
-          ) : (
-            <ChatMessageArea
-              selectedRoom={selectedRoom}
-              currentUser={user}
-              onBackToList={handleBackToListMobile}
-              isMobile={isMobile}
-            />
-          )}
-        </>
-      <div className="absolute top-4 right-4 z-20">
-        {user && <span className="text-sm mr-3 text-muted-foreground">Hi, {user.first_name || "User"}!</span>}
+    <div className="h-full flex items-center justify-center text-muted-foreground md:hidden">
+      <div className="text-center space-y-3 p-6">
+        <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
+          <MessageCircleMore size={36} className="text-primary" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground">Your Conversations</h3>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Select a chat from your list to start messaging
+        </p>
       </div>
     </div>
   );

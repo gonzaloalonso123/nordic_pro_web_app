@@ -13,6 +13,8 @@ import * as eventsInvitationQueries from "@/hooks/queries/useEventsInvitation";
 import * as formInvitationQueries from "@/hooks/queries/useFormInvitations";
 import * as avatarsQueries from "@/hooks/queries/useAvatars";
 import * as locationQueries from "@/hooks/queries/useLocations";
+import * as chatRoomQueries from "@/hooks/queries/useChatRooms";
+import * as chatMessagesQueries from "@/hooks/queries/useChatMessages";
 import { useCallback } from "react";
 import { supabase } from "../supabase/client";
 
@@ -151,6 +153,44 @@ export const useClientData = () => {
       // Mutations
       useSubmit: formResponseQueries.useSubmitFormResponse,
       useDelete: formResponseQueries.useDeleteFormResponse,
+    },
+    chatRooms: {
+      // Queries
+      useAll: chatRoomQueries.useChatRooms,
+      useById: chatRoomQueries.useChatRoom,
+      useByUser: chatRoomQueries.useChatRoomsByUser,
+      useWithMessages: chatRoomQueries.useChatRoomWithMessages,
+
+      useWithUsers: chatRoomQueries.useChatRoomWithUsers,
+      // Message methods
+      useMessagesByRoom: chatRoomQueries.useChatMessagesByRoom,
+      useSendMessage: chatRoomQueries.useSendChatMessage,
+
+      // Chat room members methods
+      useMembers: chatRoomQueries.useChatRoomMembers,
+      useAddMember: chatRoomQueries.useAddChatRoomMember,
+
+      // Message reads methods
+      useMarkAsRead: chatRoomQueries.useMarkMessageAsRead,
+      useUnreadCount: chatRoomQueries.useUnreadMessageCount,
+
+      useUnreadCountBatch: chatRoomQueries.useUnreadMessageCountBatch,
+      useMarkRoomAsRead: chatRoomQueries.useMarkRoomAsRead,
+
+      useStartDirectChat: chatRoomQueries.useStartDirectChat,
+      // Mutations
+      useCreate: chatRoomQueries.useCreateChatRoom,
+      useUpdate: chatRoomQueries.useUpdateChatRoom,
+      useDelete: chatRoomQueries.useDeleteChatRoom,
+    },
+
+    chatMessages: {
+      useChatMessagesByRoom: chatMessagesQueries.useChatMessagesByRoom,
+      useCreateChatMessage: chatMessagesQueries.useCreateChatMessage,
+        useById: chatMessagesQueries.useChatMessageById,
+        useUpdate: chatMessagesQueries.useUpdateChatMessage,
+        useDelete: chatMessagesQueries.useDeleteChatMessage,
+        useMarkAsRead: chatMessagesQueries.useMarkMessageAsRead,
     },
 
     organisationsInvitation: {

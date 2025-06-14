@@ -12,7 +12,7 @@ export const useChatRoomDisplayName = () => {
     }
 
     // Get other members (exclude current user)
-    const otherMembers = room.chat_room_members?.filter(
+    const otherMembers = room.chat_room_participants?.filter(
       (member) => member.user_id !== user?.id
     ) || [];
 
