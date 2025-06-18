@@ -14,15 +14,16 @@ const Page = () => {
         <CardTitle>
           <h1 className="text-2xl font-bold">Admin</h1>
         </CardTitle>
-        <Image
-          src="/hero-image.webp"
-          width={200}
-          height={200}
-          className="w-full"
-          alt="Hero image"
-        />
-        <LoadingLink variant="default" href={`${path}/organisations`}>Organisations</LoadingLink>
-        <LoadingLink variant="default" href={`${path}/forms`}>Forms</LoadingLink>
+        <Image src="/hero-image.webp" width={200} height={200} className="w-full" alt="Hero image" />
+        <LoadingLink variant="default" href={`${path}/organisations`}>
+          Organisations
+        </LoadingLink>
+        <LoadingLink variant="default" href={`${path}/forms`}>
+          Forms
+        </LoadingLink>
+        <LoadingLink variant="default" href={`${path}/export-data`}>
+          Export Data
+        </LoadingLink>
       </Card>
     </div>
   );

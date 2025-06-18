@@ -105,7 +105,14 @@ export const formInvitationsService = {
           title,
           description,
           created_at,
-          updated_at
+          updated_at,
+          form_questions(
+            id,
+            questions(
+              id,
+              question
+            )
+          )
         ),
         users(
           first_name,
