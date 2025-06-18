@@ -64,7 +64,9 @@ export function AvailableForms() {
             <div>
               <div className="font-medium">{form.title}</div>
               {form.description && (
-                <div className="text-sm text-muted-foreground truncate max-w-md">{form.description}</div>
+                <div className="hidden lg:block text-sm text-muted-foreground truncate max-w-md">
+                  {form.description}
+                </div>
               )}
             </div>
           </div>

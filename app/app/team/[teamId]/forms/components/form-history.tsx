@@ -55,7 +55,9 @@ export function FormHistory({ teamId }: FormHistoryProps) {
             <div className="min-w-0">
               <div className="font-medium truncate">{invitation.form.title}</div>
               {invitation.form.description && (
-                <div className="text-sm text-muted-foreground truncate max-w-xs">{invitation.form.description}</div>
+                <div className="hidden lg:block text-sm text-muted-foreground truncate max-w-xs">
+                  {invitation.form.description}
+                </div>
               )}
             </div>
           </div>
