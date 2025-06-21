@@ -28,11 +28,11 @@ export function ChatInterface({
 }: ChatInterfaceProps) {
   const [isInitialLoading, setIsInitialLoading] = useState(initialMessages.length === 0);
 
-    useEffect(() => {
-      if (initialMessages.length > 0) {
-        setIsInitialLoading(false);
-      }
-    }, [initialMessages.length]);
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setIsInitialLoading(false);
+    }
+  }, [initialMessages.length]);
 
   if (!roomId || !currentUser) {
     return (
@@ -92,14 +92,14 @@ export function ChatInterface({
       }
 
       const user = userCache.get(newMessage.sender_id);
-        if (!user) {
-          console.warn(`User not found in cache for sender_id: ${newMessage.sender_id}`);
-          return prev;
-        }
+      if (!user) {
+        console.warn(`User not found in cache for sender_id: ${newMessage.sender_id}`);
+        return prev;
+      }
 
       const messageWithDetails: ChatMessageWithDetails = {
         ...newMessage,
-          users: user,
+        users: user,
         message_reads: []
       };
 
@@ -122,7 +122,7 @@ export function ChatInterface({
 
   return (
     <div className="max-h-screen-without-header-mobile md:max-h-screen-without-header flex flex-col h-full bg-background">
-      <ScrollArea ref={scrollAreaRef} className="p-4 h-full">
+      <ScrollArea ref={scrollAreaRef} className="h-full">
         <div className="space-y-4">
           {isInitialLoading ? (
             <div className="space-y-4">
@@ -144,7 +144,7 @@ export function ChatInterface({
               <MessageItem
                 key={msg.id}
                 message={msg}
-                  currentUserId={currentUser.id}
+                currentUserId={currentUser.id}
               />
             ))
           )}

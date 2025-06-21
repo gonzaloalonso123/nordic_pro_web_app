@@ -8,8 +8,7 @@ export function useRealtimeChat(roomId: string, onNewMessage: (message: Tables<"
   useEffect(() => {
     if (!roomId) return;
 
-    const channel = supabase.channel(roomId)
-
+    const channel = supabase.channel(roomId);
     channel.on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
@@ -22,7 +21,7 @@ export function useRealtimeChat(roomId: string, onNewMessage: (message: Tables<"
     channel.subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(channel);
     }
-  }, [roomId, supabase, onNewMessage])
+  }, [roomId, onNewMessage]);
 }
