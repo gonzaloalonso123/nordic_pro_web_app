@@ -34,9 +34,7 @@ export const MessageItem = memo(function MessageItem({
   };
 
   return (
-    <div
-      className={cn("flex mb-3", isCurrentUserMessage ? "justify-end" : "justify-start")}
-    >
+    <div className={cn("flex m-3", isCurrentUserMessage ? "justify-end" : "justify-start")}>
       <div className={cn("flex items-end gap-2 max-w-[75%]", isCurrentUserMessage ? "flex-row-reverse" : "flex-row")}>
         {!isCurrentUserMessage && (
           <Avatar className="h-8 w-8">

@@ -6,10 +6,12 @@
 
 @theme {
   --height-screen-without-header: calc(100vh - 4rem);
-  --height-screen-without-header-mobile: calc(100vh - 4rem - 4rem);
+  /* height over header, height of mobile navbar and padding on the navbar */
+  --height-screen-without-header-mobile: calc(100vh - 4rem - 4rem - calc(var(--spacing) * 3));
 
-  --max-height-screen-without-header: calc(100vh - 4rem);
-  --max-height-screen-without-header-mobile: calc(100vh - 4rem - 4rem);
+  --max-height-screen-without-header: var(--height-screen-without-header);
+  --max-height-screen-without-header-mobile: var(--height-screen-without-header-mobile);
+
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));

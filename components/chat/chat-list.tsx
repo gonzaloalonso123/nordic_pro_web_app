@@ -39,7 +39,7 @@ export default function ChatList() {
 
   if (error) {
     return (
-      <Card className="h-full flex flex-col">
+      <Card className="h-full flex flex-col rounded-none">
         <CardContent className="flex items-center justify-center h-full">
           <div className="text-center space-y-2">
             <p className="text-destructive">Failed to load chats</p>
@@ -51,7 +51,7 @@ export default function ChatList() {
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col rounded-none">
       <CardHeader className="px-4 py-3 border-b shrink-0">
         <Input
           placeholder="Search chats..."

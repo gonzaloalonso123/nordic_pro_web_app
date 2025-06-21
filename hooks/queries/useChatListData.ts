@@ -4,7 +4,10 @@ import { useMemo, useCallback } from "react";
 import { useChatRoomsByUser } from "@/hooks/queries/useChatRooms";
 import { useChatRoomAvatar } from "@/hooks/useChatRoomAvatar";
 import { useClientData } from "@/utils/data/client";
+import { useRealtimeChatList } from "@/hooks/useRealtimeChatList";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ChatRoomWithDetails } from "@/utils/supabase/services/chat-rooms";
+import { Tables } from "@/types/database.types";
 
 export interface ProcessedChatRoom {
   id: string;
@@ -21,6 +24,7 @@ export interface ProcessedChatRoom {
 }
 
 export function useChatListData(userId?: string) {
+  const queryClient = useQueryClient();
   const { getChatAvatarInfo } = useChatRoomAvatar();
   const { chatRooms: chatRoomQueries } = useClientData();
 
@@ -30,11 +34,25 @@ export function useChatListData(userId?: string) {
     error: roomsError
   } = useChatRoomsByUser(userId || '');
 
-  const roomIds = rawChatRooms.map(room => room.id);
+  const roomIds = useMemo(() => rawChatRooms.map(room => room.id), [rawChatRooms]);
   const {
     data: unreadCounts = {},
     isLoading: isLoadingCounts
   } = chatRoomQueries.useUnreadCountBatch(roomIds, userId || '');
+
+  const handleNewMessage = useCallback((message: Tables<"messages">) => {
+    if (message.sender_id !== userId) {
+      queryClient.refetchQueries({
+        queryKey: ["chatRooms", "user", userId]
+      })
+
+      queryClient.invalidateQueries({
+        queryKey: ["unreadMessages", "batch", roomIds, userId]
+      });
+    }
+  }, [queryClient, userId, roomIds]);
+
+  useRealtimeChatList(roomIds, userId, handleNewMessage);
 
   const chatRooms = useMemo((): ProcessedChatRoom[] => {
     if (!rawChatRooms.length) return [];
