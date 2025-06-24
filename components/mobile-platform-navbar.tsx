@@ -4,8 +4,12 @@ import { LoadingLink } from "@/components/ui/loading-link";
 import { usePathname } from "next/navigation";
 import { useMenuItems } from "@/hooks/use-menu-items";
 import { cn } from "@/lib/utils";
+import { useKeyboardOpen } from "@/hooks/use-keyboard-open";
 
 export default function MobilePlatformNavbar() {
+  const keyboardOpen = useKeyboardOpen(100);
+  if (keyboardOpen) return null;
+
   const pathname = usePathname();
   const items = useMenuItems();
   return (
