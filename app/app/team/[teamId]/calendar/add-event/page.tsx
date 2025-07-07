@@ -51,7 +51,6 @@ const AddTeamEventPage = () => {
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [inviteFutureMembers, setInviteFutureMembers] = useState<boolean>(true);
   const { data: team, isPending: isTeamPending } = useClientData().teams.useWithUsers(teamId);
-  const { data: calendar, isPending: isCalendarPending } = useClientData().calendars.useByTeam(teamId);
   const createEvent = useClientData().events.useCreate();
   const createInvitation = useClientData().eventsInvitation.useCreate();
   const sendEventsToCalendars = useClientData().calendars.useSendEventsToCalendars();
@@ -91,14 +90,6 @@ const AddTeamEventPage = () => {
     type: string;
     invite_future_members: boolean;
   }) => {
-    if (!calendar) {
-      toast({
-        title: "Error",
-        description: "Team calendar not found",
-        variant: "destructive",
-      });
-      return;
-    }
 
     if (!dates.dates || dates.dates.length === 0) {
       toast({
@@ -132,7 +123,6 @@ const AddTeamEventPage = () => {
           time_to_come: dates.timeToCome ? timeToCome.toISOString() : null,
           location_id: selectedLocation?.id,
           type: values.type,
-          calendar_id: calendar.id,
           invite_future_members: inviteFutureMembers,
         });
 
@@ -177,7 +167,7 @@ const AddTeamEventPage = () => {
     }
   };
 
-  if (isTeamPending || isCalendarPending) {
+  if (isTeamPending) {
     return <div>Loading...</div>;
   }
 
